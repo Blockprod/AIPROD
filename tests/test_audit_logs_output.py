@@ -3,6 +3,7 @@
 Test simple pour vérifier que l'audit logger fonctionne
 """
 
+import pytest
 from src.security.audit_logger import get_audit_logger, AuditEventType
 
 
@@ -50,14 +51,14 @@ def test_audit_logger():
         print("✅ Deuxième log_api_call() exécuté avec succès")
 
         print("\n✅ ÉTAPE 5: Audit Logger functional tests - ALL PASSED!")
-        return True
+        assert True, "Audit logger tests passed"
 
     except Exception as e:
         print(f"❌ ERROR: {e}")
         import traceback
 
         traceback.print_exc()
-        return False
+        pytest.fail("Audit logger test failed")
 
 
 if __name__ == "__main__":
