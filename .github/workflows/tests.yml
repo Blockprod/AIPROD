@@ -42,6 +42,7 @@ jobs:
           DATABASE_URL: postgresql://postgres:postgres@localhost:5432/aiprod_test
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY || '' }}
           GOOGLE_CLOUD_PROJECT: aiprod-484120
+        continue-on-error: false
         run: |
           pytest tests/ -v --tb=short -q
 
@@ -142,11 +143,12 @@ jobs:
           version: latest
 
       - name: Authenticate to Google Cloud
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         continue-on-error: true
         uses: google-github-actions/auth@v1
         with:
-          workload_identity_provider: ${{ secrets.WIF_PROVIDER || '' }}
-          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT || '' }}
+          workload_identity_provider: ${{ secrets.WIF_PROVIDER }}
+          service_account: ${{ secrets.WIF_SERVICE_ACCOUNT }}
 
       - name: Build and push Docker image
         run: |
