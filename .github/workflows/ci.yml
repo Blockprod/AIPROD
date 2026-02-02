@@ -2,9 +2,13 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [main, master]
+    branches:
+      - main
+      - master
   pull_request:
-    branches: [main, master]
+    branches:
+      - main
+      - master
 
 jobs:
   test:
@@ -12,27 +16,27 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: pip
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pytest-cov coverage
-      - name: Run tests (pytest)
+
+      - name: Run tests
         run: pytest tests/ -v --tb=short
-      - name: Generate coverage report
+
+      - name: Generate coverage
+        continue-on-error: true
         run: |
           coverage run -m pytest tests/ -q
           coverage report -m
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results
-          path: .coverage
 
   docker-build:
     runs-on: ubuntu-latest
@@ -41,7 +45,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
+
       - name: Build Docker image
         run: docker build -t aiprod-v33:latest .
