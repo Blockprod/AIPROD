@@ -1,0 +1,142 @@
+# AlertManager Alert Rules pour Phase 2
+# Alertes critiques pour pipeline IA/vidéo avec SLAs
+
+groups:
+  - name: aiprod_alerts
+    interval: 1m
+    rules:
+      # 1. HIGH ERROR RATE - Plus de 5% d'erreurs
+      - alert: PipelineHighErrorRate
+        expr: |
+          (
+            rate(pipeline_errors_total[5m]) /
+            (rate(pipeline_executions_total[5m]) + 0.0001)
+          ) > 0.05
+        for: 5m
+        labels:
+          severity: critical
+          component: pipeline
+        annotations:
+          summary: "Pipeline error rate exceeds 5%"
+          description: "Error rate: {{ $value | humanizePercentage }}"
+          runbook: "docs/runbooks/high-error-rate.md"
+
+      # 2. PIPELINE COST THRESHOLD - Coûts excessifs
+      - alert: PipelineCostThresholdExceeded
+        expr: |
+          rate(pipeline_cost_dollars[1h]) > 500
+        for: 10m
+        labels:
+          severity: warning
+          component: pipeline
+        annotations:
+          summary: "Pipeline hourly cost exceeds $500"
+          description: "Hourly cost: ${{ $value }}"
+          runbook: "docs/runbooks/cost-threshold.md"
+
+      # 3. SLA BREACH - Latency > 5min (300s)
+      - alert: PipelineLatencySLABreach
+        expr: |
+          histogram_quantile(0.95, rate(pipeline_duration_seconds_bucket[5m])) > 300
+        for: 5m
+        labels:
+          severity: critical
+          component: sla
+        annotations:
+          summary: "Pipeline P95 latency exceeds SLA (300s)"
+          description: "P95 latency: {{ $value }}s"
+          runbook: "docs/runbooks/latency-sla.md"
+
+      # 4. PUBSUB QUEUE BACKING UP - Plus de 100 messages
+      - alert: PubSubQueueDepthHigh
+        expr: |
+          pubsub_queue_depth > 100
+        for: 10m
+        labels:
+          severity: warning
+          component: pubsub
+        annotations:
+          summary: "Pub/Sub queue depth is high: {{ $value }} messages"
+          description: "Topic: {{ $labels.topic }}"
+          runbook: "docs/runbooks/pubsub-queue.md"
+
+      # 5. AI AGENT TIMEOUT - Plus de 3 timeouts par minute
+      - alert: AIAgentTimeouts
+        expr: |
+          rate(ai_agent_calls_total{status="timeout"}[1m]) > 3
+        for: 5m
+        labels:
+          severity: critical
+          component: agents
+        annotations:
+          summary: "AI agent timeouts detected"
+          description: "Agent: {{ $labels.agent_type }}, Rate: {{ $value }}/min"
+          runbook: "docs/runbooks/agent-timeout.md"
+
+      # 6. QA GATE REJECTION RATE - Plus de 20% de rejet
+      - alert: QAGateHighRejectionRate
+        expr: |
+          (
+            rate(qa_gate_acceptance_total{result="rejected"}[1h]) /
+            (rate(qa_gate_acceptance_total[1h]) + 0.0001)
+          ) > 0.20
+        for: 10m
+        labels:
+          severity: warning
+          component: qa
+        annotations:
+          summary: "QA gate rejection rate exceeds 20%"
+          description: "Rejection rate: {{ $value | humanizePercentage }}"
+          runbook: "docs/runbooks/qa-gate-rejection.md"
+
+      # 7. RENDER FAILURES - Plus de 5 échecs dans 10 min
+      - alert: VideoRenderFailures
+        expr: |
+          rate(render_failures_total[10m]) > 5
+        for: 10m
+        labels:
+          severity: critical
+          component: render
+        annotations:
+          summary: "High render failure rate detected"
+          description: "Failures/10min: {{ $value }}, Reason: {{ $labels.reason }}"
+          runbook: "docs/runbooks/render-failures.md"
+
+      # 8. DATABASE LATENCY - Plus de 100ms
+      - alert: DatabaseLatencyHigh
+        expr: |
+          histogram_quantile(0.95, rate(db_operation_latency_seconds_bucket[5m])) > 0.1
+        for: 5m
+        labels:
+          severity: warning
+          component: database
+        annotations:
+          summary: "Database latency is high: {{ $value }}s"
+          description: "Operation: {{ $labels.operation }}, Table: {{ $labels.table }}"
+          runbook: "docs/runbooks/db-latency.md"
+
+      # 9. PROMETHEUS DOWN - Instance non reachable
+      - alert: PrometheusDown
+        expr: |
+          up{job="fastapi-api"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          component: monitoring
+        annotations:
+          summary: "Prometheus scrape target is down"
+          description: "Instance: {{ $labels.instance }}"
+          runbook: "docs/runbooks/prometheus-down.md"
+
+      # 10. ACTIVE JOBS SPIKE - Plus de 50 jobs simultanément
+      - alert: ActiveJobsSpike
+        expr: |
+          pipeline_active_jobs > 50
+        for: 5m
+        labels:
+          severity: warning
+          component: pipeline
+        annotations:
+          summary: "Spike in active jobs: {{ $value }}"
+          description: "Preset: {{ $labels.preset }}"
+          runbook: "docs/runbooks/active-jobs-spike.md"

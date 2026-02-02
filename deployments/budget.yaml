@@ -1,0 +1,18 @@
+displayName: "AIPROD V33 - Monthly Budget"
+budgetFilter:
+  projects:
+    - "projects/REPLACE_PROJECT_NUMBER"
+  creditTypesTreatment: "INCLUDE_ALL_CREDITS"
+amount:
+  specifiedAmount:
+    currencyCode: "USD"
+    units: "2000"
+thresholdRules:
+  - thresholdPercent: 0.5
+  - thresholdPercent: 0.8
+  - thresholdPercent: 0.9
+  - thresholdPercent: 1.0
+notificationsRule:
+  schemaVersion: "1.0"
+  pubsubTopic: "projects/aiprod-484120/topics/budget-alerts"
+  disableDefaultIamRecipients: false

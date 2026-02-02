@@ -1,0 +1,153 @@
+{
+  "dashboard": {
+    "title": "AIPROD V33 - Cost Dashboard",
+    "description": "Cost tracking and ROI analysis for AI video generation pipeline",
+    "tags": ["aiprod", "cost", "roi", "financial"],
+    "timezone": "browser",
+    "schemaVersion": 39,
+    "version": 1,
+    "refresh": "10s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Total Pipeline Cost (24h)",
+        "type": "stat",
+        "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "increase(pipeline_cost_dollars[24h])",
+            "legendFormat": "24h Cost",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "color": { "mode": "thresholds" },
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 500 },
+                { "color": "red", "value": 1000 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "Cost Per Job (Average)",
+        "type": "stat",
+        "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+        "targets": [
+          {
+            "expr": "avg(pipeline_cost_dollars)",
+            "legendFormat": "Avg Cost/Job",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "decimals": 2
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Cost Trend (Hourly)",
+        "type": "graph",
+        "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(pipeline_cost_dollars[1h]) * 3600",
+            "legendFormat": "Cost/hour ($)",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Cost per Hour ($)",
+            "format": "currencyUSD"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Cost by Backend",
+        "type": "piechart",
+        "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "sum by (backend) (rate(pipeline_cost_dollars[1h]) * 3600)",
+            "legendFormat": "{{ backend }}",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Cost by Preset Tier",
+        "type": "piechart",
+        "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "sum by (preset) (rate(pipeline_cost_dollars[1h]) * 3600)",
+            "legendFormat": "{{ preset }}",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Jobs Completed vs Cost Efficiency",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(user_jobs_completed_total[1h])",
+            "legendFormat": "Jobs/hour",
+            "refId": "A"
+          },
+          {
+            "expr": "(rate(pipeline_cost_dollars[1h]) * 3600) / (rate(user_jobs_completed_total[1h]) + 0.0001)",
+            "legendFormat": "Cost per Job",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          { "label": "Jobs/hour" },
+          { "label": "Cost/job ($)" }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Cost Budget Alert Threshold",
+        "type": "gauge",
+        "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "((rate(pipeline_cost_dollars[1h]) * 3600) / 2000) * 100",
+            "legendFormat": "% of Daily Budget ($2000)",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "green", "value": 0 },
+                { "color": "yellow", "value": 70 },
+                { "color": "red", "value": 90 }
+              ]
+            },
+            "max": 100
+          }
+        }
+      }
+    ]
+  }
+}

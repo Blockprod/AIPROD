@@ -1,0 +1,187 @@
+{
+  "dashboard": {
+    "title": "AIPROD V33 - Pipeline Performance",
+    "description": "Real-time monitoring of AI video pipeline performance metrics",
+    "tags": ["aiprod", "pipeline", "performance"],
+    "timezone": "browser",
+    "schemaVersion": 39,
+    "version": 1,
+    "refresh": "10s",
+    "panels": [
+      {
+        "id": 1,
+        "title": "Pipeline Execution Rate",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(pipeline_executions_total[5m])",
+            "legendFormat": "Executions/sec",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Rate (executions/sec)",
+            "format": "short"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Pipeline Error Rate",
+        "type": "graph",
+        "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(pipeline_errors_total[5m])",
+            "legendFormat": "Errors/sec",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Error Rate",
+            "format": "short"
+          }
+        ],
+        "alert": {
+          "conditions": [
+            {
+              "evaluator": { "params": [ 0.05 ], "type": "gt" },
+              "operator": { "type": "and" },
+              "query": { "params": [ "A", "5m", "now" ] },
+              "type": "query"
+            }
+          ]
+        }
+      },
+      {
+        "id": 3,
+        "title": "P95 Pipeline Duration (SLA)",
+        "type": "gauge",
+        "gridPos": { "x": 0, "y": 8, "w": 8, "h": 8 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.95, rate(pipeline_duration_seconds_bucket[5m]))",
+            "legendFormat": "P95 Duration (sec)",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 120 },
+                { "color": "red", "value": 300 }
+              ]
+            },
+            "unit": "s"
+          }
+        }
+      },
+      {
+        "id": 4,
+        "title": "Average Pipeline Cost",
+        "type": "stat",
+        "gridPos": { "x": 8, "y": 8, "w": 8, "h": 8 },
+        "targets": [
+          {
+            "expr": "avg(pipeline_cost_dollars)",
+            "legendFormat": "Avg Cost ($)",
+            "refId": "A"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 10 },
+                { "color": "red", "value": 50 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "Hourly Pipeline Cost Trend",
+        "type": "graph",
+        "gridPos": { "x": 16, "y": 8, "w": 8, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(pipeline_cost_dollars[1h]) * 3600",
+            "legendFormat": "Cost/hour ($)",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Hourly Cost ($)",
+            "format": "currencyUSD"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Success Rate by Preset",
+        "type": "piechart",
+        "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "rate(user_jobs_completed_total[1h])",
+            "legendFormat": "{{ preset }}",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "Active Pipeline Jobs",
+        "type": "timeseries",
+        "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 },
+        "targets": [
+          {
+            "expr": "pipeline_active_jobs",
+            "legendFormat": "{{ preset }} - {{ status }}",
+            "refId": "A"
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "Latency Distribution (P50/P95/P99)",
+        "type": "graph",
+        "gridPos": { "x": 0, "y": 24, "w": 24, "h": 8 },
+        "targets": [
+          {
+            "expr": "histogram_quantile(0.50, rate(pipeline_duration_seconds_bucket[5m]))",
+            "legendFormat": "P50",
+            "refId": "A"
+          },
+          {
+            "expr": "histogram_quantile(0.95, rate(pipeline_duration_seconds_bucket[5m]))",
+            "legendFormat": "P95",
+            "refId": "B"
+          },
+          {
+            "expr": "histogram_quantile(0.99, rate(pipeline_duration_seconds_bucket[5m]))",
+            "legendFormat": "P99",
+            "refId": "C"
+          }
+        ],
+        "yaxes": [
+          {
+            "label": "Duration (seconds)",
+            "format": "s"
+          }
+        ]
+      }
+    ]
+  }
+}

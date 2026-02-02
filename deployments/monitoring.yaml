@@ -1,0 +1,372 @@
+# GCP Monitoring et Alerting configuration - Phase 3 Enhanced
+# Appliquez avec: gcloud monitoring policies create --policy-from-file=monitoring.yaml
+#
+# Phase 3 Alerts:
+# - Budget > 90$/jour (warning)
+# - Quality score < 0.6 (critical)
+# - Latence P95 > 900s (critical)
+
+alertPolicies:
+  # =============================================================================
+  # PHASE 3: BUDGET ALERTS (90$/day threshold)
+  # =============================================================================
+  - displayName: "AIPROD V33 - Budget Warning (>$90/day)"
+    documentation:
+      content: |
+        Budget quotidien dépassé. Actions:
+        1. Vérifier les jobs en cours
+        2. Activer le mode économique si nécessaire
+        3. Limiter les nouveaux jobs premium
+    conditions:
+      - displayName: "Daily cost > $90"
+        conditionThreshold:
+          filter: |
+            metric.type="custom.googleapis.com/aiprod/cost_total"
+            AND resource.type="global"
+          comparison: COMPARISON_GT
+          thresholdValue: 90
+          duration: 300s
+          aggregations:
+            - alignmentPeriod: 3600s
+              perSeriesAligner: ALIGN_SUM
+              crossSeriesReducer: REDUCE_SUM
+    notificationChannels:
+      - "projects/aiprod-484120/notificationChannels/EMAIL_CHANNEL_ID"
+    alertStrategy:
+      autoClose: 86400s
+    combiner: OR
+    severity: WARNING
+
+  # =============================================================================
+  # PHASE 3: QUALITY SCORE ALERT (<0.6 threshold)
+  # =============================================================================
+  - displayName: "AIPROD V33 - Low Quality Score (<0.6)"
+    documentation:
+      content: |
+        Qualité de génération dégradée. Actions:
+        1. Vérifier les prompts récents
+        2. Analyser les logs de Semantic QA
+        3. Considérer switch vers backend premium
+    conditions:
+      - displayName: "Quality score < 0.6"
+        conditionThreshold:
+          filter: |
+            metric.type="custom.googleapis.com/aiprod/quality_score"
+            AND resource.type="global"
+          comparison: COMPARISON_LT
+          thresholdValue: 0.6
+          duration: 600s
+          aggregations:
+            - alignmentPeriod: 300s
+              perSeriesAligner: ALIGN_MEAN
+    notificationChannels:
+      - "projects/aiprod-484120/notificationChannels/EMAIL_CHANNEL_ID"
+    alertStrategy:
+      autoClose: 86400s
+    combiner: OR
+    severity: CRITICAL
+
+  # =============================================================================
+  # PHASE 3: LATENCY P95 ALERT (>900s threshold)
+  # =============================================================================
+  - displayName: "AIPROD V33 - High Latency P95 (>900s)"
+    documentation:
+      content: |
+        Latence P95 critique pour la génération vidéo. Actions:
+        1. Vérifier la file d'attente des jobs
+        2. Augmenter la concurrence backend
+        3. Activer le fallback Replicate
+    conditions:
+      - displayName: "Pipeline latency P95 > 900s"
+        conditionThreshold:
+          filter: |
+            metric.type="custom.googleapis.com/aiprod/pipeline_duration_seconds"
+            AND resource.type="global"
+          comparison: COMPARISON_GT
+          thresholdValue: 900
+          duration: 300s
+          aggregations:
+            - alignmentPeriod: 300s
+              perSeriesAligner: ALIGN_PERCENTILE_95
+    notificationChannels:
+      - "projects/aiprod-484120/notificationChannels/EMAIL_CHANNEL_ID"
+    alertStrategy:
+      autoClose: 86400s
+    combiner: OR
+    severity: CRITICAL
+
+  # =============================================================================
+  # STANDARD ALERTS
+  # =============================================================================
+  - displayName: "AIPROD V33 - High API Latency Alert"
+    conditions:
+      - displayName: "API Latency > 20s"
+        conditionThreshold:
+          filter: |
+            metric.type="run.googleapis.com/request_latencies"
+            AND resource.type="cloud_run_revision"
+            AND resource.labels.service_name="aiprod-v33"
+          comparison: COMPARISON_GT
+          thresholdValue: 20000
+          duration: 60s
+          aggregations:
+            - alignmentPeriod: 60s
+              perSeriesAligner: ALIGN_MEAN
+    notificationChannels:
+      - "projects/aiprod-484120/notificationChannels/EMAIL_CHANNEL_ID"
+    alertStrategy:
+      autoClose: 86400s
+    severity: WARNING
+
+  - displayName: "AIPROD V33 - Daily Cost Critical Alert"
+    conditions:
+      - displayName: "Daily cost > $100"
+        conditionThreshold:
+          filter: |
+            metric.type="custom.googleapis.com/aiprod/cost_total"
+            AND resource.type="global"
+          comparison: COMPARISON_GT
+          thresholdValue: 100
+          duration: 300s
+          aggregations:
+            - alignmentPeriod: 3600s
+              perSeriesAligner: ALIGN_SUM
+    notificationChannels:
+      - "projects/aiprod-484120/notificationChannels/EMAIL_CHANNEL_ID"
+    alertStrategy:
+      autoClose: 86400s
+    severity: CRITICAL
+
+  # =============================================================================
+  # ERROR RATE ALERT
+  # =============================================================================
+  - displayName: "AIPROD V33 - High Error Rate"
+    conditions:
+      - displayName: "Error rate > 5%"
+        conditionThreshold:
+          filter: |
+            metric.type="run.googleapis.com/request_count"
+            AND resource.type="cloud_run_revision"
+            AND resource.labels.service_name="aiprod-v33"
+            AND metric.labels.response_code_class="5xx"
+          comparison: COMPARISON_GT
+          thresholdValue: 0.05
+          duration: 120s
+          aggregations:
+            - alignmentPeriod: 60s
+              perSeriesAligner: ALIGN_RATE
+    notificationChannels:
+      - "projects/aiprod-484120/notificationChannels/EMAIL_CHANNEL_ID"
+    severity: CRITICAL
+
+  # =============================================================================
+  # BACKEND HEALTH ALERTS
+  # =============================================================================
+  - displayName: "AIPROD V33 - Runway Backend Errors"
+    documentation:
+      content: |
+        Runway ML backend renvoie des erreurs fréquentes.
+        Actions: Activer fallback Replicate automatique.
+    conditions:
+      - displayName: "Runway error count > 5/hour"
+        conditionThreshold:
+          filter: |
+            metric.type="custom.googleapis.com/aiprod/error_count"
+            AND resource.type="global"
+            AND metric.labels.error_type="runway_error"
+          comparison: COMPARISON_GT
+          thresholdValue: 5
+          duration: 3600s
+          aggregations:
+            - alignmentPeriod: 3600s
+              perSeriesAligner: ALIGN_SUM
+    notificationChannels:
+      - "projects/aiprod-484120/notificationChannels/EMAIL_CHANNEL_ID"
+    severity: WARNING
+
+# =============================================================================
+# DASHBOARDS
+# =============================================================================
+dashboards:
+  - displayName: "AIPROD V33 - Pipeline Dashboard"
+    mosaicLayout:
+      columns: 12
+      tiles:
+        # Pipeline Duration Chart
+        - width: 6
+          height: 4
+          widget:
+            title: "Pipeline Duration (P50/P95/P99)"
+            xyChart:
+              dataSets:
+                - timeSeriesQuery:
+                    timeSeriesFilter:
+                      filter: |
+                        metric.type="custom.googleapis.com/aiprod/pipeline_duration_seconds"
+                      aggregation:
+                        alignmentPeriod: 300s
+                        perSeriesAligner: ALIGN_PERCENTILE_50
+                  legendTemplate: "P50"
+                - timeSeriesQuery:
+                    timeSeriesFilter:
+                      filter: |
+                        metric.type="custom.googleapis.com/aiprod/pipeline_duration_seconds"
+                      aggregation:
+                        alignmentPeriod: 300s
+                        perSeriesAligner: ALIGN_PERCENTILE_95
+                  legendTemplate: "P95"
+                - timeSeriesQuery:
+                    timeSeriesFilter:
+                      filter: |
+                        metric.type="custom.googleapis.com/aiprod/pipeline_duration_seconds"
+                      aggregation:
+                        alignmentPeriod: 300s
+                        perSeriesAligner: ALIGN_PERCENTILE_99
+                  legendTemplate: "P99"
+
+        # Quality Score Chart
+        - width: 6
+          height: 4
+          widget:
+            title: "Quality Score (Average)"
+            xyChart:
+              dataSets:
+                - timeSeriesQuery:
+                    timeSeriesFilter:
+                      filter: |
+                        metric.type="custom.googleapis.com/aiprod/quality_score"
+                      aggregation:
+                        alignmentPeriod: 300s
+                        perSeriesAligner: ALIGN_MEAN
+              thresholds:
+                - label: "Minimum Quality"
+                  value: 0.6
+                  color: RED
+
+        # Cost Tracking Chart
+        - width: 6
+          height: 4
+          widget:
+            title: "Daily Cost ($)"
+            xyChart:
+              dataSets:
+                - timeSeriesQuery:
+                    timeSeriesFilter:
+                      filter: |
+                        metric.type="custom.googleapis.com/aiprod/cost_total"
+                      aggregation:
+                        alignmentPeriod: 3600s
+                        perSeriesAligner: ALIGN_SUM
+              thresholds:
+                - label: "Budget Warning"
+                  value: 90
+                  color: YELLOW
+                - label: "Budget Critical"
+                  value: 100
+                  color: RED
+
+        # Error Count Chart
+        - width: 6
+          height: 4
+          widget:
+            title: "Errors by Type"
+            xyChart:
+              dataSets:
+                - timeSeriesQuery:
+                    timeSeriesFilter:
+                      filter: |
+                        metric.type="custom.googleapis.com/aiprod/error_count"
+                      aggregation:
+                        alignmentPeriod: 300s
+                        perSeriesAligner: ALIGN_SUM
+                        groupByFields:
+                          - "metric.labels.error_type"
+
+        # Backend Usage Scorecard
+        - width: 4
+          height: 2
+          widget:
+            title: "Jobs Today"
+            scorecard:
+              timeSeriesQuery:
+                timeSeriesFilter:
+                  filter: |
+                    metric.type="custom.googleapis.com/aiprod/pipeline_duration_seconds"
+                  aggregation:
+                    alignmentPeriod: 86400s
+                    perSeriesAligner: ALIGN_COUNT
+
+        # Current Quality Scorecard
+        - width: 4
+          height: 2
+          widget:
+            title: "Current Quality Score"
+            scorecard:
+              timeSeriesQuery:
+                timeSeriesFilter:
+                  filter: |
+                    metric.type="custom.googleapis.com/aiprod/quality_score"
+                  aggregation:
+                    alignmentPeriod: 3600s
+                    perSeriesAligner: ALIGN_MEAN
+              thresholds:
+                - value: 0.6
+                  color: RED
+                - value: 0.8
+                  color: YELLOW
+
+        # Cost Today Scorecard
+        - width: 4
+          height: 2
+          widget:
+            title: "Cost Today ($)"
+            scorecard:
+              timeSeriesQuery:
+                timeSeriesFilter:
+                  filter: |
+                    metric.type="custom.googleapis.com/aiprod/cost_total"
+                  aggregation:
+                    alignmentPeriod: 86400s
+                    perSeriesAligner: ALIGN_SUM
+              thresholds:
+                - value: 90
+                  color: YELLOW
+                - value: 100
+                  color: RED
+
+# =============================================================================
+# NOTIFICATION CHANNELS (template - configure via GCP Console)
+# =============================================================================
+# To create notification channel:
+# gcloud beta monitoring channels create \
+#   --display-name="AIPROD Alerts" \
+#   --type="email" \
+#   --email-address="alerts@example.com"
+
+# =============================================================================
+# SLO CONFIGURATION
+# =============================================================================
+serviceLevelObjectives:
+  - displayName: "AIPROD V33 - Latency SLO"
+    goal: 0.95
+    rollingPeriodDays: 7
+    serviceLevelIndicator:
+      requestBased:
+        goodTotalRatio:
+          goodServiceFilter: |
+            metric.type="custom.googleapis.com/aiprod/pipeline_duration_seconds"
+            AND metric.labels.duration_seconds < 900
+          totalServiceFilter: |
+            metric.type="custom.googleapis.com/aiprod/pipeline_duration_seconds"
+
+  - displayName: "AIPROD V33 - Quality SLO"
+    goal: 0.90
+    rollingPeriodDays: 7
+    serviceLevelIndicator:
+      requestBased:
+        goodTotalRatio:
+          goodServiceFilter: |
+            metric.type="custom.googleapis.com/aiprod/quality_score"
+            AND metric.labels.score >= 0.6
+          totalServiceFilter: |
+            metric.type="custom.googleapis.com/aiprod/quality_score"

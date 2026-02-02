@@ -1,0 +1,319 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: aiprod-v33-alerts
+  namespace: default
+  labels:
+    prometheus: kube-prometheus
+spec:
+  groups:
+    - name: aiprod.rules
+      interval: 30s
+      rules:
+        # API Health Alerts
+        - alert: APIHighErrorRate
+          expr: |
+            (sum(rate(http_requests_total{job="aiprod-v33-api",status=~"5.."}[5m])) / 
+             sum(rate(http_requests_total{job="aiprod-v33-api"}[5m]))) > 0.05
+          for: 5m
+          labels:
+            severity: critical
+            service: aiprod-v33-api
+          annotations:
+            summary: "High error rate on API (>5%)"
+            description: "{{ $labels.instance }} has error rate {{ $value | humanizePercentage }} over last 5 minutes"
+
+        - alert: APIHighLatency
+          expr: |
+            histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job="aiprod-v33-api"}[5m])) > 2
+          for: 5m
+          labels:
+            severity: warning
+            service: aiprod-v33-api
+          annotations:
+            summary: "High API latency (p99 > 2s)"
+            description: "{{ $labels.instance }} has p99 latency {{ $value | humanizeDuration }}"
+
+        - alert: APIDown
+          expr: up{job="aiprod-v33-api"} == 0
+          for: 1m
+          labels:
+            severity: critical
+            service: aiprod-v33-api
+          annotations:
+            summary: "API instance is down"
+            description: "{{ $labels.instance }} has been unreachable for 1 minute"
+
+        # Worker Alerts
+        - alert: WorkerHighQueueDepth
+          expr: |
+            pubsub_subscription_num_undelivered_messages{subscription="aiprod-pipeline-worker"} > 1000
+          for: 5m
+          labels:
+            severity: warning
+            service: aiprod-v33-worker
+          annotations:
+            summary: "Worker queue depth is high (>1000)"
+            description: "Queue has {{ $value }} undelivered messages"
+
+        - alert: WorkerProcessingFailures
+          expr: |
+            (sum(rate(pipeline_job_failures_total{service="aiprod-v33-worker"}[5m])) / 
+             sum(rate(pipeline_job_total{service="aiprod-v33-worker"}[5m]))) > 0.1
+          for: 5m
+          labels:
+            severity: warning
+            service: aiprod-v33-worker
+          annotations:
+            summary: "High worker job failure rate (>10%)"
+            description: "Failure rate is {{ $value | humanizePercentage }}"
+
+        - alert: WorkerDown
+          expr: up{job="aiprod-v33-worker"} == 0
+          for: 1m
+          labels:
+            severity: critical
+            service: aiprod-v33-worker
+          annotations:
+            summary: "Worker instance is down"
+            description: "{{ $labels.instance }} has been unreachable for 1 minute"
+
+        # Database Alerts
+        - alert: DatabaseConnectionPoolExhausted
+          expr: |
+            (pg_stat_activity_count{datname="aiprod_db"} / 100) > 0.8
+          for: 5m
+          labels:
+            severity: warning
+            service: postgresql
+          annotations:
+            summary: "Database connection pool nearly exhausted"
+            description: "Using {{ $value | humanizePercentage }} of available connections"
+
+        - alert: DatabaseReplicationLag
+          expr: |
+            pg_replication_lag_bytes / 1024 / 1024 > 100
+          for: 5m
+          labels:
+            severity: warning
+            service: postgresql
+          annotations:
+            summary: "High database replication lag (>100MB)"
+            description: "Replication lag is {{ $value | humanize }}MB"
+
+        # Gemini API Alerts
+        - alert: GeminiAPIHighLatency
+          expr: |
+            histogram_quantile(0.95, rate(gemini_request_duration_seconds_bucket[5m])) > 10
+          for: 5m
+          labels:
+            severity: warning
+            service: gemini-api
+          annotations:
+            summary: "Gemini API latency is high (p95 > 10s)"
+            description: "p95 latency is {{ $value | humanizeDuration }}"
+
+        - alert: GeminiAPIRateLimitApproaching
+          expr: |
+            (gemini_api_requests_remaining / 1000) < 1
+          for: 2m
+          labels:
+            severity: warning
+            service: gemini-api
+          annotations:
+            summary: "Gemini API rate limit approaching"
+            description: "Only {{ $value }} requests remaining"
+
+        # Cloud Storage Alerts
+        - alert: GCSUploadFailureRate
+          expr: |
+            (sum(rate(gcs_upload_failures_total[5m])) / 
+             sum(rate(gcs_upload_attempts_total[5m]))) > 0.05
+          for: 5m
+          labels:
+            severity: warning
+            service: gcs
+          annotations:
+            summary: "High GCS upload failure rate (>5%)"
+            description: "Failure rate is {{ $value | humanizePercentage }}"
+
+        # Pub/Sub Alerts
+        - alert: PubSubPublishFailures
+          expr: |
+            (sum(rate(pubsub_publish_failures_total[5m])) / 
+             sum(rate(pubsub_publish_attempts_total[5m]))) > 0.1
+          for: 5m
+          labels:
+            severity: critical
+            service: pubsub
+          annotations:
+            summary: "High Pub/Sub publish failure rate (>10%)"
+            description: "Failure rate is {{ $value | humanizePercentage }}"
+
+        # Cost Alerts
+        - alert: UnusuallyHighCostTrajectory
+          expr: |
+            (month_to_date_cost - month_start_baseline) > (month_budget * 0.8)
+          for: 1h
+          labels:
+            severity: warning
+            team: platform
+          annotations:
+            summary: "Cost trajectory exceeding 80% of monthly budget"
+            description: "Current trajectory: ${{ $value | humanize }}"
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aiprod-prometheus-config
+  namespace: default
+spec:
+  prometheus.yml: |
+    global:
+      scrape_interval: 30s
+      evaluation_interval: 30s
+      external_labels:
+        cluster: 'aiprod-v33'
+        environment: 'production'
+
+    scrape_configs:
+    # API service metrics
+    - job_name: 'aiprod-v33-api'
+      kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names:
+          - default
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_app]
+        action: keep
+        regex: aiprod-v33-api
+      - source_labels: [__meta_kubernetes_pod_container_port_name]
+        action: keep
+        regex: metrics
+      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_name]
+        action: replace
+        separator: ':'
+        target_label: instance
+
+    # Worker service metrics
+    - job_name: 'aiprod-v33-worker'
+      kubernetes_sd_configs:
+      - role: pod
+        namespaces:
+          names:
+          - default
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_pod_label_app]
+        action: keep
+        regex: aiprod-v33-worker
+      - source_labels: [__meta_kubernetes_pod_container_port_name]
+        action: keep
+        regex: metrics
+      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_pod_name]
+        action: replace
+        separator: ':'
+        target_label: instance
+
+    # PostgreSQL metrics via postgres_exporter
+    - job_name: 'postgresql'
+      static_configs:
+      - targets: ['localhost:9187']
+        labels:
+          service: 'aiprod-db'
+
+    # GCP metrics via stackdriver_exporter
+    - job_name: 'gcp-metrics'
+      static_configs:
+      - targets: ['localhost:9255']
+        labels:
+          service: 'google-cloud'
+
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aiprod-grafana-dashboard
+  namespace: default
+spec:
+  aiprod-dashboard.json: |
+    {
+      "dashboard": {
+        "title": "AIPROD V33 Production Dashboard",
+        "panels": [
+          {
+            "title": "API Request Rate",
+            "targets": [
+              {
+                "expr": "sum(rate(http_requests_total{job='aiprod-v33-api'}[5m])) by (method)"
+              }
+            ]
+          },
+          {
+            "title": "API Error Rate",
+            "targets": [
+              {
+                "expr": "sum(rate(http_requests_total{job='aiprod-v33-api',status=~'5..'}[5m]))"
+              }
+            ]
+          },
+          {
+            "title": "API Latency (p99)",
+            "targets": [
+              {
+                "expr": "histogram_quantile(0.99, rate(http_request_duration_seconds_bucket{job='aiprod-v33-api'}[5m]))"
+              }
+            ]
+          },
+          {
+            "title": "Worker Queue Depth",
+            "targets": [
+              {
+                "expr": "pubsub_subscription_num_undelivered_messages{subscription='aiprod-pipeline-worker'}"
+              }
+            ]
+          },
+          {
+            "title": "Worker Job Success Rate",
+            "targets": [
+              {
+                "expr": "sum(rate(pipeline_job_total{service='aiprod-v33-worker',status='success'}[5m])) / sum(rate(pipeline_job_total{service='aiprod-v33-worker'}[5m]))"
+              }
+            ]
+          },
+          {
+            "title": "Database Connection Count",
+            "targets": [
+              {
+                "expr": "pg_stat_activity_count{datname='aiprod_db'}"
+              }
+            ]
+          },
+          {
+            "title": "Gemini API Requests (5m)",
+            "targets": [
+              {
+                "expr": "sum(rate(gemini_requests_total[5m])) by (endpoint)"
+              }
+            ]
+          },
+          {
+            "title": "GCS Upload Success Rate",
+            "targets": [
+              {
+                "expr": "sum(rate(gcs_upload_total{status='success'}[5m])) / sum(rate(gcs_upload_total[5m]))"
+              }
+            ]
+          },
+          {
+            "title": "Monthly Cost Trajectory",
+            "targets": [
+              {
+                "expr": "month_to_date_cost"
+              }
+            ]
+          }
+        ]
+      }
+    }

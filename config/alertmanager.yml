@@ -1,0 +1,104 @@
+# AlertManager Configuration pour Phase 2
+# Routing, grouping et notifications des alertes critiques
+
+global:
+  resolve_timeout: 5m
+  slack_api_url: "${SLACK_WEBHOOK_URL}"
+  pagerduty_url: "https://events.pagerduty.com/v2/enqueue"
+
+templates:
+  - "/etc/alertmanager/templates/*.tmpl"
+
+route:
+  # Route root pour tous les alertes
+  receiver: "default-receiver"
+  group_by: ["alertname", "cluster", "service"]
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+
+  routes:
+    # Alertes CRITIQUES - PagerDuty + Slack
+    - match:
+        severity: critical
+      receiver: "critical-team"
+      group_wait: 10s
+      group_interval: 1m
+      repeat_interval: 2h
+      continue: true
+
+    # Alertes de SLA - Slack #sla-alerts
+    - match_re:
+        alertname: "SLABreach|HighErrorRate|CostThresholdExceeded"
+      receiver: "sla-team"
+      group_interval: 10m
+
+    # Alertes d'infrastructure - Slack #infra-alerts
+    - match_re:
+        component: "database|pubsub|prometheus"
+      receiver: "infra-team"
+      group_interval: 10m
+
+receivers:
+  # Slack notifications par défaut
+  - name: "default-receiver"
+    slack_configs:
+      - channel: "#alerts"
+        title: "{{ .GroupLabels.alertname }}"
+        text: "{{ range .Alerts }}{{ .Annotations.description }}{{ end }}"
+        send_resolved: true
+        color: '{{ if eq .Status "firing" }}danger{{ else }}good{{ end }}'
+        actions:
+          - type: button
+            text: "View in Grafana"
+            url: "http://grafana:3000"
+
+  # Équipe critique - PagerDuty + Slack
+  - name: "critical-team"
+    slack_configs:
+      - channel: "#critical-alerts"
+        title: ":rotating_light: CRITICAL: {{ .GroupLabels.alertname }}"
+        text: '{{ range .Alerts }}{{ .Annotations.description }}\nRunbook: {{ .Annotations.runbook }}{{ end }}'
+        send_resolved: true
+        color: "danger"
+    pagerduty_configs:
+      - service_key: "${PAGERDUTY_SERVICE_KEY}"
+        description: "{{ .GroupLabels.alertname }}"
+        details:
+          firing: '{{ template "pagerduty.default.instances" .Alerts.Firing }}'
+          resolved: '{{ template "pagerduty.default.instances" .Alerts.Resolved }}'
+
+  # Équipe SLA - Slack #sla-alerts
+  - name: "sla-team"
+    slack_configs:
+      - channel: "#sla-alerts"
+        title: ":warning: SLA Alert: {{ .GroupLabels.alertname }}"
+        text: '{{ range .Alerts }}{{ .Annotations.description }}\nRunbook: {{ .Annotations.runbook }}{{ end }}'
+        send_resolved: true
+        color: "warning"
+
+  # Équipe infra - Slack #infra-alerts
+  - name: "infra-team"
+    slack_configs:
+      - channel: "#infra-alerts"
+        title: ":gear: Infrastructure Alert: {{ .GroupLabels.alertname }}"
+        text: "{{ range .Alerts }}{{ .Annotations.description }}{{ end }}"
+        send_resolved: true
+        color: "warning"
+
+# Silencing rules (exemples pour les maintenances)
+inhibit_rules:
+  # Ne pas alerter si le service entier est down
+  - source_match:
+      severity: "critical"
+      alertname: "PrometheusDown"
+    target_match_re:
+      severity: "warning|info"
+    equal: ["cluster", "service"]
+
+  # Ne pas alerter sur des erreurs spécifiques si c'est une période maintenue
+  - source_match:
+      maintenance: "true"
+    target_match_re:
+      severity: ".*"
+    equal: ["service", "instance"]
