@@ -103,6 +103,7 @@ Format de réponse JSON:
             # Construire la réponse finale
             report = {
                 "status": "adapted",
+                "lang": target_lang,
                 "language": target_lang,
                 "adapted_assets": result.get("adapted_assets", assets),
                 "cultural_insights": result.get("cultural_insights", []),
@@ -132,6 +133,7 @@ Format de réponse JSON:
         adapted = {k: f"{v}_translated_{target_lang}" for k, v in assets.items()}
         return {
             "status": "adapted",
+            "lang": target_lang,
             "language": target_lang,
             "adapted_assets": adapted,
             "cultural_insights": ["Mock translation applied"],
