@@ -14,7 +14,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY src/ ./src/
 COPY config/ ./config/
-COPY logs/ ./logs/
+# logs/ directory is created at runtime if needed
 
 # Environment variables
 ENV PYTHONPATH=/app
