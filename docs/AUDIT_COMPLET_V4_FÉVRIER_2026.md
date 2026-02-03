@@ -1378,6 +1378,11 @@ gcloud run deploy aiprod-api \
 
 ## 📋 CHECKLIST COMPLÉTION
 
+**Mise à jour** : 3 février 2026 - GitHub Actions workflows ✅ PASSING  
+**Status global** : Phase 3 à 98% (prêt pour Terraform deployment)
+
+---
+
 ### Phase 0 (100%) ✅
 
 - [x] Secrets exposés → Secret Manager
@@ -1403,7 +1408,9 @@ gcloud run deploy aiprod-api \
 - [x] Alerting → AlertManager + Budget alerts
 - [x] 73 tests monitoring
 
-### Phase 3 (95%) 🟡
+### Phase 3 (98%) 🟢 → READY FOR DEPLOYMENT
+
+**Code & CI/CD** ✅
 
 - [x] IaC Terraform → 5 files, 50+ variables, 364 LOC main.tf
 - [x] Scalabilité → Cloud Run autoscaling (1-10), Pub/Sub unlimited
@@ -1414,9 +1421,363 @@ gcloud run deploy aiprod-api \
 - [x] Workers → Cloud Run worker service (4 CPU, 1-5 instances)
 - [x] Pub/Sub integration → 3 topics, 2 subscriptions, DLQ
 - [x] Secret Manager → 4 secrets, dynamic env injection
-- [ ] **Terraform deploy** → Awaiting execution (`terraform init/plan/apply`)
-- [ ] **GCP configuration** → Manual: revoke old keys, create secrets
-- [ ] **Validation tests** → Post-deploy verification
+- [x] **GitHub Actions workflows** → 295/295 tests PASSING ✅ (Feb 3)
+- [x] **Docker build** → SUCCESS ✅ (Feb 3)
+- [x] **runwayml reintegrated** → requirements-ci.txt for CI/CD (Feb 3)
+- [x] **CI/CD stable** → Both workflows green, no false errors (Feb 3)
+
+**Deployment pipeline** 🔴 NEXT STEPS
+
+- [ ] **Terraform init** → Setup GCS backend (optional but recommended)
+- [ ] **Terraform plan** → Validate infrastructure changes
+- [ ] **Terraform apply** → Provision GCP resources (4-6 hours)
+- [ ] **GCP configuration** → Manual setup (2-3 hours)
+- [ ] **Validation tests** → Post-deploy verification (1-2 hours)
+
+---
+
+## 🚀 PROCHAINES ÉTAPES (ACTION ITEMS)
+
+### ÉTAPE 1 : GCP Manual Configuration (2-3h) 🔴 **À faire D'ABORD**
+
+**Objectif** : Préparer GCP avant le déploiement Terraform
+
+1. **Revoke old API keys** (15 min)
+   - [ ] Gemini API Key (ancienne clé) → Supprimer depuis GCP Console
+   - [ ] Runway API Key (ancienne clé) → Supprimer
+   - [ ] Datadog API Key (ancienne clé) → Supprimer
+   - [ ] GCS Bucket Name (ancienne config) → Vérifier/mettre à jour
+
+2. **Create secrets in GCP Secret Manager** (30 min)
+
+   ```bash
+   gcloud secrets create gemini-api-key --data="<your-key>"
+   gcloud secrets create runway-api-key --data="<your-key>"
+   gcloud secrets create datadog-api-key --data="<your-key>"
+   gcloud secrets create gcs-bucket-name --data="aiprod-v33-assets"
+   ```
+
+   - [ ] GEMINI_API_KEY (from Google AI Studio)
+   - [ ] RUNWAY_API_KEY (from Runway ML dashboard)
+   - [ ] DATADOG_API_KEY (from Datadog org)
+   - [ ] GCS_BUCKET_NAME = "aiprod-v33-assets"
+
+3. **Generate Firebase credentials** (30 min)
+   - [ ] Go to GCP Console → Firebase
+   - [ ] Create service account key
+   - [ ] Save as `firebase-credentials.json` (NEVER commit!)
+   - [ ] Grant role: Editor
+
+4. **Create service account for Terraform** (30 min)
+
+   ```bash
+   gcloud iam service-accounts create terraform-sa \
+     --display-name="Terraform Service Account"
+
+   gcloud projects add-iam-policy-binding aiprod-484120 \
+     --member="serviceAccount:terraform-sa@aiprod-484120.iam.gserviceaccount.com" \
+     --role="roles/editor"
+
+   gcloud iam service-accounts keys create terraform-key.json \
+     --iam-account=terraform-sa@aiprod-484120.iam.gserviceaccount.com
+   ```
+
+   - [ ] Service account created
+   - [ ] Editor role granted
+   - [ ] Key file downloaded (`terraform-key.json`)
+
+5. **Verify GCP prerequisites** (15 min)
+   - [ ] Project ID: `aiprod-484120` ✓
+   - [ ] Billing enabled
+   - [ ] APIs enabled: Cloud Run, Cloud SQL, Pub/Sub, Secret Manager
+   - [ ] Docker image in Artifact Registry: `europe-west1-docker.pkg.dev/aiprod-484120/aiprod/api:latest`
+
+---
+
+### ÉTAPE 2 : Terraform Deployment (4-6h) 🟠 **Après GCP setup**
+
+**Objectif** : Déployer infrastructure complète sur GCP
+
+1. **Initialize Terraform** (30 min)
+
+   ```bash
+   cd infra/terraform
+   export GOOGLE_APPLICATION_CREDENTIALS=../../terraform-key.json
+
+   terraform init
+   # Output: Successfully configured the backend "local"!
+   ```
+
+   - [ ] Backend initialized (local or GCS)
+   - [ ] Providers downloaded
+   - [ ] `.terraform/` directory created
+
+2. **Review the plan** (1h)
+
+   ```bash
+   terraform plan -out=tfplan
+   # Review 50+ resources to be created:
+   # - Cloud Run API service
+   # - Cloud Run Worker service
+   # - Cloud SQL database
+   # - VPC network + subnet + connector
+   # - 3 Pub/Sub topics + 2 subscriptions
+   # - Secret Manager references
+   # - Service account + IAM roles
+   ```
+
+   - [ ] Plan reviewed (no destructive changes)
+   - [ ] 50+ resources to be created
+   - [ ] Estimated cost: ~$2,000/month
+   - [ ] tfplan file saved
+
+3. **Apply the plan** (3-4h)
+
+   ```bash
+   terraform apply tfplan
+   # This will:
+   # 1. Create Cloud SQL instance (database + user)
+   # 2. Create VPC + networking
+   # 3. Create Pub/Sub topics
+   # 4. Deploy Cloud Run services
+   # 5. Grant IAM permissions
+   # 6. Configure Secret Manager
+
+   # Watch deployment progress in Cloud Console
+   ```
+
+   - [ ] Cloud SQL provisioned (wait ~30 min)
+   - [ ] VPC network created
+   - [ ] Pub/Sub topics ready
+   - [ ] Cloud Run services deployed
+   - [ ] All 50+ resources created successfully
+   - [ ] Outputs displayed (Cloud Run URLs, etc.)
+
+4. **Verify deployment** (30 min)
+
+   ```bash
+   # Get outputs
+   terraform output cloud_run_url
+   # Expected: https://aiprod-api-xxxxx.run.app
+
+   # Test API health
+   curl https://aiprod-api-xxxxx.run.app/health
+   # Expected: {"status": "ok"}
+
+   # Check Cloud SQL connection
+   gcloud sql instances describe aiprod-v33 --project=aiprod-484120
+
+   # List Cloud Run services
+   gcloud run services list --project=aiprod-484120
+
+   # Verify Pub/Sub topics
+   gcloud pubsub topics list --project=aiprod-484120
+   ```
+
+   - [ ] Cloud Run API responds to /health
+   - [ ] Cloud SQL in "RUNNABLE" state
+   - [ ] Pub/Sub topics exist (3)
+   - [ ] Secret Manager secrets configured
+   - [ ] No errors in Cloud Logging
+
+5. **Commit Terraform state** (10 min)
+
+   ```bash
+   # IMPORTANT: Terraform state contains sensitive data
+   # Store in GCS with encryption (recommended for production)
+
+   # For now, save locally and document:
+   git add terraform.tfstate
+   git commit -m "docs(infra): Add terraform deployment outputs"
+   git push
+   ```
+
+   - [ ] terraform.tfstate backed up
+   - [ ] Infrastructure documented
+   - [ ] All changes committed
+
+---
+
+### ÉTAPE 3 : Production Validation (1-2h) 🟢 **Après Terraform**
+
+**Objectif** : Vérifier que l'infrastructure fonctionne correctement
+
+1. **API smoke tests** (30 min)
+
+   ```bash
+   # Test API endpoints
+   curl -X POST https://aiprod-api-xxxxx.run.app/pipeline/run \
+     -H "Authorization: Bearer <JWT_TOKEN>" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "prompt": "Test video",
+       "aspect_ratio": "16:9",
+       "duration": 5
+     }'
+
+   # Expected: 200 OK with job_id
+   ```
+
+   - [ ] POST /pipeline/run → Creates job
+   - [ ] GET /pipeline/{id} → Returns status
+   - [ ] POST /cost/estimate → Calculates cost
+   - [ ] GET /health → Returns 200 OK
+   - [ ] GET /metrics → Returns Prometheus metrics
+
+2. **Database verification** (15 min)
+
+   ```bash
+   # Connect to Cloud SQL
+   gcloud sql connect aiprod-v33 \
+     --user=aiprod \
+     --project=aiprod-484120
+
+   # Check tables exist
+   \dt
+   # Expected: jobs, results, costs, audit_logs tables
+
+   # Test insert
+   INSERT INTO jobs (id, user_id, status) VALUES (
+     gen_random_uuid(), 'test-user', 'PENDING'
+   );
+   ```
+
+   - [ ] Can connect to Cloud SQL
+   - [ ] All tables created (Alembic migrations ran)
+   - [ ] Can write data
+   - [ ] Can read data
+
+3. **Pub/Sub verification** (15 min)
+
+   ```bash
+   # Publish test message
+   gcloud pubsub topics publish pipeline-jobs \
+     --message='{"job_id": "test-123", "user_id": "test"}' \
+     --project=aiprod-484120
+
+   # Subscribe to results topic
+   gcloud pubsub subscriptions pull results-subscription \
+     --auto-ack \
+     --project=aiprod-484120
+   ```
+
+   - [ ] Can publish to topics
+   - [ ] Can pull from subscriptions
+   - [ ] Dead-letter queue configured
+
+4. **Monitoring setup** (15 min)
+   - [ ] Prometheus scraping metrics from `/metrics`
+   - [ ] Grafana dashboards display data
+   - [ ] Cloud Logging receiving application logs
+   - [ ] Datadog receiving audit events
+
+5. **Security validation** (15 min)
+   - [ ] API requires valid JWT token (test with invalid → 401)
+   - [ ] Secrets not exposed in logs
+   - [ ] Cloud SQL has no public IP
+   - [ ] VPC connector working
+   - [ ] TLS enforced (HTTPS only)
+
+---
+
+### ÉTAPE 4 : Go-Live Preparation (Feb 17) 📅 **Semaine de go-live**
+
+**Objectif** : Préparer pour production en direct
+
+1. **Production load testing** (2h)
+   - [ ] Simulate 100 jobs/minute
+   - [ ] Verify autoscaling (Cloud Run 1→10 instances)
+   - [ ] Check database connections (max 1,000)
+   - [ ] Monitor error rate (<0.1%)
+   - [ ] Record P95 latency baseline
+
+2. **Disaster recovery drill** (1h)
+   - [ ] Test backup/restore procedure
+   - [ ] Verify PITR recovery time (<30 min)
+   - [ ] Document runbook
+   - [ ] Test team notification flow
+
+3. **Final security audit** (1h)
+   - [ ] Run OWASP Top 10 checks
+   - [ ] Verify all secrets in Secret Manager
+   - [ ] Check IAM permissions (least privilege)
+   - [ ] Enable Cloud Armor if needed
+
+4. **Communicate go-live** (30 min)
+   - [ ] Notify stakeholders
+   - [ ] Update status pages
+   - [ ] Prepare incident response team
+   - [ ] Document support contacts
+
+---
+
+## 📊 TIMELINE RÉVISÉ
+
+| Phase  | Tâches                        | Durée    | Statut | Dates cibles |
+| ------ | ----------------------------- | -------- | ------ | ------------ |
+| **0**  | Sécurité (P0)                 | 24-48h   | ✅     | Jan 30-31    |
+| **1**  | Fondation (DB, Queue, APIs)   | 1-2 sem  | ✅     | Feb 1-7      |
+| **2**  | Observabilité (Logs, Monitor) | 2-3 sem  | ✅     | Feb 1-14     |
+| **3a** | **GCP Setup** (manuel)        | **2-3h** | 🔴     | **Feb 3-4**  |
+| **3b** | **Terraform Deploy**          | **4-6h** | 🟠     | **Feb 4-5**  |
+| **3c** | **Validation Tests**          | **1-2h** | 🟠     | **Feb 5-6**  |
+| **4**  | Production preparation        | 1 week   | 🟡     | Feb 10-16    |
+| **5**  | **GO-LIVE** 🚀                | -        | 📅     | **Feb 17**   |
+
+---
+
+## ✅ ÉTAPES COMPLÉTÉES (Feb 3)
+
+- [x] Code audit complet (3,500+ LOC)
+- [x] 295/295 tests PASSING
+- [x] GitHub Actions workflows validated ✅
+- [x] Docker image builds successfully
+- [x] runwayml reintegrated properly
+- [x] CI/CD pipeline stable
+- [x] Terraform IaC ready
+- [x] All 3 phases code-complete
+
+## 🔴 ÉTAPES IMMÉDIATES (Feb 3-4)
+
+- [ ] **GCP Manual Configuration** (2-3h) ← **START HERE**
+  - Secrets creation
+  - Firebase setup
+  - Terraform SA key
+- [ ] **Terraform Deployment** (4-6h) ← **AFTER GCP**
+  - terraform init
+  - terraform plan
+  - terraform apply
+- [ ] **Production Validation** (1-2h) ← **AFTER TERRAFORM**
+  - Smoke tests
+  - DB verification
+  - Security checks
+
+---
+
+## ⚠️ NOTES IMPORTANTES
+
+🟡 **Blockers** :
+
+- Terraform not yet deployed (infrastructure not live)
+- GCP manual setup required (secrets, Firebase, keys)
+- Cloud Run services not yet running
+
+🟢 **Ready** :
+
+- Code 100% production-ready
+- Tests 100% passing
+- CI/CD stable and validated
+- All IaC files prepared
+- Documentation complete
+
+🎯 **Success Criteria** :
+
+- All GCP resources provisioned
+- Cloud Run API responding
+- Database connected and migrated
+- Pub/Sub topics active
+- Monitoring receiving data
+- 0 errors in first 1 hour
 
 ---
 
