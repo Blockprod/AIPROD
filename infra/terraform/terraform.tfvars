@@ -26,7 +26,6 @@ secret_env = {
   GEMINI_API_KEY  = "GEMINI_API_KEY"
   RUNWAY_API_KEY  = "RUNWAY_API_KEY"
   DATADOG_API_KEY = "DATADOG_API_KEY"
-  GCS_BUCKET_NAME = "GCS_BUCKET_NAME"
 }
 
 vpc_enabled         = true
@@ -34,7 +33,7 @@ vpc_name            = "aiprod-v33-vpc"
 vpc_subnet_name     = "aiprod-v33-subnet"
 vpc_subnet_cidr     = "10.10.0.0/24"
 vpc_connector_name  = "aiprod-v33-connector"
-vpc_connector_cidr  = "10.8.0.0/28"
+vpc_connector_cidr  = "10.9.0.0/28"
 vpc_egress          = "all-traffic"
 private_service_cidr = "10.20.0.0/16"
 
@@ -42,7 +41,7 @@ cloudsql_enabled        = true
 cloudsql_instance_name  = "aiprod-v33-postgres"
 cloudsql_database_name  = "aiprod_v33"
 cloudsql_user           = "aiprod"
-cloudsql_password       = "CHANGE_ME"
+cloudsql_password       = "P@ssw0rd!aiprod2026xyz123"
 
 worker_service_name = "aiprod-v33-worker"
 worker_container_image = "gcr.io/aiprod-484120/aiprod-v33:latest"

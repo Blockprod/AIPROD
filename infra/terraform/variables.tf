@@ -59,7 +59,7 @@ variable "timeout_seconds" {
 variable "ingress" {
   description = "Ingress settings for Cloud Run"
   type        = string
-  default     = "INGRESS_TRAFFIC_ALL"
+  default     = "all"
 }
 
 variable "env" {
@@ -264,6 +264,12 @@ variable "cloudsql_user" {
   description = "Cloud SQL database user"
   type        = string
   default     = "aiprod"
+}
+
+variable "enable_worker" {
+  description = "Enable the Cloud Run worker service"
+  type        = bool
+  default     = false
 }
 
 variable "cloudsql_password" {

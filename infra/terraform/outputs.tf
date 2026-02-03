@@ -5,7 +5,7 @@ output "cloud_run_url" {
 
 output "cloud_run_worker_url" {
   description = "Cloud Run worker service URL"
-  value       = google_cloud_run_service.worker.status[0].url
+  value       = var.enable_worker ? google_cloud_run_service.worker[0].status[0].url : ""
 }
 
 output "service_account_email" {

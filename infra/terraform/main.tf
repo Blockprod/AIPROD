@@ -98,12 +98,15 @@ resource "google_service_networking_connection" "private_vpc_connection" {
 }
 
 resource "google_vpc_access_connector" "connector" {
-  count        = var.vpc_enabled ? 1 : 0
-  name         = var.vpc_connector_name
-  region       = var.region
-  project      = var.project_id
+  count         = var.vpc_enabled ? 1 : 0
+  name          = var.vpc_connector_name
+  region        = var.region
+  project       = var.project_id
   ip_cidr_range = var.vpc_connector_cidr
-  network      = google_compute_network.vpc[0].name
+  network       = google_compute_network.vpc[0].name
+  machine_type  = "e2-micro"
+  min_instances = 2
+  max_instances = 3
 
   depends_on = [google_project_service.services]
 }
@@ -159,18 +162,14 @@ resource "google_secret_manager_secret" "secrets" {
   project   = var.project_id
 
   replication {
-    automatic = true
+    auto {}
   }
 
   depends_on = [google_project_service.services]
 }
 
-resource "google_secret_manager_secret_version" "secret_versions" {
-  for_each = { for k, v in var.secret_values : k => v if v != "" }
-
-  secret      = google_secret_manager_secret.secrets[each.key].id
-  secret_data = each.value
-}
+# Note: Secret versions are managed outside Terraform
+# The secrets already exist in GCP Secret Manager
 
 resource "google_sql_database_instance" "primary" {
   count   = var.cloudsql_enabled ? 1 : 0
@@ -225,9 +224,7 @@ resource "google_cloud_run_service" "api" {
 
   metadata {
     annotations = {
-      "run.googleapis.com/ingress"         = var.ingress
-      "autoscaling.knative.dev/minScale"  = tostring(var.min_instances)
-      "autoscaling.knative.dev/maxScale"  = tostring(var.max_instances)
+      "run.googleapis.com/ingress" = var.ingress
     }
   }
 
@@ -250,6 +247,10 @@ resource "google_cloud_run_service" "api" {
 
       containers {
         image = var.container_image
+
+        ports {
+          container_port = 8000
+        }
 
         resources {
           limits = {
@@ -290,15 +291,19 @@ resource "google_cloud_run_service" "api" {
   depends_on = [google_project_service.services]
 }
 
+# Note: Public access (allUsers) configured via gcloud:
+# gcloud run services add-iam-policy-binding aiprod-v33-api \
+#   --member="allUsers" --role="roles/run.invoker" \
+#   --region=europe-west1 --project=aiprod-484120
+
 resource "google_cloud_run_service" "worker" {
+  count    = var.enable_worker ? 1 : 0
   name     = var.worker_service_name
   location = var.region
 
   metadata {
     annotations = {
-      "run.googleapis.com/ingress"         = var.ingress
-      "autoscaling.knative.dev/minScale"  = tostring(var.worker_min_instances)
-      "autoscaling.knative.dev/maxScale"  = tostring(var.worker_max_instances)
+      "run.googleapis.com/ingress" = var.ingress
     }
   }
 
