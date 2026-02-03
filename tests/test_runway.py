@@ -1,5 +1,8 @@
 import asyncio
-from runwayml import RunwayML
+import pytest
+import os
+
+pytest.importorskip("runwayml", reason="RunwayML not installed")
 
 async def test_runway_image():
     client = RunwayML(api_key="key_50d32d6432d622ec0c7c95f1aa0a68cf781192bd531ff1580c3f4853755c5edba0b52fb49426d07aa6b4356e505ab6e1b80987b501aa08f37000fa51f76796b7")

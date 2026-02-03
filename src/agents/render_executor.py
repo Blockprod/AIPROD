@@ -11,7 +11,15 @@ import time
 from enum import Enum
 from typing import Any, Dict, Optional, List
 import httpx
-from runwayml import RunwayML, TaskFailedError
+
+try:
+    from runwayml import RunwayML, TaskFailedError
+    HAS_RUNWAY = True
+except ImportError:
+    HAS_RUNWAY = False
+    RunwayML = None
+    TaskFailedError = Exception
+
 from src.utils.monitoring import logger
 from src.utils.gcp_client import GCPClient
 
@@ -51,6 +59,11 @@ class RenderExecutor:
         self.runway_api_key = os.getenv("RUNWAYML_API_SECRET") or os.getenv("RUNWAY_API_KEY", "")
         if self.runway_api_key:
             self.runway_api_key = self.runway_api_key.strip()
+        
+        # Check if runway is available
+        if not HAS_RUNWAY and preferred_backend == VideoBackend.RUNWAY:
+            logger.warning("RunwayML not installed. Falling back to alternative backends.")
+            preferred_backend = VideoBackend.VEO3
         
         self.replicate_api_key = os.getenv("REPLICATE_API_TOKEN", "")
         self.gcp_project = os.getenv("GCP_PROJECT_ID", "aiprod-484120")
