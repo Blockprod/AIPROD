@@ -14,6 +14,7 @@ from src.agents.supervisor import Supervisor
 from src.agents.gcp_services_integrator import GoogleCloudServicesIntegrator
 from src.agents.audio_generator import AudioGenerator
 from src.agents.music_composer import MusicComposer
+from src.agents.sound_effects_agent import SoundEffectsAgent
 
 class PipelineState(Enum):
     INIT = auto()
@@ -47,8 +48,10 @@ class StateMachine:
         # 🎤 Audio & Music Agents (Phase 1 Integration)
         self.audio_generator = AudioGenerator(tts_provider="auto")
         self.music_composer = MusicComposer()
+        # 🎬 Sound Effects Agent (Phase 3 Integration)
+        self.sound_effects_agent = SoundEffectsAgent()
         logger.info(f"StateMachine initialized in state {self.state}")
-        logger.info("Audio & Music agents loaded successfully")
+        logger.info("Audio, Music & SFX agents loaded successfully")
 
     def transition(self, new_state: PipelineState) -> None:
         logger.info(f"Transition: {self.state} -> {new_state}")
@@ -92,6 +95,17 @@ class StateMachine:
             music_output = self.music_composer.run(music_manifest)
             self.data["music"] = music_output
             logger.info(f"MusicComposer: Music generated. Provider: {music_output.get('provider')}")
+            
+            # 🎬 Génération bruitages (SFX) — Phase 3
+            logger.info("SoundEffectsAgent: Starting SFX generation...")
+            script = audio_manifest.get("script", "") or inputs.get("text_prompt", "")
+            sfx_manifest = audio_manifest.copy()
+            sfx_manifest["script"] = script
+            sfx_manifest["duration"] = inputs.get("duration", 30)
+            sfx_manifest["intensity"] = inputs.get("sfx_intensity", "medium")
+            sfx_output = self.sound_effects_agent.run(sfx_manifest)
+            self.data["sound_effects"] = sfx_output
+            logger.info(f"SoundEffectsAgent: SFX generated. Count: {sfx_output.get('sound_effects', {}).get('count', 0)}")
             
             # Validation sémantique
             self.transition(PipelineState.QA_SEMANTIC)
