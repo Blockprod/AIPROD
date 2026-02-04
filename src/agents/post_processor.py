@@ -1,156 +1,128 @@
 """
 PostProcessor Agent pour AIPROD V33
-Montage vidéo, transitions, effets, titrage, sous-titres (MoviePy/FFmpeg ou API cloud).
+Montage vidéo, transitions, effets, titrage, sous-titres, mélange audio.
+Utilise FFmpeg, OpenCV, PyAV pour les différents effets post-production.
 """
 
 import os
+import logging
 from src.utils.monitoring import logger
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
+
 try:
     import ffmpeg
 except ImportError:
     ffmpeg = None
-    logger.warning("[PostProcessor] 'ffmpeg-python' package not found. FFmpeg features will be disabled. To enable, install with: pip install ffmpeg-python")
+    logger.warning("[PostProcessor] 'ffmpeg-python' not found. FFmpeg features disabled.")
+
 try:
     import cv2
 except ImportError:
     cv2 = None
-    logger.warning("[PostProcessor] 'opencv-python' package not found. OpenCV features will be disabled. To enable, install with: pip install opencv-python")
+    logger.warning("[PostProcessor] 'opencv-python' not found. OpenCV features disabled.")
+
 try:
     import av
 except ImportError:
     av = None
-    logger.warning("[PostProcessor] 'av' package not found. PyAV features will be disabled. To enable, install with: pip install av")
+    logger.warning("[PostProcessor] 'av' not found. PyAV features disabled.")
+
 try:
     import scenepic
 except ImportError:
     scenepic = None
-    logger.warning("[PostProcessor] 'scenepic' package not found. 3D overlay features will be disabled. To enable, install with: pip install scenepic")
+    logger.warning("[PostProcessor] 'scenepic' not found. 3D features disabled.")
+
 
 class PostProcessor:
     """
-    Applique le montage, transitions, effets visuels, titrage et sous-titres à la vidéo générée.
+    Orchestre le post-traitement complet : transitions, effets vidéo, mélange audio.
     """
+    
     def __init__(self, backend: str = "ffmpeg"):
-        self.backend = backend  # "ffmpeg", "opencv", "pyav", "scenepic", ou "cloud"
+        self.backend = backend
+        logger.info(f"[PostProcessor] Initialized with backend: {backend}")
 
     def apply_transitions(self, video_path: str, transitions: Optional[list] = None) -> str:
-        """
-        Applique des transitions entre scènes à l'aide de ffmpeg-python.
-
-        Args:
-            video_path (str): Chemin du fichier vidéo d'entrée.
-            transitions (Optional[list]): Liste de transitions à appliquer. Exemple :
-                [{"type": "fade", "start": 5, "duration": 2}, ...]
-
-        Returns:
-            str: Chemin du fichier vidéo de sortie (avec transitions appliquées), ou le chemin d'origine en cas d'échec.
-        """
+        """Applique des transitions vidéo (fade in/out)."""
         if ffmpeg is None:
             logger.warning("[PostProcessor] FFmpeg not available. Skipping transitions.")
             return video_path
         if not transitions:
             return video_path
+        
         output = f"trans_{os.path.basename(video_path)}"
-        # Example: fade in/out using ffmpeg filter_complex
         filter_cmds = []
         for t in transitions:
             if t.get('type') == 'fade':
                 start = t.get('start', 0)
                 duration = t.get('duration', 1)
                 filter_cmds.append(f"fade=t=in:st={start}:d={duration}")
+        
         if filter_cmds:
             filter_complex = ','.join(filter_cmds)
-            out = ffmpeg.output(ffmpeg.input(video_path), output, vf=filter_complex, vcodec='libx264', acodec='aac')
             try:
+                out = ffmpeg.output(
+                    ffmpeg.input(video_path),
+                    output,
+                    vf=filter_complex,
+                    vcodec='libx264',
+                    acodec='aac'
+                )
                 ffmpeg.run(out, overwrite_output=True, quiet=True)
                 return output
-            except ffmpeg.Error as e:
-                logger.error(f"[PostProcessor] Erreur FFmpeg transitions: {e}")
+            except Exception as e:
+                logger.error(f"[PostProcessor] Error applying transitions: {e}")
                 return video_path
         return video_path
 
     def add_titles_subtitles(self, video_path: str, titles: Optional[list] = None, subtitles: Optional[list] = None) -> str:
-        """
-        Ajoute des titres et/ou sous-titres à la vidéo à l'aide de ffmpeg-python (overlay texte).
-
-        Args:
-            video_path (str): Chemin du fichier vidéo d'entrée.
-            titles (Optional[list]): Liste de titres à ajouter. Exemple :
-                [{"text": "Titre", "start": 0, "duration": 3}, ...]
-            subtitles (Optional[list]): Liste de sous-titres à ajouter. Exemple :
-                [{"text": "Sous-titre", "start": 0, "duration": 3}, ...]
-
-        Returns:
-            str: Chemin du fichier vidéo de sortie (avec titres/sous-titres), ou le chemin d'origine en cas d'échec.
-        """
+        """Ajoute des titres et sous-titres à la vidéo."""
         if ffmpeg is None:
             logger.warning("[PostProcessor] FFmpeg not available. Skipping titles/subtitles.")
             return video_path
-        output = f"postproc_{os.path.basename(video_path)}"
+        
+        output = f"titled_{os.path.basename(video_path)}"
         input_stream = ffmpeg.input(video_path)
         filters = []
+        
         if titles:
             for t in titles:
-                text = t.get("text", "Titre")
+                text = t.get("text", "Title")
                 start = t.get("start", 0)
                 end = start + t.get("duration", 3)
                 filters.append(
                     f"drawtext=text='{text}':fontcolor=white:fontsize=70:x=(w-text_w)/2:y=(h-text_h)/4:enable='between(t,{start},{end})'"
                 )
+        
         if subtitles:
             for s in subtitles:
-                text = s.get("text", "Sous-titre")
+                text = s.get("text", "Subtitle")
                 start = s.get("start", 0)
                 end = start + s.get("duration", 3)
                 filters.append(
                     f"drawtext=text='{text}':fontcolor=yellow:fontsize=40:x=(w-text_w)/2:y=h-text_h-40:enable='between(t,{start},{end})'"
                 )
+        
         if filters:
             filter_complex = ','.join(filters)
-            out = ffmpeg.output(input_stream, output, vf=filter_complex, vcodec='libx264', acodec='aac')
-        else:
-            out = ffmpeg.output(input_stream, output, vcodec='libx264', acodec='aac')
-        try:
-            ffmpeg.run(out, overwrite_output=True, quiet=True)
-            return output
-        except ffmpeg.Error as e:
-            logger.error(f"[PostProcessor] Erreur FFmpeg: {e}")
-            return video_path
+            try:
+                out = ffmpeg.output(input_stream, output, vf=filter_complex, vcodec='libx264', acodec='aac')
+                ffmpeg.run(out, overwrite_output=True, quiet=True)
+                return output
+            except Exception as e:
+                logger.error(f"[PostProcessor] Error adding titles/subtitles: {e}")
+                return video_path
+        return video_path
 
     def apply_effects(self, video_path: str, effects: Optional[list] = None) -> str:
-        """
-        Applique des effets visuels à la vidéo avec OpenCV, optimisé par multiprocessing (batch frames).
-
-        Args:
-            video_path (str): Chemin du fichier vidéo d'entrée.
-            effects (Optional[list]): Liste d'effets à appliquer. Exemple :
-                [{"type": "blur", "start": 2, "end": 5}, ...]
-
-        Returns:
-            str: Chemin du fichier vidéo de sortie (avec effets appliqués), ou le chemin d'origine en cas d'échec.
-        """
-        import numpy as np
-        from multiprocessing import Pool, cpu_count
-
-        def process_frame(args):
-            frame_idx, frame, fps, effects = args
-            time_sec = frame_idx / fps if fps else 0
-            if cv2 is None:
-                return frame_idx, frame
-            for eff in effects:
-                if eff.get('type') == 'blur' and eff.get('start', 0) <= time_sec <= eff.get('end', 0):
-                    frame = cv2.GaussianBlur(frame, (15, 15), 0)
-                if eff.get('type') == 'gray' and eff.get('start', 0) <= time_sec <= eff.get('end', 0):
-                    frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-                    frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
-            return frame_idx, frame
-
+        """Applique des effets visuels avec OpenCV."""
         if cv2 is None:
             logger.warning("[PostProcessor] OpenCV not available. Skipping effects.")
             return video_path
         if not effects:
             return video_path
+        
         output = f"effects_{os.path.basename(video_path)}"
         try:
             cap = cv2.VideoCapture(video_path)
@@ -158,49 +130,40 @@ class PostProcessor:
             fps = cap.get(cv2.CAP_PROP_FPS)
             width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
             height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
-            frames = []
+            out = cv2.VideoWriter(output, fourcc, fps, (width, height))
+            
             frame_idx = 0
             while cap.isOpened():
                 ret, frame = cap.read()
                 if not ret:
                     break
-                frames.append((frame_idx, frame, fps, effects))
-                frame_idx += 1
-            cap.release()
-            # Traitement en parallèle
-            try:
-                with Pool(processes=cpu_count()) as pool:
-                    results = pool.map(process_frame, frames)
-                results.sort()  # Assure l'ordre des frames
-                processed_frames = [f for idx, f in results]
-            except Exception as e:
-                logger.warning(f"[PostProcessor] Multiprocessing failed, fallback to sequential: {e}")
-                processed_frames = [process_frame(args)[1] for args in frames]
-            out = cv2.VideoWriter(output, fourcc, fps, (width, height))
-            for frame in processed_frames:
+                
+                time_sec = frame_idx / fps if fps else 0
+                for eff in effects:
+                    if eff.get('type') == 'blur' and eff.get('start', 0) <= time_sec <= eff.get('end', 999):
+                        frame = cv2.GaussianBlur(frame, (15, 15), 0)
+                    if eff.get('type') == 'gray' and eff.get('start', 0) <= time_sec <= eff.get('end', 999):
+                        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                        frame = cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR)
+                
                 out.write(frame)
+                frame_idx += 1
+            
+            cap.release()
             out.release()
             return output
         except Exception as e:
-            logger.error(f"[PostProcessor] Erreur OpenCV: {e}")
+            logger.error(f"[PostProcessor] Error applying effects: {e}")
             return video_path
+
     def apply_pyav_effects(self, video_path: str, effects: Optional[list] = None) -> str:
-        """
-        Applique des effets bas niveau à la vidéo avec PyAV (exemple : inversion des couleurs).
-
-        Args:
-            video_path (str): Chemin du fichier vidéo d'entrée.
-            effects (Optional[list]): Liste d'effets à appliquer. Exemple :
-                [{"type": "invert"}]
-
-        Returns:
-            str: Chemin du fichier vidéo de sortie (avec effets PyAV appliqués), ou le chemin d'origine en cas d'échec.
-        """
+        """Applique des effets bas niveau avec PyAV."""
         if av is None:
             logger.warning("[PostProcessor] PyAV not available. Skipping PyAV effects.")
             return video_path
         if not effects:
             return video_path
+        
         output = f"pyav_{os.path.basename(video_path)}"
         try:
             container = av.open(video_path)
@@ -210,6 +173,7 @@ class PostProcessor:
             out_stream.width = stream.width
             out_stream.height = stream.height
             out_stream.pix_fmt = 'yuv420p'
+            
             for frame in container.decode(stream):
                 img = frame.to_ndarray(format='bgr24')
                 for eff in effects:
@@ -218,32 +182,26 @@ class PostProcessor:
                 new_frame = av.VideoFrame.from_ndarray(img, format='bgr24')
                 for packet in out_stream.encode(new_frame):
                     out.mux(packet)
+            
             out.close()
             container.close()
             return output
         except Exception as e:
-            logger.error(f"[PostProcessor] Erreur PyAV: {e}")
+            logger.error(f"[PostProcessor] Error applying PyAV effects: {e}")
             return video_path
+
     def apply_scenepic_overlay(self, video_path: str, overlays: Optional[list] = None) -> str:
-        """
-        Ajoute une animation/scène 3D avec Scenepic (si installé).
-
-        Args:
-            video_path (str): Chemin du fichier vidéo d'entrée.
-            overlays (Optional[list]): Liste d'éléments 3D à ajouter (non utilisé dans cet exemple).
-
-        Returns:
-            str: Chemin du fichier HTML généré (visualisation 3D), ou le chemin d'origine en cas d'échec.
-        """
+        """Ajoute des overlays 3D avec Scenepic."""
         if scenepic is None or not overlays:
-            logger.warning("[PostProcessor] Scenepic not available or no overlays. Skipping 3D overlay.")
+            logger.warning("[PostProcessor] Scenepic not available or no overlays.")
             return video_path
+        
         output_html = f"scenepic_{os.path.splitext(os.path.basename(video_path))[0]}.html"
         try:
             sp = scenepic.Scene()
             canvas = sp.create_canvas_3d(width=800, height=600)
             mesh = sp.create_mesh(layer_id="cube_layer")
-            # Ajout d'un cube simple
+            
             import numpy as np
             vertices = np.array([
                 [0, 0, 0], [1, 0, 0], [1, 1, 0], [0, 1, 0],
@@ -259,18 +217,154 @@ class PostProcessor:
             sp.save_as_html(output_html)
             return output_html
         except Exception as e:
-            logger.error(f"[PostProcessor] Erreur Scenepic: {e}")
+            logger.error(f"[PostProcessor] Error applying scenepic overlay: {e}")
+            return video_path
+
+    def mix_audio_tracks(
+        self,
+        video_path: str,
+        audio_tracks: Optional[List[Dict[str, Any]]] = None
+    ) -> str:
+        """
+        Mélange plusieurs pistes audio (voix, musique, SFX) en une seule piste.
+        
+        Args:
+            video_path: Chemin du fichier vidéo d'entrée
+            audio_tracks: Liste des pistes audio à mixer. Exemple:
+                [
+                    {"type": "voice", "path": "voice.mp3", "volume": 1.0},
+                    {"type": "music", "path": "music.mp3", "volume": 0.7},
+                    {"type": "sfx", "path": "sfx.mp3", "volume": 0.5}
+                ]
+        
+        Returns:
+            str: Chemin du fichier vidéo avec audio mixé
+        """
+        if ffmpeg is None:
+            logger.warning("[PostProcessor] FFmpeg not available. Skipping audio mixing.")
+            return video_path
+        
+        if not audio_tracks:
+            logger.info("[PostProcessor] No audio tracks to mix.")
+            return video_path
+        
+        try:
+            # Filtrer les pistes audio existantes
+            existing_tracks = [
+                t for t in audio_tracks 
+                if t.get("path") and os.path.exists(t.get("path", ""))
+            ]
+            
+            if not existing_tracks:
+                logger.warning("[PostProcessor] No existing audio files found.")
+                return video_path
+            
+            output = f"mixed_audio_{os.path.basename(video_path)}"
+            
+            # Construire commande FFmpeg pour mixer l'audio
+            input_specs = []
+            filter_parts = []
+            
+            # Input vidéo
+            input_specs.append(ffmpeg.input(video_path))
+            
+            # Inputs audio
+            for i, track in enumerate(existing_tracks):
+                audio_path = track.get("path")
+                volume = track.get("volume", 1.0)
+                track_type = track.get("type", "audio")
+                
+                logger.info(f"[PostProcessor] Adding {track_type} track: {audio_path} (volume: {volume})")
+                
+                input_audio = ffmpeg.input(audio_path)
+                if volume != 1.0:
+                    input_audio = ffmpeg.filter(input_audio, 'volume', volume)
+                
+                input_specs.append(input_audio)
+                filter_parts.append(f"[{i+1}]")
+            
+            # Mixer tous les inputs audio
+            if len(existing_tracks) == 1:
+                # Un seul track
+                output_stream = ffmpeg.output(
+                    input_specs[0],  # Vidéo
+                    input_specs[1],  # Audio unique
+                    output,
+                    vcodec='copy',
+                    acodec='aac'
+                )
+            else:
+                # Plusieurs tracks - les mixer
+                # Construire le filtre amix
+                audio_filter = ''.join(filter_parts) + f'amix=inputs={len(existing_tracks)}:duration=longest[a]'
+                
+                output_stream = ffmpeg.output(
+                    input_specs[0]['v'],  # Vidéo
+                    ffmpeg.filter(*[inp['a'] for inp in input_specs[1:]], 'amix', inputs=len(existing_tracks), duration='longest'),
+                    output,
+                    vcodec='copy',
+                    acodec='aac'
+                )
+            
+            logger.info(f"[PostProcessor] Running FFmpeg audio mixing ({len(existing_tracks)} tracks)...")
+            ffmpeg.run(output_stream, overwrite_output=True, quiet=True)
+            
+            logger.info(f"[PostProcessor] Audio mixing completed: {output}")
+            return output
+                
+        except Exception as e:
+            logger.error(f"[PostProcessor] Error during audio mixing: {e}")
+            return video_path
+
+    def composite_audio_with_video(
+        self,
+        video_path: str,
+        audio_path: Optional[str] = None
+    ) -> str:
+        """
+        Attache une piste audio (pré-mixée) à la vidéo.
+        """
+        if ffmpeg is None:
+            logger.warning("[PostProcessor] FFmpeg not available. Skipping audio compositing.")
+            return video_path
+        
+        if not audio_path or not os.path.exists(audio_path):
+            logger.warning("[PostProcessor] Audio file not found. Skipping audio compositing.")
+            return video_path
+        
+        try:
+            output = f"composite_audio_{os.path.basename(video_path)}"
+            
+            video_input = ffmpeg.input(video_path)
+            audio_input = ffmpeg.input(audio_path)
+            
+            output_stream = ffmpeg.output(
+                video_input,
+                audio_input,
+                output,
+                vcodec='copy',
+                acodec='aac'
+            )
+            
+            logger.info(f"[PostProcessor] Compositing audio with video...")
+            ffmpeg.run(output_stream, overwrite_output=True, quiet=True)
+            
+            logger.info(f"[PostProcessor] Audio compositing completed: {output}")
+            return output
+            
+        except Exception as e:
+            logger.error(f"[PostProcessor] Error during audio compositing: {e}")
             return video_path
 
     def run(self, manifest: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Applique le post-traitement à la vidéo finale avec tous les backends disponibles.
+        Applique le post-traitement complet : transitions, effets vidéo, mélange audio.
 
         Args:
-            manifest (Dict[str, Any]): Dictionnaire contenant les chemins et paramètres de la vidéo à traiter.
+            manifest: Dictionnaire avec vidéo et paramètres audio
 
         Returns:
-            Dict[str, Any]: Le manifest enrichi avec le chemin du fichier post-traité (clé 'post_processed_video').
+            Dict enrichi avec chemin fichier post-traité
         """
         video_path = manifest.get("video_path", "output_video.mp4")
         transitions = manifest.get("transitions", [])
@@ -278,16 +372,41 @@ class PostProcessor:
         subtitles = manifest.get("subtitles", [])
         effects = manifest.get("effects", [])
         overlays = manifest.get("overlays", [])
+        audio_tracks = manifest.get("audio_tracks", [])
+        
+        logger.info(f"[PostProcessor] Starting post-processing: {video_path}")
 
-        # FFmpeg pour transitions et overlays texte
-        video_path = self.apply_transitions(video_path, transitions)
-        video_path = self.add_titles_subtitles(video_path, titles, subtitles)
-        # OpenCV pour effets frame par frame
-        video_path = self.apply_effects(video_path, effects)
-        # PyAV pour effets bas niveau
-        video_path = self.apply_pyav_effects(video_path, effects)
-        # Scenepic pour overlays 3D (retourne un HTML si overlay, sinon la vidéo)
-        video_path = self.apply_scenepic_overlay(video_path, overlays)
+        # Étape 1: Transitions vidéo
+        if transitions:
+            video_path = self.apply_transitions(video_path, transitions)
+            logger.info("[PostProcessor] ✓ Transitions applied")
+        
+        # Étape 2: Titres et sous-titres
+        if titles or subtitles:
+            video_path = self.add_titles_subtitles(video_path, titles, subtitles)
+            logger.info("[PostProcessor] ✓ Titles/subtitles added")
+        
+        # Étape 3: Effets vidéo (OpenCV)
+        if effects:
+            video_path = self.apply_effects(video_path, effects)
+            logger.info("[PostProcessor] ✓ Video effects applied")
+        
+        # Étape 4: Effets PyAV
+        if effects:
+            video_path = self.apply_pyav_effects(video_path, effects)
+            logger.info("[PostProcessor] ✓ PyAV effects applied")
+        
+        # Étape 5: Overlays 3D
+        if overlays:
+            video_path = self.apply_scenepic_overlay(video_path, overlays)
+            logger.info("[PostProcessor] ✓ 3D overlays added")
+        
+        # Étape 6: Mélange audio (voix + musique + SFX)
+        if audio_tracks:
+            logger.info(f"[PostProcessor] Mixing {len(audio_tracks)} audio tracks...")
+            video_path = self.mix_audio_tracks(video_path, audio_tracks)
+            logger.info(f"[PostProcessor] ✓ Audio mixing completed ({len(audio_tracks)} tracks)")
 
         manifest["post_processed_video"] = video_path
+        logger.info(f"[PostProcessor] ✓ Post-processing complete!")
         return manifest

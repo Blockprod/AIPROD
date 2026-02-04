@@ -15,6 +15,7 @@ from src.agents.gcp_services_integrator import GoogleCloudServicesIntegrator
 from src.agents.audio_generator import AudioGenerator
 from src.agents.music_composer import MusicComposer
 from src.agents.sound_effects_agent import SoundEffectsAgent
+from src.agents.post_processor import PostProcessor
 
 class PipelineState(Enum):
     INIT = auto()
@@ -50,8 +51,10 @@ class StateMachine:
         self.music_composer = MusicComposer()
         # 🎬 Sound Effects Agent (Phase 3 Integration)
         self.sound_effects_agent = SoundEffectsAgent()
+        # 🎬 Post-Processor Agent (Phase 4 Integration)
+        self.post_processor = PostProcessor()
         logger.info(f"StateMachine initialized in state {self.state}")
-        logger.info("Audio, Music & SFX agents loaded successfully")
+        logger.info("Audio, Music, SFX & PostProcessor agents loaded successfully")
 
     def transition(self, new_state: PipelineState) -> None:
         logger.info(f"Transition: {self.state} -> {new_state}")
@@ -106,6 +109,39 @@ class StateMachine:
             sfx_output = self.sound_effects_agent.run(sfx_manifest)
             self.data["sound_effects"] = sfx_output
             logger.info(f"SoundEffectsAgent: SFX generated. Count: {sfx_output.get('sound_effects', {}).get('count', 0)}")
+            
+            # 🎬 Post-Processing : Montage audio-vidéo — Phase 4
+            logger.info("PostProcessor: Starting audio/video montage...")
+            post_manifest = render_output.copy() if render_output else {}
+            # Construire les pistes audio pour le mélange
+            audio_tracks = []
+            if audio_output.get("audio_url"):
+                audio_tracks.append({
+                    "type": "voice",
+                    "path": audio_output.get("audio_url"),
+                    "volume": 1.0  # Voix à volume normal
+                })
+            if music_output.get("music_url"):
+                audio_tracks.append({
+                    "type": "music",
+                    "path": music_output.get("music_url"),
+                    "volume": 0.6  # Musique légèrement plus basse
+                })
+            sfx_list = sfx_output.get("sound_effects", {}).get("sfx_list", [])
+            for sfx in sfx_list:
+                if sfx.get("preview_url") or sfx.get("download_url"):
+                    audio_tracks.append({
+                        "type": "sfx",
+                        "path": sfx.get("preview_url") or sfx.get("download_url"),
+                        "volume": 0.5  # SFX à volume réduit
+                    })
+            
+            post_manifest["audio_tracks"] = audio_tracks
+            post_manifest["transitions"] = inputs.get("transitions", [])
+            post_manifest["effects"] = inputs.get("effects", [])
+            post_output = self.post_processor.run(post_manifest)
+            self.data["post_processor"] = post_output
+            logger.info(f"PostProcessor: Montage complete with {len(audio_tracks)} audio tracks mixed")
             
             # Validation sémantique
             self.transition(PipelineState.QA_SEMANTIC)
