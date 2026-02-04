@@ -91,6 +91,9 @@ def load_secrets():
         "REPLICATE_API_KEY",
         "DD_API_KEY",
         "DD_APP_KEY",
+        "SUNO_API_KEY",
+        "SOUNDFUL_API_KEY",
+        "ELEVENLABS_API_KEY",
     ]
 
     # Charger secrets critiques

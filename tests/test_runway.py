@@ -1,6 +1,7 @@
 import asyncio
 import pytest
 import os
+from runwayml import RunwayML
 
 pytest.importorskip("runwayml", reason="RunwayML not installed")
 

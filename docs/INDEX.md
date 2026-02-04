@@ -1,7 +1,7 @@
 # 📚 AIPROD V33 - Index Documentation
 
-**Dernière mise à jour:** 2026-02-02  
-**État:** Phase 1 Complete (236/236 tests ✅)  
+**Dernière mise à jour:** 2026-02-04  
+**État:** Phase 2 Complete (296/296 tests ✅)  
 **Organisation:** Structure chronologique et thématique
 
 ---
@@ -10,13 +10,13 @@
 
 ### 📋 Plan de Production Actuel
 
-**[PROGRESSION_PLAN_PRODUCTION.md](plans/PROGRESSION_PLAN_PRODUCTION.md)** ⭐  
-→ Roadmap complète du projet avec toutes les phases
+**[INTEGRATION_FULL_PIPELINE.md](INTEGRATION_FULL_PIPELINE.md)** ⭐  
+→ Roadmap complète du projet (6 phases, 3h45min)
 
-### 🚀 Phase Actuelle: P1.4 - CI/CD Pipeline
+### 🚀 Phase Actuelle: Phase 2 - Suno API Music Generation
 
-**[P1_4_CI_CD_PIPELINE.md](phases/phase_1/P1_4_CI_CD_PIPELINE.md)**  
-→ GitHub Actions + Cloud Build + Cloud Run (COMPLET)
+**[PHASE2_SUNO_INTEGRATION.md](PHASE2_SUNO_INTEGRATION.md)**  
+→ Intégration Suno API pour génération musicale (COMPLÈTE ✅)
 
 ### 🏗️ Architecture Système
 
@@ -129,24 +129,34 @@ docs/
 
 ## 📊 État du Projet
 
-### Phase 1 - Infrastructure Backend ✅ COMPLETE
+### Phase 1 - Audio Integration (Orchestration) ✅ COMPLETE
 
-| Sous-phase       | Statut | Tests   | Documentation                                                                              |
-| ---------------- | ------ | ------- | ------------------------------------------------------------------------------------------ |
-| P1.1 PostgreSQL  | ✅     | 37/37   | [archive/phase_1_2026/](archive/phase_1_2026/)                                             |
-| P1.2.1 Pub/Sub   | ✅     | 14/14   | [phases/phase_1/](phases/phase_1/)                                                         |
-| P1.2.2 API Async | ✅     | 13/13   | [phases/phase_1/P1_2_2_API_ASYNC.md](phases/phase_1/P1_2_2_API_ASYNC.md)                   |
-| P1.2.3 Worker    | ✅     | 23/23   | [phases/phase_1/P1_2_3_WORKER.md](phases/phase_1/P1_2_3_WORKER.md)                         |
-| P1.3 Real Impl   | ✅     | 17/17   | [phases/phase_1/P1_3_REAL_IMPLEMENTATIONS.md](phases/phase_1/P1_3_REAL_IMPLEMENTATIONS.md) |
-| P1.4 CI/CD       | ✅     | 236/236 | [phases/phase_1/P1_4_CI_CD_PIPELINE.md](phases/phase_1/P1_4_CI_CD_PIPELINE.md)             |
+| Component         | Statut | Tests    | Documentation                                    |
+| ----------------- | ------ | -------- | ------------------------------------------------ |
+| AudioGenerator    | ✅     | Passing  | `src/agents/audio_generator.py`                  |
+| MusicComposer     | ✅     | Passing  | `src/agents/music_composer.py` (nouveau)         |
+| StateMachine      | ✅     | 296/296  | `src/orchestrator/state_machine.py` (mis à jour) |
+| Integration Tests | ✅     | All Pass | `tests/unit/test_state_machine.py`               |
 
-**Total:** 236 tests unitaires - 100% passing ✅
+### Phase 2 - Suno API Integration ✅ COMPLETE
+
+| Composant            | Statut | Description                                  |
+| -------------------- | ------ | -------------------------------------------- |
+| Suno API Integration | ✅     | `generate_music_suno()` implémenté           |
+| Fallback Strategy    | ✅     | Suno → Soundful → Mock                       |
+| GCP Secret Manager   | ✅     | `SUNO_API_KEY` ajouté aux secrets optionnels |
+| Setup Script         | ✅     | `scripts/setup_suno_secret.py` créé          |
+| Documentation        | ✅     | `PHASE2_SUNO_INTEGRATION.md` complet         |
+| Tests Integration    | ✅     | Tous les 296 tests passent                   |
+
+**Total:** 296 tests unitaires - 100% passing ✅
 
 ### Prochaines Phases
 
-- **Phase 1.5:** Advanced Features (GraphQL, WebSockets, Redis)
-- **Phase 2:** Scaling & Optimization (Read replicas, CDN, ML optimization)
-- **Phase 3:** Multi-Region Deployment (Global LB, DR, Failover)
+- **Phase 3:** SoundEffectsAgent Creation (30 min)
+- **Phase 4:** PostProcessor Integration for Montage (45 min)
+- **Phase 5:** Comprehensive Testing (30 min)
+- **Phase 6:** Production Deployment (30 min)
 
 ---
 

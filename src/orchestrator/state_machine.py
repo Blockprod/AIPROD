@@ -12,6 +12,8 @@ from src.agents.semantic_qa import SemanticQA
 from src.agents.visual_translator import VisualTranslator
 from src.agents.supervisor import Supervisor
 from src.agents.gcp_services_integrator import GoogleCloudServicesIntegrator
+from src.agents.audio_generator import AudioGenerator
+from src.agents.music_composer import MusicComposer
 
 class PipelineState(Enum):
     INIT = auto()
@@ -42,7 +44,11 @@ class StateMachine:
         self.visual_translator = VisualTranslator()
         self.supervisor = Supervisor()
         self.gcp_services = GoogleCloudServicesIntegrator()
+        # 🎤 Audio & Music Agents (Phase 1 Integration)
+        self.audio_generator = AudioGenerator(tts_provider="auto")
+        self.music_composer = MusicComposer()
         logger.info(f"StateMachine initialized in state {self.state}")
+        logger.info("Audio & Music agents loaded successfully")
 
     def transition(self, new_state: PipelineState) -> None:
         logger.info(f"Transition: {self.state} -> {new_state}")
@@ -66,6 +72,27 @@ class StateMachine:
             assets = self.data.get("fusion", {}).get("inputs") or self.data.get("fast_track", {}).get("inputs")
             render_output = await self.render_executor.run(assets)
             self.data["render"] = render_output
+            
+            # 🎤 Génération audio (voix humaine) — Phase 1.1
+            logger.info("AudioGenerator: Starting TTS generation...")
+            audio_manifest = self.data.get("fusion", {}) or self.data.get("fast_track", {})
+            audio_manifest["lang"] = inputs.get("lang", "fr")
+            audio_manifest["voice"] = inputs.get("voice", None)
+            audio_manifest["emotion"] = inputs.get("emotion", None)
+            audio_output = self.audio_generator.run(audio_manifest)
+            self.data["audio"] = audio_output
+            logger.info(f"AudioGenerator: TTS completed. Provider: {audio_output.get('provider')}")
+            
+            # 🎵 Génération musique — Phase 1.2
+            logger.info("MusicComposer: Starting music generation...")
+            music_manifest = audio_manifest.copy()
+            music_manifest["music_style"] = inputs.get("music_style", "cinematic")
+            music_manifest["mood"] = inputs.get("mood", None)
+            music_manifest["duration"] = inputs.get("duration", 5)
+            music_output = self.music_composer.run(music_manifest)
+            self.data["music"] = music_output
+            logger.info(f"MusicComposer: Music generated. Provider: {music_output.get('provider')}")
+            
             # Validation sémantique
             self.transition(PipelineState.QA_SEMANTIC)
             semantic_report = await self.semantic_qa.run(render_output)

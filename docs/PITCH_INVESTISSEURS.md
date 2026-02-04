@@ -440,7 +440,7 @@ _(À personnaliser selon votre équipe réelle)_
 ---
 
 **Contact** :  
-📧 [votre-email@domain.com]  
+📧 [climax2creative@gmail.com]  
 📱 [+33 X XX XX XX XX]  
 🔗 [LinkedIn Profile]  
 🌐 [Website]

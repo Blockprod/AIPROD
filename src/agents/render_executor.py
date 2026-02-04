@@ -432,6 +432,8 @@ class RenderExecutor:
         Génère une image de concept avec gen4_image.
         Cost: 5-8 credits par image
         """
+        if RunwayML is None:
+            raise Exception("RunwayML package is not installed. Install with: pip install runwayml")
         client = RunwayML(api_key=self.runway_api_key)
         
         # Améliorer le prompt pour l'image
@@ -481,6 +483,8 @@ class RenderExecutor:
         Génère une vidéo basée sur l'image de concept avec gen4_turbo.
         Cost: 5 credits/second → 25 credits pour 5 secondes
         """
+        if RunwayML is None:
+            raise Exception("RunwayML package is not installed. Install with: pip install runwayml")
         client = RunwayML(api_key=self.runway_api_key)
         
         # Améliorer le prompt pour la vidéo
