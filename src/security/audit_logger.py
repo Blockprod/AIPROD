@@ -27,6 +27,14 @@ class AuditEventType(str, Enum):
     ADMIN_ACTION = "ADMIN_ACTION"
     ERROR = "ERROR"
     SECURITY_ALERT = "SECURITY_ALERT"
+    # Phase 1.2 - Export events
+    EXPORT = "EXPORT"
+    # Phase 1.3 - API Key events
+    API_KEY_CREATED = "API_KEY_CREATED"
+    API_KEY_ROTATED = "API_KEY_ROTATED"
+    API_KEY_REVOKED = "API_KEY_REVOKED"
+    API_KEY_MASS_REVOKED = "API_KEY_MASS_REVOKED"
+    API_KEY_LISTED = "API_KEY_LISTED"
 
 
 class AuditLogger:

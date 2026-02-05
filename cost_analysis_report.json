@@ -1,0 +1,55 @@
+{
+  "timestamp": "2026-02-05T11:28:21.456238",
+  "project_id": "aiprod-v33",
+  "billing_account": {
+    "account_id": "YOUR_BILLING_ACCOUNT_ID",
+    "note": "Could not fetch - ensure billing_v1 client is configured"
+  },
+  "cost_breakdown": null,
+  "monthly_trend": null,
+  "top_cost_drivers": null,
+  "recommendations": [
+    {
+      "priority": "MEDIUM",
+      "service": "Firestore",
+      "recommendation": "Switch to On-demand billing for better cost optimization",
+      "potential_savings": "USD 50-200/month (variable)",
+      "effort": "Low (30 minutes)",
+      "roi": "Medium (depends on usage patterns)",
+      "steps": [
+        "Analyze current read/write patterns",
+        "Switch to on-demand billing mode",
+        "Monitor usage for 2 weeks",
+        "Compare costs with provisioned mode"
+      ]
+    },
+    {
+      "priority": "MEDIUM",
+      "service": "Cloud SQL",
+      "recommendation": "Enable automated backups and optimize backup retention",
+      "potential_savings": "USD 100-300/month (20-30% of Cloud SQL)",
+      "effort": "Low (1 hour)",
+      "roi": "High (simple configuration)",
+      "steps": [
+        "Review current backup retention policy",
+        "Reduce retention for non-critical databases",
+        "Enable point-in-time recovery for production only",
+        "Archive older backups to Cloud Storage"
+      ]
+    },
+    {
+      "priority": "MEDIUM",
+      "service": "Cloud Storage",
+      "recommendation": "Implement lifecycle policies and use cheaper storage classes",
+      "potential_savings": "USD 50-150/month (15-25% of Cloud Storage)",
+      "effort": "Low (1 hour)",
+      "roi": "High (automatic)",
+      "steps": [
+        "Identify data retention requirements",
+        "Create lifecycle policies to move data to Coldline",
+        "Archive data >90 days old to Nearline",
+        "Delete unnecessary old backups"
+      ]
+    }
+  ]
+}
