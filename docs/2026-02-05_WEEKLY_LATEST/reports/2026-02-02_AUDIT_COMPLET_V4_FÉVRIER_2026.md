@@ -1,4 +1,4 @@
-# 🔍 AUDIT COMPLET & PRÉCIS — AIPROD_V33
+# 🔍 AUDIT COMPLET & PRÉCIS — AIPROD
 
 **Date d'audit** : 2 février 2026  
 **Dernière mise à jour** : 3 février 2026 - **DÉPLOIEMENT RÉUSSI** ✅  
@@ -18,7 +18,7 @@
 
 ## 📊 EXECUTIVE SUMMARY
 
-AIPROD_V33 est une **plateforme vidéo IA entièrement conçue, documentée et prête pour la production**.
+AIPROD est une **plateforme vidéo IA entièrement conçue, documentée et prête pour la production**.
 
 - ✅ **Phase 0** : Sécurité (24-48h) = **100% COMPLÈTE**
 - ✅ **Phase 1** : AudioGenerator (Narration) = **100% COMPLÈTE**
@@ -219,7 +219,7 @@ Accès endpoint autorisé ✅
 
 ```yaml
 environment:
-  - DATABASE_URL=postgresql://aiprod:${DB_PASSWORD}@postgres:5432/aiprod_v33
+  - DATABASE_URL=postgresql://aiprod:${DB_PASSWORD}@postgres:5432/AIPROD
   - GEMINI_API_KEY=${GEMINI_API_KEY}
   - GCS_BUCKET_NAME=${GCS_BUCKET_NAME}
   - GRAFANA_PASSWORD=${GRAFANA_PASSWORD}
@@ -311,7 +311,7 @@ resource "google_sql_database_instance" "primary" {
 }
 
 resource "google_sql_database" "aiprod" {
-  name     = "aiprod_v33"
+  name     = "AIPROD"
   instance = google_sql_database_instance.primary.name
 }
 
@@ -375,7 +375,7 @@ CREATE TABLE audit_logs (
 from src.db.models import get_session_factory
 from src.db.job_repository import JobRepository
 
-db_url = "postgresql://aiprod:password@private-sql:5432/aiprod_v33"
+db_url = "postgresql://aiprod:password@private-sql:5432/AIPROD"
 SessionLocal, engine = get_session_factory(db_url)
 
 repo = JobRepository(SessionLocal)
@@ -691,7 +691,7 @@ scrape_configs:
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│  AIPROD_V33 - FastAPI API Overview                          │
+│  AIPROD - FastAPI API Overview                          │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
 │  Pipeline Runs (24h)           API Request Duration       │
@@ -1339,14 +1339,14 @@ services:
     build: .
     ports: ["8000:8000"]
     environment:
-      DATABASE_URL: postgresql://aiprod:${DB_PASSWORD}@postgres:5432/aiprod_v33
+      DATABASE_URL: postgresql://aiprod:${DB_PASSWORD}@postgres:5432/AIPROD
       GEMINI_API_KEY: ${GEMINI_API_KEY}
     depends_on: [postgres]
 
   postgres:
     image: postgres:15-alpine
     environment:
-      POSTGRES_DB: aiprod_v33
+      POSTGRES_DB: AIPROD
       POSTGRES_USER: aiprod
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     volumes:
@@ -1700,7 +1700,7 @@ gcloud run deploy aiprod-api \
    # {"status": "ok"} ✅
 
    curl https://aiprod-v33-api-hxhx3s6eya-ew.a.run.app/
-   # {"status": "ok", "name": "AIPROD V33 API", "docs": "/docs"} ✅
+   # {"status": "ok", "name": "AIPROD API", "docs": "/docs"} ✅
 
    curl https://aiprod-v33-api-hxhx3s6eya-ew.a.run.app/openapi.json
    # OpenAPI 3.1.0, 10 endpoints ✅
@@ -1829,7 +1829,7 @@ gcloud run deploy aiprod-api \
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│         AIPROD V33 COMPLETE AUDIO-VIDEO PIPELINE            │
+│         AIPROD COMPLETE AUDIO-VIDEO PIPELINE            │
 ├─────────────────────────────────────────────────────────────┤
 │                                                             │
 │  USER INPUT → SCRIPT ANALYSIS → RENDER EXECUTOR           │
@@ -2017,7 +2017,7 @@ gcloud run deploy aiprod-api \
 
 ## 🏆 CONCLUSION — PHASES 1-6 ENTIÈREMENT COMPLÈTES
 
-**AIPROD_V33 is 100% PRODUCTION-READY** 🎉
+**AIPROD is 100% PRODUCTION-READY** 🎉
 
 ### ✅ Accomplissements majeurs
 

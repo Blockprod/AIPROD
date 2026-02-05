@@ -1,6 +1,6 @@
 {
   "dashboard": {
-    "title": "AIPROD V33 - SLA & Error Tracking",
+    "title": "AIPROD - SLA & Error Tracking",
     "description": "SLA compliance, error tracking, and reliability metrics",
     "tags": ["aiprod", "sla", "reliability", "errors"],
     "timezone": "browser",

@@ -1,5 +1,5 @@
 """
-CreativeDirector Agent pour AIPROD V33
+CreativeDirector Agent pour AIPROD
 Génère des scripts vidéo via Gemini.
 Utilise le consistency cache pour maintenir la cohérence marque.
 """

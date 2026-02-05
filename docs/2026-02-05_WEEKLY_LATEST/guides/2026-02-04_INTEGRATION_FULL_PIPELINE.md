@@ -1,4 +1,4 @@
-# 🎬 Plan d'intégration AIPROD V33 — Produit Fini Complet
+# 🎬 Plan d'intégration AIPROD — Produit Fini Complet
 
 **Date** : Février 4, 2026  
 **Objectif** : Transformer le pipeline actuel (vidéo muette) en **produit fini multi-média**  
@@ -233,7 +233,7 @@ gcloud secrets create SUNO_API_KEY \
 
 ```python
 """
-SoundEffectsAgent pour AIPROD V33
+SoundEffectsAgent pour AIPROD
 Génère des bruitages/SFX adaptés au script.
 """
 import os
@@ -735,7 +735,7 @@ curl -X POST https://aiprod-v33-api.../pipeline/run \
 
 **À documenter** :
 ```markdown
-# Configuration des API Keys — AIPROD V33
+# Configuration des API Keys — AIPROD
 
 ## APIs requises pour fonctionnement COMPLET
 

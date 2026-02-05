@@ -1,4 +1,4 @@
-# 📘 Production Deployment Guide - AIPROD V33
+# 📘 Production Deployment Guide - AIPROD
 
 **Last Updated**: February 4, 2026  
 **Version**: 1.0  
@@ -21,7 +21,7 @@
 
 ## Overview
 
-AIPROD V33 is a complete audio-video generation pipeline deployed on Google Cloud Run with the following components:
+AIPROD is a complete audio-video generation pipeline deployed on Google Cloud Run with the following components:
 
 - **API Service**: FastAPI/Uvicorn running on Cloud Run
 - **Database**: Cloud SQL PostgreSQL 14
@@ -102,8 +102,8 @@ gcloud config set run/region europe-west1
 
 ```bash
 # Clone repository
-git clone https://github.com/your-org/AIPROD_V33.git
-cd AIPROD_V33
+git clone https://github.com/your-org/AIPROD.git
+cd AIPROD
 
 # Build image
 docker build -t gcr.io/aiprod-484120/aiprod-v33:latest .

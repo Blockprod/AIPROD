@@ -1,5 +1,5 @@
 """
-FinancialOrchestrator pour AIPROD V33
+FinancialOrchestrator pour AIPROD
 Optimisation coût/qualité, audit trail, dynamic pricing (sans LLM).
 """
 from typing import Any, Dict
@@ -8,7 +8,7 @@ from src.utils.monitoring import logger
 
 class FinancialOrchestrator:
     """
-    Orchestrateur financier déterministe pour le pipeline AIPROD V33.
+    Orchestrateur financier déterministe pour le pipeline AIPROD.
     Optimise coût/qualité, gère le dynamic pricing et l'audit trail.
     """
     def __init__(self, update_interval_hours: int = 24):

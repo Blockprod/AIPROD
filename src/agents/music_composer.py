@@ -1,5 +1,5 @@
 """
-MusicComposer Agent pour AIPROD V33
+MusicComposer Agent pour AIPROD
 Génère une bande-son contextuelle adaptée au script/scènes via API musicale.
 Supports: Suno (primary), Soundful (legacy), Mock (fallback)
 """

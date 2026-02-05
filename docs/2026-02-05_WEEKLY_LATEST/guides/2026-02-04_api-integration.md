@@ -1,4 +1,4 @@
-# API Integration Guide — AIPROD V33
+# API Integration Guide — AIPROD
 
 **Version**: 1.0  
 **Updated**: February 4, 2026  

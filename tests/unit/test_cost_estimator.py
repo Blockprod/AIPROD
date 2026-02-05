@@ -1,5 +1,5 @@
 """
-Tests unitaires pour l'estimateur de coûts AIPROD V33.
+Tests unitaires pour l'estimateur de coûts AIPROD.
 """
 import pytest
 from src.api.cost_estimator import (

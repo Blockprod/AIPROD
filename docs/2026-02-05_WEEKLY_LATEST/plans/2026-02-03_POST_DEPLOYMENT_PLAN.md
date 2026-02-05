@@ -1,4 +1,4 @@
-# 📋 PLAN COMPLET POST-DÉPLOIEMENT — AIPROD_V33
+# 📋 PLAN COMPLET POST-DÉPLOIEMENT — AIPROD
 
 **Date de création** : 3 février 2026  
 **Dernière mise à jour** : 4 février 2026  

@@ -1,4 +1,4 @@
-"""Google Cloud Pub/Sub client and utilities for AIPROD_V33."""
+"""Google Cloud Pub/Sub client and utilities for AIPROD."""
 
 import json
 import logging

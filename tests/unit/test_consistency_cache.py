@@ -1,5 +1,5 @@
 """
-Tests unitaires pour le Consistency Cache AIPROD V33.
+Tests unitaires pour le Consistency Cache AIPROD.
 """
 import pytest
 from unittest.mock import MagicMock, patch

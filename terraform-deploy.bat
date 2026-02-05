@@ -1,14 +1,14 @@
 @echo off
 REM Script Terraform deployment
 
-cd /d C:\Users\averr\AIPROD_V33
+cd /d C:\Users\averr\AIPROD
 
 REM Activer le venv
 call .venv311\Scripts\activate.bat
 
 REM Définir les variables d'env
-set PATH=C:\Users\averr\AIPROD_V33\.terraform-bin;%PATH%
-set GOOGLE_APPLICATION_CREDENTIALS=C:\Users\averr\AIPROD_V33\credentials\terraform-key.json
+set PATH=C:\Users\averr\AIPROD\.terraform-bin;%PATH%
+set GOOGLE_APPLICATION_CREDENTIALS=C:\Users\averr\AIPROD\credentials\terraform-key.json
 
 REM Aller dans le dossier terraform
 cd infra\terraform

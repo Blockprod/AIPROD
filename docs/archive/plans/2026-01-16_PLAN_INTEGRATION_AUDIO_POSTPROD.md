@@ -1,8 +1,8 @@
-# Plan d’intégration des modules audio et post-production – AIPROD V33
+# Plan d’intégration des modules audio et post-production – AIPROD
 
 ## Objectif
 
-Compléter la pipeline AIPROD V33 pour couvrir l’ensemble des besoins d’un studio vidéo automatisé, en ajoutant :
+Compléter la pipeline AIPROD pour couvrir l’ensemble des besoins d’un studio vidéo automatisé, en ajoutant :
 
 - AudioGenerator (TTS + musique)
 - PostProcessor (montage, transitions, effets, titrage)

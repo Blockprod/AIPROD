@@ -257,7 +257,7 @@ variable "cloudsql_disk_size_gb" {
 variable "cloudsql_database_name" {
   description = "Cloud SQL database name"
   type        = string
-  default     = "aiprod_v33"
+  default     = "AIPROD"
 }
 
 variable "cloudsql_user" {

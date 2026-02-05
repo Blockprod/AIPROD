@@ -1,4 +1,4 @@
-# Disaster Recovery Guide — AIPROD V33
+# Disaster Recovery Guide — AIPROD
 
 **Document Version**: 1.0  
 **Effective Date**: February 4, 2026  

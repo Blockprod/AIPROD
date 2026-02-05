@@ -1,6 +1,6 @@
 {
   "dashboard": {
-    "title": "AIPROD V33 - Pipeline Performance",
+    "title": "AIPROD - Pipeline Performance",
     "description": "Real-time monitoring of AI video pipeline performance metrics",
     "tags": ["aiprod", "pipeline", "performance"],
     "timezone": "browser",

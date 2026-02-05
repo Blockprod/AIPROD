@@ -1,5 +1,5 @@
 """
-AIPROD V33 - Interactive Creative Control (ICC)
+AIPROD - Interactive Creative Control (ICC)
 Endpoints pour le contrôle créatif interactif et la gestion des jobs.
 """
 import uuid

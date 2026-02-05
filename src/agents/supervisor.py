@@ -1,5 +1,5 @@
 """
-Supervisor Agent pour AIPROD V33
+Supervisor Agent pour AIPROD
 Agent d'approbation finale - Certifie la qualité et le coût pour la livraison
 """
 import asyncio
@@ -9,7 +9,7 @@ from src.utils.monitoring import logger
 
 class Supervisor:
     """
-    Agent Supervisor pour AIPROD V33.
+    Agent Supervisor pour AIPROD.
     Vérifie la qualité et le coût avant approbation finale.
     Génère le manifeste de livraison.
     """

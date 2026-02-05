@@ -1,5 +1,5 @@
 """
-Load testing infrastructure for AIPROD V33
+Load testing infrastructure for AIPROD
 Tests system performance under high load (1000+ RPS)
 Uses simulated load for testing without external dependencies
 """

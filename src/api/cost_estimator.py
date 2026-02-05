@@ -1,5 +1,5 @@
 """
-AIPROD V33 - Estimateur de Coûts
+AIPROD - Estimateur de Coûts
 Expose la valeur ajoutée en comparant les coûts AIPROD vs concurrents.
 """
 from typing import Dict, Any, Optional

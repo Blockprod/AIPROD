@@ -1,5 +1,5 @@
 """
-FastTrackAgent pour AIPROD V33
+FastTrackAgent pour AIPROD
 Gère le pipeline simplifié et les contraintes de rapidité.
 """
 import asyncio

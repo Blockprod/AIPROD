@@ -1,10 +1,10 @@
 #!/bin/bash
-# Script d'initialisation GCP pour AIPROD V33
+# Script d'initialisation GCP pour AIPROD
 
 set -e
 
 echo "========================================="
-echo "AIPROD V33 - GCP Project Setup"
+echo "AIPROD - GCP Project Setup"
 echo "========================================="
 
 # Configuration variables

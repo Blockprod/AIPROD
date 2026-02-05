@@ -1,5 +1,5 @@
 """
-TechnicalQAGate pour AIPROD V33
+TechnicalQAGate pour AIPROD
 Vérifications binaires déterministes pour la validation technique.
 """
 from typing import Any, Dict, List

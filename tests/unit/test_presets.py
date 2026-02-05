@@ -1,5 +1,5 @@
 """
-Tests unitaires pour le système de presets AIPROD V33.
+Tests unitaires pour le système de presets AIPROD.
 """
 import pytest
 from src.api.presets import (

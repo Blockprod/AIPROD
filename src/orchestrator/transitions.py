@@ -1,5 +1,5 @@
 """
-Transitions module pour l'orchestrateur AIPROD V33
+Transitions module pour l'orchestrateur AIPROD
 Gère les transitions conditionnelles entre états selon le JSON
 """
 from enum import Enum
@@ -7,7 +7,7 @@ from typing import Dict, Any
 from src.utils.monitoring import logger
 
 class TransitionCondition:
-    """Évalue les conditions de transition selon le JSON AIPROD_V33."""
+    """Évalue les conditions de transition selon le JSON AIPROD."""
     
     @staticmethod
     def evaluate(state: str, memory: Dict[str, Any]) -> str:

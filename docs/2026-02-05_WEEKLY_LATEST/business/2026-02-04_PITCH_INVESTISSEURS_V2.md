@@ -1,4 +1,4 @@
-# 🎬 AIPROD V33 — Pitch Investisseurs V2
+# 🎬 AIPROD — Pitch Investisseurs V2
 
 **Date** : Février 2026  
 **Version** : 2.0 - PRODUCTION READY  
@@ -9,7 +9,7 @@
 
 ## 🚀 L'ELEVATOR PITCH (30 secondes)
 
-> **AIPROD V33 est une plateforme SaaS B2B de génération vidéo audiovisuelle complète par intelligence artificielle.**
+> **AIPROD est une plateforme SaaS B2B de génération vidéo audiovisuelle complète par intelligence artificielle.**
 >
 > Nous permettons aux entreprises de créer des **vidéos professionnelles avec narration vocale, musique de fond et effets sonores** en quelques minutes au lieu de plusieurs jours, grâce à 6 phases d'IA orchestrées:
 >
@@ -104,12 +104,12 @@
 
 ---
 
-## ✨ LA SOLUTION : AIPROD V33 V2 - COMPLETE AUDIO-VIDEO PIPELINE
+## ✨ LA SOLUTION : AIPROD V2 - COMPLETE AUDIO-VIDEO PIPELINE
 
 ### Une plateforme de création vidéo audiovisuelle IA "clé en main"
 
 ```
-     UTILISATEUR                    AIPROD V33 V2                    RÉSULTAT
+     UTILISATEUR                    AIPROD V2                    RÉSULTAT
          │                              │                              │
          │   "Créer une vidéo          │                              │
          │    avec narration,          │                              │
@@ -172,7 +172,7 @@
 
 ### Ce qui nous différencie - UNIQUE SUR LE MARCHÉ
 
-| Feature                    | Concurrents              | AIPROD V33 V2                         |
+| Feature                    | Concurrents              | AIPROD V2                             |
 | -------------------------- | ------------------------ | ------------------------------------- |
 | **Orchestration IA**       | Mono-modèle              | Multi-agents 9 agents spécialisés     |
 | **Narration vocale**       | TTS basique              | Google TTS + ElevenLabs fallback      |
@@ -287,14 +287,14 @@ Audio Gen    Music Comp   SFX Agent    PostProcessor
 
 ### Pour les entreprises (B2B SaaS)
 
-| Aspect          | Avant (Manuel)      | Avec AIPROD V33 | Gain                 |
-| --------------- | ------------------- | --------------- | -------------------- |
-| **Temps**       | 5-7 jours           | 5 minutes       | **98% plus rapide**  |
-| **Coût/vidéo**  | 5 000€ - 20 000€    | 50€ - 200€      | **95% moins cher**   |
-| **Équipe**      | 4-5 spécialistes    | Aucun           | **Économies RH**     |
-| **Qualité**     | Variable            | Consistante     | **Contrôle qualité** |
-| **Itérations**  | 8-15 allers-retours | 2-3 max         | **90% plus rapide**  |
-| **Scalabilité** | Impossible          | Illimitée       | **Production 10x**   |
+| Aspect          | Avant (Manuel)      | Avec AIPROD | Gain                 |
+| --------------- | ------------------- | ----------- | -------------------- |
+| **Temps**       | 5-7 jours           | 5 minutes   | **98% plus rapide**  |
+| **Coût/vidéo**  | 5 000€ - 20 000€    | 50€ - 200€  | **95% moins cher**   |
+| **Équipe**      | 4-5 spécialistes    | Aucun       | **Économies RH**     |
+| **Qualité**     | Variable            | Consistante | **Contrôle qualité** |
+| **Itérations**  | 8-15 allers-retours | 2-3 max     | **90% plus rapide**  |
+| **Scalabilité** | Impossible          | Illimitée   | **Production 10x**   |
 
 ### ROI pour les clients
 
@@ -306,7 +306,7 @@ SANS AIPROD:
 • Temps: 50 × 6 jours = 300 jours-hommes
 • Équipe: 5 personnes spécialisées
 
-AVEC AIPROD V33:
+AVEC AIPROD:
 • Coût: 50 × 100€ + 500€ abonnement = 5 500€/mois
 • Temps: 50 × 5 min = 4 heures
 • Équipe: 1 personne (peut faire autre chose)
@@ -417,7 +417,7 @@ AVEC AIPROD V33:
 
 ---
 
-## 💡 POURQUOI AIPROD V33 GAGNERA
+## 💡 POURQUOI AIPROD GAGNERA
 
 ### 1. Technologie supérieure
 
@@ -447,7 +447,7 @@ AVEC AIPROD V33:
 
 ## 🎬 APPEL À L'ACTION
 
-**AIPROD V33 recherche:**
+**AIPROD recherche:**
 
 1. **Financement Série A** (€2-5M)
    - Expansion commerciale

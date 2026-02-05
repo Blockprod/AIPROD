@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test Report Generator for AIPROD_V33
+Test Report Generator for AIPROD
 Analyses all test files and generates a comprehensive report
 """
 
@@ -62,7 +62,7 @@ def print_report(stats):
     """Print formatted test report."""
 
     print("\n" + "=" * 80)
-    print("🧪 AIPROD_V33 TEST SUITE ANALYSIS")
+    print("🧪 AIPROD TEST SUITE ANALYSIS")
     print("=" * 80)
 
     print(f"\n📊 OVERALL STATISTICS")

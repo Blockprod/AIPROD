@@ -1,13 +1,14 @@
-# Architecture AIPROD V33
+# Architecture AIPROD
 
 ## Vue d'ensemble
 
-AIPROD V33 est un pipeline de génération vidéo IA cloud-native construit sur une architecture asynchrone modulaire. Le système orche
+AIPROD est un pipeline de génération vidéo IA cloud-native construit sur une architecture asynchrone modulaire. Le système orche
 stre plusieurs agents spécialisés pour transformer un texte en vidéo optimisée, avec double validation technique et sémantique.
 
 ## Composants principaux
 
 ### 1. Orchestrator (State Machine)
+
 - **Fichier** : `src/orchestrator/state_machine.py`
 - **Rôle** : Gère les états du pipeline et les transitions
 - **États** : INIT → INPUT_SANITIZED → AGENTS_EXECUTED → QA_SEMANTIC → FINAL_APPROVAL → DELIVERED
@@ -17,6 +18,7 @@ stre plusieurs agents spécialisés pour transformer un texte en vidéo optimis�
   - Intégration des agents
 
 ### 2. Memory Manager
+
 - **Fichier** : `src/memory/memory_manager.py`
 - **Rôle** : Gère la mémoire partagée et le cache de cohérence
 - **Fonctionnalités** :
@@ -28,27 +30,32 @@ stre plusieurs agents spécialisés pour transformer un texte en vidéo optimis�
 ### 3. Agents
 
 #### Creative Director
+
 - **Fichier** : `src/agents/creative_director.py`
 - **Rôle** : Fusion des outputs, gestion du cache et fallback Gemini
 - **Comportement** : Utilise les résultats en cache si disponibles, sinon exécute la fusion
 
 #### Fast Track Agent
+
 - **Fichier** : `src/agents/fast_track_agent.py`
 - **Rôle** : Pipeline simplifié pour les requêtes de faible complexité
 - **Contraintes** : maxDurationSec: 30, maxScenes: 3, priority-based
 - **Target latence** : < 20 secondes
 
 #### Render Executor
+
 - **Fichier** : `src/agents/render_executor.py`
 - **Rôle** : Exécution du rendu des assets
 - **Comportement** : Simule le temps de rendu (mock en développement)
 
 #### Semantic QA
+
 - **Fichier** : `src/agents/semantic_qa.py`
 - **Rôle** : Validation sémantique des outputs
 - **Validation** : Basée sur vision LLM (Gemini 1.5 Pro Vision)
 
 #### Visual Translator
+
 - **Fichier** : `src/agents/visual_translator.py`
 - **Rôle** : Traduction et adaptation des assets visuels
 - **Support** : Multi-langue (en, fr, etc.)
@@ -56,6 +63,7 @@ stre plusieurs agents spécialisés pour transformer un texte en vidéo optimis�
 ### 4. Fonctions métier
 
 #### Financial Orchestrator
+
 - **Fichier** : `src/api/functions/financial_orchestrator.py`
 - **Rôle** : Optimisation coût/qualité sans LLM
 - **Fonctionnalités** :
@@ -64,21 +72,25 @@ stre plusieurs agents spécialisés pour transformer un texte en vidéo optimis�
   - Certification des coûts
 
 #### Technical QA Gate
+
 - **Fichier** : `src/api/functions/technical_qa_gate.py`
 - **Rôle** : Vérifications binaires déterministes
 - **Checks** : asset_count, manifest_complete, cost_valid, quality_acceptable
 
 #### Input Sanitizer
+
 - **Fichier** : `src/api/functions/input_sanitizer.py`
 - **Rôle** : Nettoyage et validation des entrées utilisateur
 - **Validations** : Pydantic + nettoyage (trim, lowercase, etc.)
 
 ### 5. API REST
+
 - **Fichier** : `src/api/main.py`
 - **Framework** : FastAPI avec documentation Swagger
 - **Endpoints** : Pipeline, métriques, alertes, ICC, optimisation financière, QA technique
 
 ### 6. Monitoring & Métriques
+
 - **Fichier** : `src/utils/monitoring.py` et `src/utils/metrics_collector.py`
 - **Métriques** : Latence, coût, qualité, taux d'erreur
 - **Alertes** : high_latency (>5s), high_cost (>$1), low_quality (<60%), high_error_rate
@@ -110,6 +122,7 @@ API Response + ICC Data
 ## Configuration
 
 Configuration externalisée depuis `config/v33.json` avec les paramètres :
+
 - retry: { maxRetries: 3, backoffSec: 15 }
 - cache: { ttl: 168 (heures) }
 - fastTrack: { maxDurationSec: 30, maxScenes: 3, costCeiling: 0.3 }
@@ -118,7 +131,7 @@ Configuration externalisée depuis `config/v33.json` avec les paramètres :
 ## Logging & Monitoring
 
 - **Logging** : Format structuré avec rotation des fichiers (5MB max, 5 backups)
-- **Répertoire logs** : `logs/aiprod_v33.log`
+- **Répertoire logs** : `logs/AIPROD.log`
 - **Niveaux** : INFO, ERROR, WARNING avec contexte détaillé
 
 ## Tests

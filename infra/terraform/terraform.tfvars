@@ -39,7 +39,7 @@ private_service_cidr = "10.20.0.0/16"
 
 cloudsql_enabled        = true
 cloudsql_instance_name  = "aiprod-v33-postgres"
-cloudsql_database_name  = "aiprod_v33"
+cloudsql_database_name  = "AIPROD"
 cloudsql_user           = "aiprod"
 cloudsql_password       = "P@ssw0rd!aiprod2026xyz123"
 

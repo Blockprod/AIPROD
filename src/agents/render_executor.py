@@ -1,5 +1,5 @@
 """
-RenderExecutor Agent pour AIPROD V33 - Phase 3 Multi-Backend
+RenderExecutor Agent pour AIPROD - Phase 3 Multi-Backend
 Exécute le rendu complet: génération d'image + vidéo via:
 - Runway ML (primary)
 - Veo-3 via Vertex AI (premium)

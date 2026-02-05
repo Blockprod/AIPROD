@@ -57,7 +57,7 @@ class PipelineWorker:
 
         # Database
         self.db_url = os.getenv(
-            "DATABASE_URL", "postgresql://aiprod:password@localhost:5432/aiprod_v33"
+            "DATABASE_URL", "postgresql://aiprod:password@localhost:5432/AIPROD"
         )
         session_factory, _ = get_session_factory(self.db_url)
         self.session_factory = session_factory
@@ -270,7 +270,7 @@ def main():
     import argparse
 
     parser = argparse.ArgumentParser(
-        description="AIPROD V33 Pipeline Worker - Background job processor"
+        description="AIPROD Pipeline Worker - Background job processor"
     )
     parser.add_argument(
         "--project",

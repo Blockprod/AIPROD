@@ -240,7 +240,7 @@ spec:
   aiprod-dashboard.json: |
     {
       "dashboard": {
-        "title": "AIPROD V33 Production Dashboard",
+        "title": "AIPROD Production Dashboard",
         "panels": [
           {
             "title": "API Request Rate",

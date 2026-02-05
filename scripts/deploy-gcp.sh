@@ -1,5 +1,5 @@
 #!/bin/bash
-# Deployment script for AIPROD V33 to Google Cloud
+# Deployment script for AIPROD to Google Cloud
 # Usage: ./deploy.sh [environment] [version]
 
 set -e
@@ -12,7 +12,7 @@ IMAGE_NAME="aiprod-v33"
 ENVIRONMENT="${1:-production}"
 VERSION="${2:-latest}"
 
-echo "🚀 Deploying AIPROD V33 to $ENVIRONMENT environment"
+echo "🚀 Deploying AIPROD to $ENVIRONMENT environment"
 echo "   Project: $PROJECT_ID"
 echo "   Region: $REGION"
 echo "   Image: $GCR_HOSTNAME/$PROJECT_ID/$IMAGE_NAME:$VERSION"

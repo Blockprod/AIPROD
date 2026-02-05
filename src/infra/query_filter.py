@@ -1,5 +1,5 @@
 """
-Advanced query filtering system for AIPROD V33
+Advanced query filtering system for AIPROD
 Supports complex filters, operators, and performance optimization
 """
 

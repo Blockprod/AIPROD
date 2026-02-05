@@ -1,5 +1,5 @@
 """
-Role-Based Access Control (RBAC) infrastructure for AIPROD V33
+Role-Based Access Control (RBAC) infrastructure for AIPROD
 Provides role definitions, permission management, and access control
 """
 

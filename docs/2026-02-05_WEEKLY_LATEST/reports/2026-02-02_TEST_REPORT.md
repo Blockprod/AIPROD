@@ -1,4 +1,4 @@
-# 🧪 TEST REPORT — AIPROD_V33
+# 🧪 TEST REPORT — AIPROD
 
 **Date** : 2 février 2026  
 **Status** : ✅ **296+ TESTS READY FOR EXECUTION**  
@@ -344,7 +344,7 @@ tests/performance/test_latency.py::test_health_latency PASSED      [100%]
 **Solution**: Run pytest from project root
 
 ```bash
-cd C:\Users\averr\AIPROD_V33
+cd C:\Users\averr\AIPROD
 pytest tests/
 ```
 

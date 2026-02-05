@@ -1,5 +1,5 @@
 """
-CDN Configuration for AIPROD V33
+CDN Configuration for AIPROD
 Configures Cloud CDN with intelligent caching policies
 """
 

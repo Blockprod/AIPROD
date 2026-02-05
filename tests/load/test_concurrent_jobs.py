@@ -1,5 +1,5 @@
 """
-Tests de charge pour jobs concurrents - AIPROD V33 Phase 3
+Tests de charge pour jobs concurrents - AIPROD Phase 3
 Vérifie que le système peut gérer 10+ jobs simultanés.
 """
 import asyncio

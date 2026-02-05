@@ -1,5 +1,5 @@
 """
-PostProcessor Agent pour AIPROD V33
+PostProcessor Agent pour AIPROD
 Montage vidéo, transitions, effets, titrage, sous-titres, mélange audio.
 Utilise FFmpeg, OpenCV, PyAV pour les différents effets post-production.
 """

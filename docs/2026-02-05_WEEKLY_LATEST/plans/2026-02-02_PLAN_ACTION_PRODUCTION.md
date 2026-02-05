@@ -1,6 +1,6 @@
-# 📋 PLAN D'ACTION PRODUCTION — AIPROD_V33
+# 📋 PLAN D'ACTION PRODUCTION — AIPROD
 
-**Document** : Plan d'action complet pour rendre AIPROD_V33 prêt pour la production  
+**Document** : Plan d'action complet pour rendre AIPROD prêt pour la production  
 **Date** : 2 février 2026  
 **Scope** : Basé sur AUDIT_COMPLET + AUDIT_TECHNIQUE  
 **Durée totale estimée** : 6-8 semaines  
@@ -10,7 +10,7 @@
 
 ## 📌 Executive Summary
 
-AIPROD_V33 est une plateforme beta bien architecturée mais **non productible** en l'état. Les audits identifient **4 risques critiques** et **6 améliorations majeures**. Ce plan priorise les actions urgentes (24-48h), puis les blocages structurels (1-2 semaines), et enfin les optimisations (mois 1-2).
+AIPROD est une plateforme beta bien architecturée mais **non productible** en l'état. Les audits identifient **4 risques critiques** et **6 améliorations majeures**. Ce plan priorise les actions urgentes (24-48h), puis les blocages structurels (1-2 semaines), et enfin les optimisations (mois 1-2).
 
 | Phase              | Durée   | Risques levés | Effort |
 | ------------------ | ------- | ------------- | ------ |
@@ -424,7 +424,7 @@ from sqlalchemy.orm import sessionmaker
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://aiprod:password@localhost:5432/aiprod_v33"
+    "postgresql://aiprod:password@localhost:5432/AIPROD"
 )
 
 engine = create_engine(

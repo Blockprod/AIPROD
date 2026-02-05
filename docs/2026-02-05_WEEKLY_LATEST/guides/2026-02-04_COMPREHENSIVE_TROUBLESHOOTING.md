@@ -1,4 +1,4 @@
-# AIPROD V33 - Comprehensive Troubleshooting Guide
+# AIPROD - Comprehensive Troubleshooting Guide
 
 **Last Updated**: February 4, 2026  
 **Version**: 2.0  

@@ -1,7 +1,7 @@
 # Ensure prom_router is importable when using 'from src.utils.metrics_collector import prom_router'
 __all__ = ["MetricsCollector", "prom_router"]
 """
-Métriques et monitoring pour AIPROD V33
+Métriques et monitoring pour AIPROD
 Collecte et exposition des métriques de performance.
 """
 from datetime import datetime
@@ -53,7 +53,7 @@ PROM_LATENCY_MS.labels(type="execution")
 
 class MetricsCollector:
     """
-    Collecteur de métriques pour le pipeline AIPROD V33.
+    Collecteur de métriques pour le pipeline AIPROD.
     
     Suit les KPIs suivants :
     - Nombre d'exécutions et d'erreurs

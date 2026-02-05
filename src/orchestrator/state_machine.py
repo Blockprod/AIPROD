@@ -1,5 +1,5 @@
 """
-StateMachine pour orchestrer le pipeline AIPROD V33 avec intégration des agents
+StateMachine pour orchestrer le pipeline AIPROD avec intégration des agents
 """
 from enum import Enum, auto
 from typing import Any, Dict
@@ -29,7 +29,7 @@ class PipelineState(Enum):
 
 class StateMachine:
     """
-    Orchestrateur d'états pour le pipeline AIPROD V33.
+    Orchestrateur d'états pour le pipeline AIPROD.
     Gère les transitions, le retry et le logging.
     Intègre les agents principaux du pipeline.
     """

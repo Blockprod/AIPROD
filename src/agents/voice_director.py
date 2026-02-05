@@ -1,5 +1,5 @@
 """
-VoiceDirector Agent pour AIPROD V33
+VoiceDirector Agent pour AIPROD
 Gère la direction vocale : émotions, intonation, synchronisation audio/vidéo.
 """
 from typing import Any, Dict, Optional

@@ -1,5 +1,5 @@
 """
-AIPROD V33 - Consistency Cache avec stockage GCS
+AIPROD - Consistency Cache avec stockage GCS
 Cache de cohérence pour maintenir le style/caractères entre projets d'une même marque.
 TTL: 7 jours (168 heures)
 """

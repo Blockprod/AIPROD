@@ -223,7 +223,7 @@ TAGS_METADATA = [
 # API documentation sections
 API_DOCUMENTATION = {
     "overview": """
-# AIPROD V33 API
+# AIPROD API
 
 Advanced AI-powered audio production platform for generating, optimizing, and managing audio content.
 

@@ -1,7 +1,8 @@
-# CONTEXTE : CRÉATION DU PROJET AIPROD V33 ULTIMATE
+# CONTEXTE : CRÉATION DU PROJET AIPROD ULTIMATE
 
 ## 🎯 OBJECTIF
-Créer une implémentation complète et fonctionnelle du pipeline de génération vidéo IA "AIPROD V33" basé sur le fichier de configuration `AIPROD_V33.json` que j'ai joint.
+
+Créer une implémentation complète et fonctionnelle du pipeline de génération vidéo IA "AIPROD" basé sur le fichier de configuration `AIPROD.json` que j'ai joint.
 
 ## 📁 STRUCTURE DU PROJET À CRÉER
 
@@ -73,8 +74,8 @@ aiprod-v33/
 ├── docker-compose.yml
 └── README.md
 
-
 ## 🔧 CONTRAINTES TECHNIQUES
+
 - **Python 3.10+** avec typage fort (type hints)
 - **Architecture asynchrone** (async/await) pour les agents
 - **Configuration externalisée** depuis v33.json
@@ -84,6 +85,7 @@ aiprod-v33/
 - **Tests unitaires et d'intégration** complets
 
 ## 🎨 STYLE DE CODE
+
 - **Documentation complète** avec docstrings Google style
 - **Logging structuré** avec différents niveaux
 - **Gestion d'erreurs élégante** avec retry mechanisms
@@ -93,38 +95,45 @@ aiprod-v33/
 ## 📋 EXIGENCES FONCTIONNELLES (basées sur v33.json)
 
 ### 1. ORCHESTRATOR (État Machine)
+
 - Implémenter les états : INIT, ANALYSIS, CREATIVE_DIRECTION, VISUAL_TRANSLATION, FINANCIAL_OPTIMIZATION, RENDER_EXECUTION, QA_TECHNICAL, QA_SEMANTIC, FINALIZE, ERROR, FAST_TRACK
 - Gérer les transitions conditionnelles (fast vs full pipeline)
 - Implémenter retry policy (maxRetries: 3, backoffSec: 15)
 
 ### 2. MEMORY MANAGER
+
 - Système de mémoire partagée avec validation de schéma
 - Mémoire exposée pour ICC (Interface Client Collaboratif)
 - Cache de cohérence avec TTL 168h
 
 ### 3. CREATIVE DIRECTOR (Agent principal)
+
 - Fusion de 4 agents : Reasoner + ICRL + ACT + ScriptMind
 - Génère ProductionManifest avec consistency_markers
 - Intègre le cache de cohérence
 - Utilise Gemini 1.5 Pro avec fallback vers Flash
 
 ### 4. FINANCIAL ORCHESTRATOR (Déterministe)
+
 - Décisions financières SANS LLM
 - Optimisation coût/qualité basée sur rules
 - Dynamic pricing avec updateIntervalHours: 24
 - Certification des coûts avec audit trail
 
 ### 5. DOUBLE QA SYSTEM
+
 - QA Technique : vérifications binaires déterministes
 - QA Sémantique : évaluation par vision LLM (Gemini 1.5 Pro Vision)
 - Rapports interactifs pour ICC
 
 ### 6. FAST TRACK AGENT
+
 - Pipeline simplifié pour complexité < 0.3
 - Contraintes : maxDurationSec: 30, maxScenes: 3, noDialogue: true
 - Performance target : maxLatencySec: 20, costCeiling: 0.3
 
 ## 🚀 COMME DÉMARRER
+
 1. **Pour chaque fichier** : Commence par le code le plus critique
 2. **Approche incrémentale** : Implémente un composant, teste, passe au suivant
 3. **Priorité des composants** :
@@ -135,6 +144,7 @@ aiprod-v33/
 4. **Tests en parallèle** : Écrire les tests pendant le développement
 
 ## 💡 CONSEILS D'IMPLÉMENTATION
+
 - Utiliser `@dataclass` pour les DTOs
 - Implémenter `__str__` et `__repr__` pour le debugging
 - Configurer le logging avec rotation des fichiers
@@ -142,7 +152,9 @@ aiprod-v33/
 - Prévoir l'extension avec de nouveaux backends (Sora, etc.)
 
 ## 🎯 LIVRABLE FINAL
+
 Une application Cloud-Native prête pour le déploiement sur Google Cloud Platform avec :
+
 - ✅ Pipeline complet fonctionnel
 - ✅ API REST documentée
 - ✅ Interface Client Collaboratif (ICC)
@@ -151,6 +163,7 @@ Une application Cloud-Native prête pour le déploiement sur Google Cloud Platfo
 - ✅ Documentation technique
 
 ## ❓ QUESTIONS À SE POSER POUR CHAQUE COMPOSANT
+
 1. Quelles sont les entrées/sorties définies dans v33.json ?
 2. Comment gérer les erreurs et retries ?
 3. Quels logs sont nécessaires pour le debugging ?
@@ -159,4 +172,4 @@ Une application Cloud-Native prête pour le déploiement sur Google Cloud Platfo
 
 ---
 
-**NOTE AU DÉVELOPPEUR** : Ce prompt est conçu pour être utilisé avec GitHub Copilot dans VS Code. Attache le fichier `AIPROD_V33.json` comme contexte. Commence par créer la structure de dossiers, puis génère chaque fichier en suivant les spécifications du JSON. Pose-moi des questions si une partie du fichier de configuration n'est pas claire.
+**NOTE AU DÉVELOPPEUR** : Ce prompt est conçu pour être utilisé avec GitHub Copilot dans VS Code. Attache le fichier `AIPROD.json` comme contexte. Commence par créer la structure de dossiers, puis génère chaque fichier en suivant les spécifications du JSON. Pose-moi des questions si une partie du fichier de configuration n'est pas claire.

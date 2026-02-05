@@ -1,4 +1,4 @@
-# Service Level Agreement (SLA) — AIPROD V33
+# Service Level Agreement (SLA) — AIPROD
 
 **Effective Date**: February 4, 2026  
 **Last Updated**: February 4, 2026  
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-AIPROD V33 commits to industry-leading service levels across all customer tiers. This document defines uptime guarantees, response time targets, support levels, and credit policies.
+AIPROD commits to industry-leading service levels across all customer tiers. This document defines uptime guarantees, response time targets, support levels, and credit policies.
 
 **Key Commitments**:
 

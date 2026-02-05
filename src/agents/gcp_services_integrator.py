@@ -1,5 +1,5 @@
 """
-GCP Services Integrator pour AIPROD V33
+GCP Services Integrator pour AIPROD
 Gère l'intégration réelle des services Google Cloud
 """
 

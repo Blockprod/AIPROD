@@ -9,7 +9,7 @@
 
 ## 📌 Challenge
 
-### Before AIPROD V33
+### Before AIPROD
 
 ```
 Requirement: Premium brand campaign video (YouTube, broadcast)
@@ -39,7 +39,7 @@ Total: $1,300/month for unpredictable results 😞
 
 ---
 
-## ✅ Solution with AIPROD V33
+## ✅ Solution with AIPROD
 
 ### Implementation
 
@@ -152,7 +152,7 @@ Before AIPROD:
 ├─ Color correction:   $0.75/video (post-prod)
 └─ Monthly (20):       $270
 
-With AIPROD V33:
+With AIPROD:
 ├─ Brand Campaign:     $0.95/video (includes ICC)
 ├─ Creative feedback:  $0.00/video (integrated)
 ├─ Iterations:         Auto-included (QA driven)

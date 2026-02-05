@@ -1,4 +1,4 @@
-displayName: "AIPROD V33 - Monthly Budget"
+displayName: "AIPROD - Monthly Budget"
 budgetFilter:
   projects:
     - "projects/REPLACE_PROJECT_NUMBER"

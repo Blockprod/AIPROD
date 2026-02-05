@@ -1,11 +1,13 @@
-# Runtime Fixes Summary - AIPROD V33
+# Runtime Fixes Summary - AIPROD
 
 ## Overview
+
 Fixed 2 critical test failures discovered during Pylance type error resolution phase. Both issues were identified and resolved, achieving **100% test pass rate (561/561 tests)**.
 
 ## Issues Fixed
 
 ### 1. Token Expiration Test Failure
+
 **File:** [tests/auth/test_token_refresh.py](tests/auth/test_token_refresh.py#L136)  
 **Issue:** `test_token_expiration` was failing with `AssertionError: assert True is False`
 
@@ -14,10 +16,13 @@ The test was setting `manager.access_token_ttl = 1` but the `generate_refresh_to
 
 **Fix Applied:**
 Changed line 145 from:
+
 ```python
 manager.access_token_ttl = 1  # Wrong TTL - for access tokens, not refresh tokens
 ```
+
 To:
+
 ```python
 manager.refresh_token_ttl = 1  # Correct TTL - for refresh token generation
 ```
@@ -28,6 +33,7 @@ manager.refresh_token_ttl = 1  # Correct TTL - for refresh token generation
 ---
 
 ### 2. InputSanitizer Request Parameter Type Error
+
 **File:** [src/api/main.py](src/api/main.py#L530)  
 **Issue:** `test_pipeline_run_success` was failing with `500 Internal Server Error`  
 **Error Message:** `InputSchema() argument after ** must be a mapping, not PipelineRequest`
@@ -38,6 +44,7 @@ The `/pipeline/run` endpoint was passing a `PipelineRequest` Pydantic model obje
 **Fix Applied (3 changes):**
 
 **Change 1 - Line 530:**
+
 ```python
 # Before:
 sanitized = input_sanitizer.sanitize(request_data)
@@ -47,6 +54,7 @@ sanitized = input_sanitizer.sanitize(request_dict)
 ```
 
 **Change 2 - Lines 545 and 559 - Fix request references:**
+
 ```python
 # Before:
 sanitized.get("content", request.content),
@@ -63,6 +71,7 @@ sanitized.get("content", request_data.content),
 
 **Change 3 - /cost-estimate endpoint (lines 962-969):**
 Similar issue in `estimate_cost()` endpoint using `request.content` instead of `request_data.content`:
+
 ```python
 # Before:
 estimate = get_full_cost_estimate(
@@ -89,6 +98,7 @@ estimate = get_full_cost_estimate(
 ## Test Results
 
 ### Before Fixes
+
 ```
 ❌ test_token_expiration - AssertionError: assert True is False
 ❌ test_pipeline_run_success - assert 500 == 200
@@ -96,6 +106,7 @@ estimate = get_full_cost_estimate(
 ```
 
 ### After Fixes
+
 ```
 ✅ test_token_expiration - PASSED
 ✅ test_pipeline_run_success - PASSED
@@ -103,22 +114,24 @@ estimate = get_full_cost_estimate(
 ```
 
 ### Full Test Suite Execution
+
 ```
 ======================= 561 passed in 259.03s (0:04:19) =======================
 ```
 
 ## Production Impact
 
-| Metric | Status |
-|--------|--------|
-| **Test Pass Rate** | 100% (561/561) |
-| **API Routes** | 91 operational |
-| **Type Errors** | 0 (from previous 45+) |
-| **Production Readiness** | 99.8-100% |
+| Metric                   | Status                |
+| ------------------------ | --------------------- |
+| **Test Pass Rate**       | 100% (561/561)        |
+| **API Routes**           | 91 operational        |
+| **Type Errors**          | 0 (from previous 45+) |
+| **Production Readiness** | 99.8-100%             |
 
 ## Summary
 
 Both issues stemmed from incorrect parameter handling:
+
 1. **Token TTL Bug** - Using wrong TTL constant for test
 2. **InputSanitizer Bug** - Passing Pydantic model instead of dict
 

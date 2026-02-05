@@ -1,4 +1,4 @@
-﻿# 📋 AIPROD V33 - DEPLOIEMENT GCP COMPLET
+﻿# 📋 AIPROD - DEPLOIEMENT GCP COMPLET
 
 **Status global** : ✅ **DEPLOIEMENT REUSSI - 100% OPERATIONNEL**  
 **Date** : 3 fevrier 2026  
@@ -8,18 +8,18 @@
 
 ## 🎉 RESUME EXECUTIF
 
-| Etape | Status | Description |
-|-------|--------|-------------|
+| Etape       | Status      | Description                   |
+| ----------- | ----------- | ----------------------------- |
 | **ETAPE 1** | ✅ COMPLETE | Configuration GCP & Terraform |
-| **ETAPE 2** | ✅ COMPLETE | Deploiement Infrastructure |
-| **ETAPE 3** | ✅ COMPLETE | Validation Production |
+| **ETAPE 2** | ✅ COMPLETE | Deploiement Infrastructure    |
+| **ETAPE 3** | ✅ COMPLETE | Validation Production         |
 
 ### 🌐 URL de Production
 
-| Acces | URL |
-|-------|-----|
-| **API** | https://aiprod-v33-api-hxhx3s6eya-ew.a.run.app |
-| **Swagger** | https://aiprod-v33-api-hxhx3s6eya-ew.a.run.app/docs |
+| Acces       | URL                                                         |
+| ----------- | ----------------------------------------------------------- |
+| **API**     | https://aiprod-v33-api-hxhx3s6eya-ew.a.run.app              |
+| **Swagger** | https://aiprod-v33-api-hxhx3s6eya-ew.a.run.app/docs         |
 | **OpenAPI** | https://aiprod-v33-api-hxhx3s6eya-ew.a.run.app/openapi.json |
 
 ---
@@ -64,23 +64,23 @@
 
 ### Infrastructure Deployee
 
-| Resource | Status | Details |
-|----------|--------|---------|
-| **Cloud Run API** | 🟢 ACTIF | aiprod-v33-api sur europe-west1 |
-| **Cloud SQL** | 🟢 RUNNABLE | aiprod-v33-postgres (PostgreSQL 14, db-f1-micro) |
-| **VPC Network** | 🟢 ACTIF | aiprod-v33-vpc avec subnet |
-| **VPC Connector** | 🟢 READY | aiprod-v33-connector (e2-micro, 2-3 instances) |
-| **Pub/Sub Topics** | 🟢 ACTIF | 3 topics crees |
-| **Pub/Sub Subscriptions** | 🟢 ACTIF | 2 subscriptions |
-| **Service Account** | 🟢 ACTIF | aiprod-cloud-run@aiprod-484120.iam.gserviceaccount.com |
-| **IAM Roles** | 🟢 CONFIGURES | 7 roles assignes |
+| Resource                  | Status        | Details                                                |
+| ------------------------- | ------------- | ------------------------------------------------------ |
+| **Cloud Run API**         | 🟢 ACTIF      | aiprod-v33-api sur europe-west1                        |
+| **Cloud SQL**             | 🟢 RUNNABLE   | aiprod-v33-postgres (PostgreSQL 14, db-f1-micro)       |
+| **VPC Network**           | 🟢 ACTIF      | aiprod-v33-vpc avec subnet                             |
+| **VPC Connector**         | 🟢 READY      | aiprod-v33-connector (e2-micro, 2-3 instances)         |
+| **Pub/Sub Topics**        | 🟢 ACTIF      | 3 topics crees                                         |
+| **Pub/Sub Subscriptions** | 🟢 ACTIF      | 2 subscriptions                                        |
+| **Service Account**       | 🟢 ACTIF      | aiprod-cloud-run@aiprod-484120.iam.gserviceaccount.com |
+| **IAM Roles**             | 🟢 CONFIGURES | 7 roles assignes                                       |
 
 ### Terraform Outputs
 
 ```bash
 cloud_run_url            = "https://aiprod-v33-api-hxhx3s6eya-ew.a.run.app"
 cloudsql_connection_name = "aiprod-484120:europe-west1:aiprod-v33-postgres"
-cloudsql_database        = "aiprod_v33"
+cloudsql_database        = "AIPROD"
 pubsub_topic             = "aiprod-pipeline-jobs"
 pubsub_results_topic     = "aiprod-pipeline-results"
 pubsub_dlq_topic         = "aiprod-pipeline-dlq"
@@ -117,7 +117,7 @@ service_account_email    = "aiprod-cloud-run@aiprod-484120.iam.gserviceaccount.c
 GET /health -> {"status": "ok"} ✅
 
 # Root Endpoint
-GET / -> {"status": "ok", "name": "AIPROD V33 API", "docs": "/docs"} ✅
+GET / -> {"status": "ok", "name": "AIPROD API", "docs": "/docs"} ✅
 
 # OpenAPI Spec
 GET /openapi.json -> OpenAPI 3.1.0, 10 endpoints ✅
@@ -131,19 +131,19 @@ GET /icc/data -> OK ✅
 
 ### Endpoints disponibles
 
-| Endpoint | Methode | Description |
-|----------|---------|-------------|
-| / | GET | Info API |
-| /health | GET | Health check |
-| /docs | GET | Swagger UI |
-| /openapi.json | GET | OpenAPI spec |
-| /pipeline/run | POST | Lancer un job |
-| /pipeline/status | GET | Status pipeline |
-| /icc/data | GET | Donnees ICC |
-| /metrics | GET | Metriques |
-| /alerts | GET | Alertes |
-| /financial/optimize | POST | Optimisation financiere |
-| /qa/technical | POST | QA technique |
+| Endpoint            | Methode | Description             |
+| ------------------- | ------- | ----------------------- |
+| /                   | GET     | Info API                |
+| /health             | GET     | Health check            |
+| /docs               | GET     | Swagger UI              |
+| /openapi.json       | GET     | OpenAPI spec            |
+| /pipeline/run       | POST    | Lancer un job           |
+| /pipeline/status    | GET     | Status pipeline         |
+| /icc/data           | GET     | Donnees ICC             |
+| /metrics            | GET     | Metriques               |
+| /alerts             | GET     | Alertes                 |
+| /financial/optimize | POST    | Optimisation financiere |
+| /qa/technical       | POST    | QA technique            |
 
 ### Verifications Infrastructure
 
@@ -178,18 +178,19 @@ gcloud secrets list -> 4 secrets ✅
 
 ## 📅 TIMELINE FINAL
 
-| Etape | Duree | Status | Date |
-|-------|-------|--------|------|
-| **GCP Setup** | 2-3h | ✅ COMPLETE | Feb 3, 2026 |
-| **Terraform Deploy** | 4-6h | ✅ COMPLETE | Feb 3, 2026 |
-| **Validation** | 1-2h | ✅ COMPLETE | Feb 3, 2026 |
-| **Go-Live** | - | 🎯 PRET | **Feb 17, 2026** |
+| Etape                | Duree | Status      | Date             |
+| -------------------- | ----- | ----------- | ---------------- |
+| **GCP Setup**        | 2-3h  | ✅ COMPLETE | Feb 3, 2026      |
+| **Terraform Deploy** | 4-6h  | ✅ COMPLETE | Feb 3, 2026      |
+| **Validation**       | 1-2h  | ✅ COMPLETE | Feb 3, 2026      |
+| **Go-Live**          | -     | 🎯 PRET     | **Feb 17, 2026** |
 
 ---
 
 ## 🚀 PROCHAINES ETAPES (Optionnelles)
 
 ### 1. Configurer le Worker (Cloud Run Jobs)
+
 Le worker Pub/Sub necessite une conversion en Cloud Run Job car ce n'est pas un serveur HTTP.
 
 ```bash
@@ -198,18 +199,21 @@ Le worker Pub/Sub necessite une conversion en Cloud Run Job car ce n'est pas un 
 ```
 
 ### 2. Configurer le monitoring Datadog
+
 ```bash
 # Verifier que les metriques arrivent dans Datadog
 # Configurer les dashboards et alertes
 ```
 
 ### 3. Tests de charge
+
 ```bash
 # Tester les performances avec des requetes concurrentes
 # Valider l'autoscaling (1-10 instances)
 ```
 
 ### 4. Migration base de donnees
+
 ```bash
 # Executer les migrations Alembic sur Cloud SQL
 alembic upgrade head
@@ -219,7 +223,7 @@ alembic upgrade head
 
 ## ✅ RESUME FINAL
 
-**L'infrastructure AIPROD V33 est 100% operationnelle sur GCP !**
+**L'infrastructure AIPROD est 100% operationnelle sur GCP !**
 
 - 🟢 API Cloud Run accessible publiquement
 - 🟢 Base de donnees PostgreSQL fonctionnelle
@@ -232,4 +236,4 @@ alembic upgrade head
 
 ---
 
-*Derniere mise a jour : 3 fevrier 2026*
+_Derniere mise a jour : 3 fevrier 2026_

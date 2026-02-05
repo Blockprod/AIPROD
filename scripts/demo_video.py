@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-AIPROD V33 - Demo Video Script
+AIPROD - Demo Video Script
 
 Script pour générer une vidéo de démonstration du système.
 Montre le workflow complet: brief → estimation → ICC → rendu → QA.
@@ -42,7 +42,7 @@ DEMO_BRIEFS = [
 ]
 
 class DemoRunner:
-    """Exécute la démonstration AIPROD V33."""
+    """Exécute la démonstration AIPROD."""
     
     def __init__(self, api_base: str = API_BASE):
         self.api_base = api_base
@@ -62,7 +62,7 @@ class DemoRunner:
     async def check_health(self) -> bool:
         """Vérifie que l'API est accessible."""
         print("\n" + "="*60)
-        print("🏥 Vérification de l'API AIPROD V33...")
+        print("🏥 Vérification de l'API AIPROD...")
         print("="*60)
         
         if self.session is None:
@@ -310,7 +310,7 @@ class DemoRunner:
         start_time = time.time()
         
         print("\n" + "="*60)
-        print("🚀 AIPROD V33 - DÉMONSTRATION COMPLÈTE")
+        print("🚀 AIPROD - DÉMONSTRATION COMPLÈTE")
         print("="*60)
         print(f"Démarrage: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         
@@ -377,7 +377,7 @@ async def main():
     """Point d'entrée principal."""
     import argparse
     
-    parser = argparse.ArgumentParser(description="AIPROD V33 Demo")
+    parser = argparse.ArgumentParser(description="AIPROD Demo")
     parser.add_argument(
         "--preset",
         choices=["quick", "brand", "premium", "all"],

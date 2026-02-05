@@ -1,5 +1,5 @@
 ---
-# 📊 PROGRESSION PLAN D'ACTION PRODUCTION - AIPROD_V33
+# 📊 PROGRESSION PLAN D'ACTION PRODUCTION - AIPROD
 
 **Date**: 2 février 2026  
 **Vue depuis**: Session Phase 0 COMPLÉTÉE (31 janvier - 2 février)  

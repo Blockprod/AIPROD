@@ -4,7 +4,7 @@
 
 ### Executive Summary
 
-Security audit performed on AIPROD V33 API codebase and dependencies. 6 vulnerabilities identified in development/build dependencies, all LOW-MEDIUM severity and remediable.
+Security audit performed on AIPROD API codebase and dependencies. 6 vulnerabilities identified in development/build dependencies, all LOW-MEDIUM severity and remediable.
 
 ### Dependency Vulnerabilities Found
 

@@ -1,9 +1,9 @@
-# 🚀 PLAN COMPLET DES PHASES RESTANTES — AIPROD V33
+# 🚀 PLAN COMPLET DES PHASES RESTANTES — AIPROD
 
 **Document de planification** : 5 février 2026  
 **Horizon** : 5 février — 31 mai 2026  
 **Total Tâches Restantes** : 41 tâches | ~22 heures  
-**Status** : 🟢 Production LIVE — Prêt pour optimisations  
+**Status** : 🟢 Production LIVE — Prêt pour optimisations
 
 ---
 
@@ -11,7 +11,7 @@
 
 ```
 ╔═══════════════════════════════════════════════════════════════════════════════╗
-║                      AIPROD V33 — FEUILLE DE ROUTE                           ║
+║                      AIPROD — FEUILLE DE ROUTE                           ║
 ╠═══════════════════════════════════════════════════════════════════════════════╣
 ║                                                                               ║
 ║  Phases Complétées:     6/6 ✅ (Jan 10 - Feb 4)                              ║
@@ -44,7 +44,7 @@
 **Durée totale** : ~1 heure  
 **Objectif** : Confirmer que tout fonctionne en production  
 **Dépendances** : None (déjà en production)  
-**Success Criteria** : 100% des 6 validations ✅  
+**Success Criteria** : 100% des 6 validations ✅
 
 ---
 
@@ -73,7 +73,7 @@
 
 ```bash
 #!/bin/bash
-# Validation endpoints API AIPROD V33
+# Validation endpoints API AIPROD
 
 API_URL="https://aiprod-v33-api-hxhx3s6eya-ew.a.run.app"
 
@@ -102,7 +102,7 @@ failed=0
 for endpoint_pair in "${endpoints[@]}"; do
   IFS=':' read -r method url <<< "$endpoint_pair"
   status=$(curl -s -o /dev/null -w "%{http_code}" -X "$method" "$url")
-  
+
   if [[ "$status" == "200" || "$status" == "202" ]]; then
     echo -e "${GREEN}✅ $method $url → $status${NC}"
     ((passed++))
@@ -138,14 +138,14 @@ fi
 
 **ID** : `CRIT-2`  
 **Titre** : Vérifier Firestore et Cloud SQL en production  
-**Durée** : 15 min  
+**Durée** : 15 min
 
 ### Checklist
 
 ```bash
 ☐ gcloud firestore databases list
   # Doit retourner la DB de production
-  
+
 ☐ gcloud sql instances list
   # Doit retourner l'instance Cloud SQL
 
@@ -166,7 +166,7 @@ fi
 
 **ID** : `CRIT-3`  
 **Titre** : Confirmer que tous les secrets sont en place en production  
-**Durée** : 10 min  
+**Durée** : 10 min
 
 ### Checklist
 
@@ -189,7 +189,7 @@ fi
 
 **ID** : `CRIT-4`  
 **Titre** : Vérifier que les certificats HTTPS sont valides  
-**Durée** : 5 min  
+**Durée** : 5 min
 
 ### Checklist
 
@@ -213,7 +213,7 @@ fi
 
 **ID** : `CRIT-5`  
 **Titre** : Tester avec un peu de trafic pour vérifier la stabilité  
-**Durée** : 10 min  
+**Durée** : 10 min
 
 ### Script de test
 
@@ -232,7 +232,7 @@ failed=0
 
 for i in {1..100}; do
   status=$(curl -s -o /dev/null -w "%{http_code}" "$API_URL/health")
-  
+
   if [[ "$status" == "200" ]]; then
     ((success++))
     echo -n "."
@@ -240,7 +240,7 @@ for i in {1..100}; do
     ((failed++))
     echo -n "x"
   fi
-  
+
   # Petit délai pour ne pas surcharger
   sleep 0.6
 done
@@ -270,7 +270,7 @@ fi
 
 **ID** : `CRIT-6`  
 **Titre** : Vérifier que les logs et métriques Prometheus sont disponibles  
-**Durée** : 10 min  
+**Durée** : 10 min
 
 ### Checklist
 
@@ -296,7 +296,7 @@ fi
 **Durée totale** : ~4 heures  
 **Objectif** : Mettre en place la sécurité de niveau entreprise  
 **Dépendances** : Phase Critique (CRIT-1 à CRIT-6) ✅  
-**Success Criteria** : 9/9 tâches ✅  
+**Success Criteria** : 9/9 tâches ✅
 
 ---
 
@@ -306,7 +306,7 @@ fi
 **Titre** : Implémenter rate limiting pour prévenir les abus  
 **Priorité** : ⭐⭐⭐ HAUTE  
 **Durée** : 45 min  
-**Impact** : Prévention des attaques DDoS  
+**Impact** : Prévention des attaques DDoS
 
 ### Checklist
 
@@ -357,7 +357,7 @@ async def health(request: Request):
 **Titre** : Implémenter refresh tokens pour Firebase auth  
 **Priorité** : ⭐⭐ HAUTE  
 **Durée** : 45 min  
-**Impact** : Améliore la sécurité des tokens  
+**Impact** : Améliore la sécurité des tokens
 
 ### Checklist
 
@@ -387,7 +387,7 @@ async def health(request: Request):
 **ID** : `SEC-1.3`  
 **Titre** : Système de rotation des API keys  
 **Priorité** : ⭐⭐ MOYENNE  
-**Durée** : 30 min  
+**Durée** : 30 min
 
 ### Checklist
 
@@ -412,7 +412,7 @@ async def health(request: Request):
 **ID** : `SEC-1.4`  
 **Titre** : Durcir la politique CORS  
 **Priorité** : ⭐ MOYENNE  
-**Durée** : 20 min  
+**Durée** : 20 min
 
 ### Checklist
 
@@ -435,7 +435,7 @@ async def health(request: Request):
 **ID** : `SEC-1.5`  
 **Titre** : Audit et prévention des injections SQL  
 **Priorité** : ⭐⭐⭐ HAUTE  
-**Durée** : 50 min  
+**Durée** : 50 min
 
 ### Checklist
 
@@ -463,7 +463,7 @@ async def health(request: Request):
 **ID** : `SEC-1.6`  
 **Titre** : Protéger contre les attaques XSS  
 **Priorité** : ⭐⭐ MOYENNE  
-**Durée** : 30 min  
+**Durée** : 30 min
 
 ### Checklist
 
@@ -488,7 +488,7 @@ async def health(request: Request):
 **ID** : `SEC-1.7`  
 **Titre** : Protéger contre les attaques CSRF  
 **Priorité** : ⭐ BASSE  
-**Durée** : 20 min  
+**Durée** : 20 min
 
 ### Checklist
 
@@ -513,7 +513,7 @@ async def health(request: Request):
 **ID** : `SEC-1.8`  
 **Titre** : Auditer et ajouter les headers de sécurité  
 **Priorité** : ⭐⭐ MOYENNE  
-**Durée** : 30 min  
+**Durée** : 30 min
 
 ### Checklist
 
@@ -539,7 +539,7 @@ async def health(request: Request):
 **ID** : `SEC-1.9`  
 **Titre** : Préparer et exécuter test de pénétration basique  
 **Priorité** : ⭐⭐⭐ HAUTE  
-**Durée** : 45 min  
+**Durée** : 45 min
 
 ### Checklist
 
@@ -572,7 +572,7 @@ async def health(request: Request):
 **Durée totale** : ~3 heures  
 **Objectif** : Optimiser et sécuriser la base de données  
 **Dépendances** : Phase 1 ✅  
-**Success Criteria** : 5/5 tâches ✅  
+**Success Criteria** : 5/5 tâches ✅
 
 ---
 
@@ -580,7 +580,7 @@ async def health(request: Request):
 
 **ID** : `DB-2.1`  
 **Titre** : Optimiser les requêtes Firestore  
-**Durée** : 40 min  
+**Durée** : 40 min
 
 ### Checklist
 
@@ -606,7 +606,7 @@ async def health(request: Request):
 
 **ID** : `DB-2.2`  
 **Titre** : Configurer le connection pooling pour Cloud SQL  
-**Durée** : 40 min  
+**Durée** : 40 min
 
 ### Checklist
 
@@ -636,7 +636,7 @@ async def health(request: Request):
 
 **ID** : `DB-2.3`  
 **Titre** : Analyser et créer les indexes manquants  
-**Durée** : 40 min  
+**Durée** : 40 min
 
 ### Checklist
 
@@ -645,7 +645,7 @@ async def health(request: Request):
   gcloud sql operations list --instance=aiprod-db
 
 ☐ Créer indexes prioritaires:
-  CREATE INDEX idx_pipelines_user_created 
+  CREATE INDEX idx_pipelines_user_created
   ON pipelines(user_id, created_at DESC);
 
 ☐ Tester impact (avant/après):
@@ -660,7 +660,7 @@ async def health(request: Request):
 
 **ID** : `DB-2.4`  
 **Titre** : Configurer backups automatiques et DR  
-**Durée** : 30 min  
+**Durée** : 30 min
 
 ### Checklist
 
@@ -684,7 +684,7 @@ async def health(request: Request):
 
 **ID** : `DB-2.5`  
 **Titre** : Setup réplication pour haute disponibilité  
-**Durée** : 30 min  
+**Durée** : 30 min
 
 ### Checklist
 
@@ -710,7 +710,7 @@ async def health(request: Request):
 **Durée totale** : ~4 heures  
 **Objectif** : Ajouter les features avancées manquantes  
 **Dépendances** : Phase 1 ✅  
-**Success Criteria** : 5/5 tâches ✅  
+**Success Criteria** : 5/5 tâches ✅
 
 ---
 
@@ -718,7 +718,7 @@ async def health(request: Request):
 
 **ID** : `API-3.1`  
 **Titre** : Implémenter les webhooks pour les notifications  
-**Durée** : 50 min  
+**Durée** : 50 min
 
 ### Checklist
 
@@ -743,7 +743,7 @@ async def health(request: Request):
 
 **ID** : `API-3.2`  
 **Titre** : Ajouter les WebSockets pour les updates en temps réel  
-**Durée** : 50 min  
+**Durée** : 50 min
 
 ### Checklist
 
@@ -768,7 +768,7 @@ async def health(request: Request):
 
 **ID** : `API-3.3`  
 **Titre** : API pour traiter plusieurs jobs en batch  
-**Durée** : 50 min  
+**Durée** : 50 min
 
 ### Checklist
 
@@ -794,7 +794,7 @@ async def health(request: Request):
 
 **ID** : `API-3.4`  
 **Titre** : Permettre l'export des résultats en multiple formats  
-**Durée** : 45 min  
+**Durée** : 45 min
 
 ### Checklist
 
@@ -816,7 +816,7 @@ async def health(request: Request):
 
 **ID** : `API-3.5`  
 **Titre** : Ajouter le filtering et multi-field search  
-**Durée** : 40 min  
+**Durée** : 40 min
 
 ### Checklist
 
@@ -842,7 +842,7 @@ async def health(request: Request):
 **Durée totale** : ~4 heures  
 **Objectif** : Documentation de production  
 **Dépendances** : Phase 1, 2, 3 ✅  
-**Success Criteria** : 5/5 documents ✅  
+**Success Criteria** : 5/5 documents ✅
 
 ---
 
@@ -850,7 +850,7 @@ async def health(request: Request):
 
 **ID** : `DOC-4.1`  
 **Titre** : Documentation API complète et interactive  
-**Durée** : 50 min  
+**Durée** : 50 min
 
 ### Checklist
 
@@ -875,7 +875,7 @@ async def health(request: Request):
 
 **ID** : `DOC-4.2`  
 **Titre** : Guide pour les développeurs (15-20 pages)  
-**Durée** : 50 min  
+**Durée** : 50 min
 
 ### Checklist
 
@@ -903,7 +903,7 @@ async def health(request: Request):
 
 **ID** : `DOC-4.3`  
 **Titre** : Procédures de déploiement pour ops  
-**Durée** : 45 min  
+**Durée** : 45 min
 
 ### Checklist
 
@@ -927,7 +927,7 @@ async def health(request: Request):
 
 **ID** : `DOC-4.4`  
 **Titre** : Guide de dépannage pour problèmes courants  
-**Durée** : 45 min  
+**Durée** : 45 min
 
 ### Checklist
 
@@ -955,7 +955,7 @@ async def health(request: Request):
 
 **ID** : `DOC-4.5`  
 **Titre** : Documentation des SLAs et garanties  
-**Durée** : 30 min  
+**Durée** : 30 min
 
 ### Checklist
 
@@ -981,7 +981,7 @@ async def health(request: Request):
 **Durée totale** : ~6 heures  
 **Objectif** : Performance maximale et coûts minimisés  
 **Dépendances** : Phase 1-4 ✅  
-**Success Criteria** : 11/11 tâches ✅  
+**Success Criteria** : 11/11 tâches ✅
 
 ---
 
@@ -989,7 +989,7 @@ async def health(request: Request):
 
 **ID** : `OPT-5.1`  
 **Titre** : Implémenter Redis caching avancé  
-**Durée** : 45 min  
+**Durée** : 45 min
 
 ### Checklist
 
@@ -1013,7 +1013,7 @@ async def health(request: Request):
 
 **ID** : `OPT-5.2`  
 **Titre** : Configurer CDN pour les assets  
-**Durée** : 40 min  
+**Durée** : 40 min
 
 ### Checklist
 
@@ -1038,7 +1038,7 @@ async def health(request: Request):
 
 **ID** : `OPT-5.3`  
 **Titre** : Optimiser la distribution de charge  
-**Durée** : 40 min  
+**Durée** : 40 min
 
 ### Checklist
 
@@ -1063,7 +1063,7 @@ async def health(request: Request):
 
 **ID** : `OPT-5.4`  
 **Titre** : Configurer Celery pour les tâches en arrière-plan  
-**Durée** : 50 min  
+**Durée** : 50 min
 
 ### Checklist
 
@@ -1086,7 +1086,7 @@ async def health(request: Request):
 
 **ID** : `OPT-5.5`  
 **Titre** : Optimiser l'usage mémoire  
-**Durée** : 35 min  
+**Durée** : 35 min
 
 ### Checklist
 
@@ -1110,7 +1110,7 @@ async def health(request: Request):
 
 **ID** : `OPT-5.6`  
 **Titre** : Réduire le throttling CPU  
-**Durée** : 30 min  
+**Durée** : 30 min
 
 ### Checklist
 
@@ -1134,7 +1134,7 @@ async def health(request: Request):
 
 **ID** : `OPT-5.7`  
 **Titre** : Réduire la latence réseau  
-**Durée** : 35 min  
+**Durée** : 35 min
 
 ### Checklist
 
@@ -1159,7 +1159,7 @@ async def health(request: Request):
 
 **ID** : `OPT-5.8`  
 **Titre** : Créer dashboard de monitoring des coûts  
-**Durée** : 45 min  
+**Durée** : 45 min
 
 ### Checklist
 
@@ -1186,7 +1186,7 @@ async def health(request: Request):
 
 **ID** : `OPT-5.9`  
 **Titre** : Affiner les paramètres d'auto-scaling  
-**Durée** : 40 min  
+**Durée** : 40 min
 
 ### Checklist
 
@@ -1202,7 +1202,7 @@ async def health(request: Request):
   - Memory utilization
 
 ☐ Test avec load generation
-  
+
 ☐ Monitor scaling events
 ```
 
@@ -1212,7 +1212,7 @@ async def health(request: Request):
 
 **ID** : `OPT-5.10`  
 **Titre** : Setup redondance régionale  
-**Durée** : 50 min  
+**Durée** : 50 min
 
 ### Checklist
 
@@ -1236,7 +1236,7 @@ async def health(request: Request):
 
 **ID** : `OPT-5.11`  
 **Titre** : Test complet du plan de récupération après sinistre  
-**Durée** : 45 min  
+**Durée** : 45 min
 
 ### Checklist
 
@@ -1314,12 +1314,12 @@ async def health(request: Request):
 
 ## 📞 CONTACTS & ESCALATION
 
-| Rôle | Personne | Phone | Email |
-|------|----------|-------|-------|
-| Project Lead | TBD | +33 ... | ... |
-| Tech Lead | TBD | +33 ... | ... |
-| DevOps Lead | TBD | +33 ... | ... |
-| Security Lead | TBD | +33 ... | ... |
+| Rôle          | Personne | Phone   | Email |
+| ------------- | -------- | ------- | ----- |
+| Project Lead  | TBD      | +33 ... | ...   |
+| Tech Lead     | TBD      | +33 ... | ...   |
+| DevOps Lead   | TBD      | +33 ... | ...   |
+| Security Lead | TBD      | +33 ... | ...   |
 
 ---
 
@@ -1329,4 +1329,4 @@ async def health(request: Request):
 
 ---
 
-*Ce document doit être mis à jour après chaque phase complétée. Voir `/docs/2026-02-05_WEEKLY_LATEST/` pour les templates.*
+_Ce document doit être mis à jour après chaque phase complétée. Voir `/docs/2026-02-05_WEEKLY_LATEST/` pour les templates._

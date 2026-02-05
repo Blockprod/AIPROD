@@ -1,4 +1,4 @@
-# 🎬 AIPROD V33 — Pitch Investisseurs
+# 🎬 AIPROD — Pitch Investisseurs
 
 **Date** : Février 2026  
 **Version** : 1.0  
@@ -9,7 +9,7 @@
 
 ## 🚀 L'ELEVATOR PITCH (30 secondes)
 
-> **AIPROD V33 est une plateforme SaaS B2B de génération vidéo automatisée par intelligence artificielle.**
+> **AIPROD est une plateforme SaaS B2B de génération vidéo automatisée par intelligence artificielle.**
 >
 > Nous permettons aux entreprises de créer des vidéos professionnelles en quelques minutes au lieu de plusieurs jours, en combinant la puissance de **Google Gemini** pour l'intelligence créative et **Runway ML** pour la génération vidéo.
 >
@@ -45,12 +45,12 @@
 
 ---
 
-## ✨ LA SOLUTION : AIPROD V33
+## ✨ LA SOLUTION : AIPROD
 
 ### Une plateforme de création vidéo IA "clé en main"
 
 ```
-     UTILISATEUR                    AIPROD V33                      RÉSULTAT
+     UTILISATEUR                    AIPROD                      RÉSULTAT
          │                              │                              │
          │   "Créer une vidéo          │                              │
          │    promotionnelle           │                              │
@@ -87,7 +87,7 @@
 
 ### Ce qui nous différencie
 
-| Feature              | Concurrents      | AIPROD V33                      |
+| Feature              | Concurrents      | AIPROD                          |
 | -------------------- | ---------------- | ------------------------------- |
 | **Orchestration IA** | Mono-modèle      | Multi-agents spécialisés        |
 | **Estimation coûts** | Après génération | Avant (transparence totale)     |
@@ -246,7 +246,7 @@
 ### 1. Architecture Multi-Agents Unique
 
 ```
-Concurrent (Runway, Synthesia, etc.)     vs     AIPROD V33
+Concurrent (Runway, Synthesia, etc.)     vs     AIPROD
 
 ┌─────────────────┐                    ┌─────────────────┐
 │   User Input    │                    │   User Input    │
@@ -281,7 +281,7 @@ Concurrent (Runway, Synthesia, etc.)     vs     AIPROD V33
 | Freelance             | 1-2 jours                |
 | DIY (After Effects)   | 4-8 heures               |
 | Concurrents IA        | 15-30 minutes            |
-| **AIPROD V33**        | **< 5 minutes**          |
+| **AIPROD**            | **< 5 minutes**          |
 
 ---
 

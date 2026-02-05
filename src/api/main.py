@@ -1,5 +1,5 @@
 """
-API REST FastAPI pour AIPROD V33
+API REST FastAPI pour AIPROD
 Endpoints pour l'orchestration du pipeline, gestion des entrées et exposition des résultats.
 """
 
@@ -84,7 +84,7 @@ def get_db_session():
     global _db_session_factory
     if _db_session_factory is None:
         db_url = os.getenv(
-            "DATABASE_URL", "postgresql://aiprod:password@localhost:5432/aiprod_v33"
+            "DATABASE_URL", "postgresql://aiprod:password@localhost:5432/AIPROD"
         )
         _db_session_factory, _ = get_session_factory(db_url)
     return _db_session_factory()
@@ -120,7 +120,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(
-    title="AIPROD V33 API",
+    title="AIPROD API",
     description="Pipeline de génération vidéo IA avec orchestration, agents et QA",
     version="1.0.0",
     lifespan=lifespan,
@@ -239,7 +239,7 @@ async def root() -> Dict[str, str]:
     logger.info("GET /")
     return {
         "status": "ok",
-        "name": "AIPROD V33 API",
+        "name": "AIPROD API",
         "docs": "/docs",
         "openapi": "/openapi.json",
     }

@@ -1,4 +1,4 @@
-# Plan d'Optimisation AIPROD V33 🎯
+# Plan d'Optimisation AIPROD 🎯
 
 Basé sur votre architecture actuelle et les recommandations, voici le plan structuré :
 
@@ -12,7 +12,6 @@ Basé sur votre architecture actuelle et les recommandations, voici le plan stru
 **Solution :** Créer des presets simples
 
 - ✅ **Créer `src/api/presets.py`** : Templates prédéfinis
-
   - `"quick_social"` → Fast Track automatique (30s, 0.30$)
   - `"brand_campaign"` → Full pipeline avec ICC (qualité 0.8+)
   - `"premium_spot"` → Premium + multi-review (qualité 0.9+)
@@ -32,7 +31,6 @@ Basé sur votre architecture actuelle et les recommandations, voici le plan stru
 **Solution :** Dashboard temps réel
 
 - ✅ **Créer `/api/cost-estimate` endpoint**
-
   - Input : `{"content": "...", "duration": 30}`
   - Output :
     ```json
@@ -64,7 +62,6 @@ Basé sur votre architecture actuelle et les recommandations, voici le plan stru
 **Solution :** Implémenter vraiment le consistency cache
 
 - ✅ **Modifier `src/memory/memory_manager.py`**
-
   - Ajouter `get_cached_consistency_markers(brand_id, style_hash)`
   - Stocker dans GCS : `gs://aiprod-484120-assets/cache/{brand_id}/consistency_{hash}.json`
   - TTL : 7 jours (168h)
@@ -99,7 +96,6 @@ Basé sur votre architecture actuelle et les recommandations, voici le plan stru
   ```
 
 - ✅ **Créer `/api/job/{job_id}/approve`** (POST)
-
   - Après review du manifest
   - Déclenche transition CREATIVE_DIRECTION → RENDER
 
@@ -118,7 +114,7 @@ Basé sur votre architecture actuelle et les recommandations, voici le plan stru
 **Solution :** Créer artifacts de vente
 
 - ✅ **Générer `docs/comparison_matrix.md`**
-  | Feature | AIPROD V33 | Runway | Synthesia |
+  | Feature | AIPROD | Runway | Synthesia |
   |---------|------------|--------|-----------|
   | Cost Guarantee | ✅ ±20% | ❌ | ❌ |
   | Quality SLA | ✅ 0.7+ | ❌ | ⚠️ Templates |
@@ -138,7 +134,6 @@ Basé sur votre architecture actuelle et les recommandations, voici le plan stru
 **Solution :** Vidéo démo + landing page
 
 - ✅ **Créer `demo_video.py`** : Script automatisé
-
   1. Appelle `/pipeline/run` avec preset "brand_campaign"
   2. Récupère ICC approval screen
   3. Montre cost_certification
@@ -184,7 +179,6 @@ Basé sur votre architecture actuelle et les recommandations, voici le plan stru
 **Solution :** Ajouter fallback
 
 - ✅ **Obtenir accès Vertex AI Veo-3** (via Google Cloud Console)
-
   - Demander whitelist : https://cloud.google.com/vertex-ai/generative-ai/docs/image/overview
 
 - ✅ **Modifier `src/agents/render_executor.py`**
@@ -211,7 +205,6 @@ Basé sur votre architecture actuelle et les recommandations, voici le plan stru
 **Solution :** Valider scalabilité
 
 - ✅ **Créer `tests/load/test_concurrent_jobs.py`**
-
   - Simuler 10 jobs simultanés
   - Vérifier : no rate limiting errors, Cloud Run scale 1→10 instances
 
@@ -230,7 +223,6 @@ Basé sur votre architecture actuelle et les recommandations, voici le plan stru
 **Cible :** 10 agences moyennes (10-50 employés)
 
 - ✅ **Créer `scripts/beta_onboarding.py`**
-
   - Génère API key unique
   - Configure GCS folder dédié : `gs://.../clients/{client_id}/`
   - Active tier Platinum gratuit 3 mois
@@ -272,7 +264,7 @@ Basé sur votre architecture actuelle et les recommandations, voici le plan stru
 **Solution :** Formaliser les tiers
 
 ```markdown
-### AIPROD V33 Pricing (Beta)
+### AIPROD Pricing (Beta)
 
 **BRONZE** - $99/mois + usage
 

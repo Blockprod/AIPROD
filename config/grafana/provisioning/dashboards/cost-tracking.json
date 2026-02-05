@@ -1,6 +1,6 @@
 {
   "dashboard": {
-    "title": "AIPROD V33 - Cost Dashboard",
+    "title": "AIPROD - Cost Dashboard",
     "description": "Cost tracking and ROI analysis for AI video generation pipeline",
     "tags": ["aiprod", "cost", "roi", "financial"],
     "timezone": "browser",

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Simple test runner for AIPROD_V33
+Simple test runner for AIPROD
 Provides alternative to pytest with coverage support
 """
 

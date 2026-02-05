@@ -535,4 +535,4 @@ You have:
 
 ---
 
-**AIPROD V33 is production-ready. Launch when ready!** 🚀
+**AIPROD is production-ready. Launch when ready!** 🚀

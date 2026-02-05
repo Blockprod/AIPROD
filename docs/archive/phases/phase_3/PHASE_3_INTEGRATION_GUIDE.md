@@ -1,5 +1,5 @@
 """
-AIPROD V33 - Phase 3 Integration Guide
+AIPROD - Phase 3 Integration Guide
 
 Guide d'intégration des features Phase 3 dans l'application existante.
 """

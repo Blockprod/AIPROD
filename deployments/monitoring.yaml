@@ -10,7 +10,7 @@ alertPolicies:
   # =============================================================================
   # PHASE 3: BUDGET ALERTS (90$/day threshold)
   # =============================================================================
-  - displayName: "AIPROD V33 - Budget Warning (>$90/day)"
+  - displayName: "AIPROD - Budget Warning (>$90/day)"
     documentation:
       content: |
         Budget quotidien dépassé. Actions:
@@ -40,7 +40,7 @@ alertPolicies:
   # =============================================================================
   # PHASE 3: QUALITY SCORE ALERT (<0.6 threshold)
   # =============================================================================
-  - displayName: "AIPROD V33 - Low Quality Score (<0.6)"
+  - displayName: "AIPROD - Low Quality Score (<0.6)"
     documentation:
       content: |
         Qualité de génération dégradée. Actions:
@@ -69,7 +69,7 @@ alertPolicies:
   # =============================================================================
   # PHASE 3: LATENCY P95 ALERT (>900s threshold)
   # =============================================================================
-  - displayName: "AIPROD V33 - High Latency P95 (>900s)"
+  - displayName: "AIPROD - High Latency P95 (>900s)"
     documentation:
       content: |
         Latence P95 critique pour la génération vidéo. Actions:
@@ -98,7 +98,7 @@ alertPolicies:
   # =============================================================================
   # STANDARD ALERTS
   # =============================================================================
-  - displayName: "AIPROD V33 - High API Latency Alert"
+  - displayName: "AIPROD - High API Latency Alert"
     conditions:
       - displayName: "API Latency > 20s"
         conditionThreshold:
@@ -118,7 +118,7 @@ alertPolicies:
       autoClose: 86400s
     severity: WARNING
 
-  - displayName: "AIPROD V33 - Daily Cost Critical Alert"
+  - displayName: "AIPROD - Daily Cost Critical Alert"
     conditions:
       - displayName: "Daily cost > $100"
         conditionThreshold:
@@ -140,7 +140,7 @@ alertPolicies:
   # =============================================================================
   # ERROR RATE ALERT
   # =============================================================================
-  - displayName: "AIPROD V33 - High Error Rate"
+  - displayName: "AIPROD - High Error Rate"
     conditions:
       - displayName: "Error rate > 5%"
         conditionThreshold:
@@ -162,7 +162,7 @@ alertPolicies:
   # =============================================================================
   # BACKEND HEALTH ALERTS
   # =============================================================================
-  - displayName: "AIPROD V33 - Runway Backend Errors"
+  - displayName: "AIPROD - Runway Backend Errors"
     documentation:
       content: |
         Runway ML backend renvoie des erreurs fréquentes.
@@ -188,7 +188,7 @@ alertPolicies:
 # DASHBOARDS
 # =============================================================================
 dashboards:
-  - displayName: "AIPROD V33 - Pipeline Dashboard"
+  - displayName: "AIPROD - Pipeline Dashboard"
     mosaicLayout:
       columns: 12
       tiles:
@@ -347,7 +347,7 @@ dashboards:
 # SLO CONFIGURATION
 # =============================================================================
 serviceLevelObjectives:
-  - displayName: "AIPROD V33 - Latency SLO"
+  - displayName: "AIPROD - Latency SLO"
     goal: 0.95
     rollingPeriodDays: 7
     serviceLevelIndicator:
@@ -359,7 +359,7 @@ serviceLevelObjectives:
           totalServiceFilter: |
             metric.type="custom.googleapis.com/aiprod/pipeline_duration_seconds"
 
-  - displayName: "AIPROD V33 - Quality SLO"
+  - displayName: "AIPROD - Quality SLO"
     goal: 0.90
     rollingPeriodDays: 7
     serviceLevelIndicator:

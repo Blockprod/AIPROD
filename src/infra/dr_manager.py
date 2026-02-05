@@ -1,5 +1,5 @@
 """
-Disaster Recovery (DR) management for AIPROD V33
+Disaster Recovery (DR) management for AIPROD
 Handles failover scenarios, RTO/RPO measurement, and recovery procedures
 """
 

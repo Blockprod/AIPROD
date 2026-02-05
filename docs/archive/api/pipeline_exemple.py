@@ -1,4 +1,4 @@
-# Exemple de pipeline complet AIPROD_V33
+# Exemple de pipeline complet AIPROD
 
 """
 Ce script illustre la chaîne complète de génération vidéo à partir d'un prompt utilisateur.

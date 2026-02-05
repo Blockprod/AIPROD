@@ -1,5 +1,5 @@
 """
-Tests pour les limites de coûts et budget - AIPROD V33 Phase 3
+Tests pour les limites de coûts et budget - AIPROD Phase 3
 Vérifie que le système respecte les contraintes budgétaires.
 """
 import pytest

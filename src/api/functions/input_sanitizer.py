@@ -1,5 +1,5 @@
 """
-InputSanitizer pour AIPROD V33
+InputSanitizer pour AIPROD
 Nettoyage et prétraitement des entrées utilisateur.
 """
 from typing import Any, Dict

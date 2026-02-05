@@ -1,5 +1,5 @@
 """
-Performance optimization infrastructure for AIPROD V33
+Performance optimization infrastructure for AIPROD
 """
 
 from typing import Dict, List, Any, Optional

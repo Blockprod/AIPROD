@@ -1,5 +1,5 @@
 # memory_manager.py
-# Gestionnaire de mémoire pour AIPROD V33, basé sur le memorySchema du JSON
+# Gestionnaire de mémoire pour AIPROD, basé sur le memorySchema du JSON
 
 from typing import Any, Dict, Optional
 from pydantic import BaseModel, ValidationError, ConfigDict, RootModel
@@ -25,7 +25,7 @@ class MemorySchema(BaseModel):
 
 class MemoryManager:
     """
-    Gère la mémoire partagée entre les agents et fonctions du pipeline AIPROD V33.
+    Gère la mémoire partagée entre les agents et fonctions du pipeline AIPROD.
     Valide et expose les données selon le memorySchema.
     Gère la mémoire exposée (exposed_memory) et fournit une interface ICC.
     Utilise un cache de cohérence avec TTL (168h).

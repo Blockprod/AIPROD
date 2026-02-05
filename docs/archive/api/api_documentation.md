@@ -1,6 +1,7 @@
-# Documentation API AIPROD V33
+# Documentation API AIPROD
 
 ## URL de base
+
 ```
 http://localhost:8000
 ```
@@ -8,11 +9,13 @@ http://localhost:8000
 ## Endpoints
 
 ### Health Check
+
 **Endpoint** : `GET /health`
 
 Vérifie la disponibilité de l'API.
 
 **Response** (200):
+
 ```json
 {
   "status": "ok"
@@ -22,20 +25,23 @@ Vérifie la disponibilité de l'API.
 ---
 
 ### Lancer le pipeline
+
 **Endpoint** : `POST /pipeline/run`
 
 Lance l'exécution complète du pipeline de génération vidéo.
 
 **Request Body**:
+
 ```json
 {
   "content": "Description du contenu vidéo",
-  "priority": "low",      // ou "high" pour Fast Track
-  "lang": "en"            // code langue (en, fr, etc.)
+  "priority": "low", // ou "high" pour Fast Track
+  "lang": "en" // code langue (en, fr, etc.)
 }
 ```
 
 **Response** (200):
+
 ```json
 {
   "status": "success",
@@ -51,6 +57,7 @@ Lance l'exécution complète du pipeline de génération vidéo.
 ```
 
 **Response** (500): Erreur lors de l'exécution
+
 ```json
 {
   "detail": "Error message"
@@ -60,11 +67,13 @@ Lance l'exécution complète du pipeline de génération vidéo.
 ---
 
 ### Statut du pipeline
+
 **Endpoint** : `GET /pipeline/status`
 
 Récupère l'état actuel du pipeline.
 
 **Response** (200):
+
 ```json
 {
   "state": "DELIVERED"
@@ -74,11 +83,13 @@ Récupère l'état actuel du pipeline.
 ---
 
 ### Données ICC (Interface Client Collaboratif)
+
 **Endpoint** : `GET /icc/data`
 
 Récupère les données exposées à l'interface client.
 
 **Response** (200):
+
 ```json
 {
   "fast_track": {...},
@@ -92,11 +103,13 @@ Récupère les données exposées à l'interface client.
 ---
 
 ### Métriques de performance
+
 **Endpoint** : `GET /metrics`
 
 Récupère les métriques agrégées du pipeline.
 
 **Response** (200):
+
 ```json
 {
   "pipeline_executions": 5,
@@ -113,17 +126,20 @@ Récupère les métriques agrégées du pipeline.
 ---
 
 ### Alertes actives
+
 **Endpoint** : `GET /alerts`
 
 Récupère les alertes déclenchées basées sur les seuils.
 
 **Seuils** :
+
 - high_latency: > 5000ms
 - high_cost: > $1
 - low_quality: < 0.6 (60%)
 - high_error_rate: > 10 erreurs
 
 **Response** (200):
+
 ```json
 {
   "alerts": {
@@ -133,6 +149,7 @@ Récupère les alertes déclenchées basées sur les seuils.
 ```
 
 Ou vide si aucune alerte :
+
 ```json
 {
   "alerts": {}
@@ -142,11 +159,13 @@ Ou vide si aucune alerte :
 ---
 
 ### Optimisation financière
+
 **Endpoint** : `POST /financial/optimize`
 
 Optimise le coût et la qualité selon les règles métier.
 
 **Request Body**:
+
 ```json
 {
   "complexity_score": 0.7,
@@ -155,6 +174,7 @@ Optimise le coût et la qualité selon les règles métier.
 ```
 
 **Response** (200):
+
 ```json
 {
   "optimized_cost": 1.35,
@@ -166,11 +186,13 @@ Optimise le coût et la qualité selon les règles métier.
 ---
 
 ### Validation technique
+
 **Endpoint** : `POST /qa/technical`
 
 Valide un manifeste selon les règles techniques déterministes.
 
 **Request Body**:
+
 ```json
 {
   "assets": ["img1.png", "video1.mp4"],
@@ -181,6 +203,7 @@ Valide un manifeste selon les règles techniques déterministes.
 ```
 
 **Response** (200):
+
 ```json
 {
   "technical_valid": true,
@@ -198,19 +221,21 @@ Valide un manifeste selon les règles techniques déterministes.
 
 ## Codes HTTP
 
-| Code | Signification |
-|------|---------------|
-| 200 | OK - Succès |
-| 422 | Validation Error - Données invalides |
-| 500 | Internal Server Error - Erreur serveur |
+| Code | Signification                          |
+| ---- | -------------------------------------- |
+| 200  | OK - Succès                            |
+| 422  | Validation Error - Données invalides   |
+| 500  | Internal Server Error - Erreur serveur |
 
 ## Formats de données
 
 ### Priorités
+
 - `"low"` : Pipeline complet (full)
 - `"high"` : Fast Track (latence minimale)
 
 ### Langues supportées
+
 - `"en"` : Anglais
 - `"fr"` : Français
 - (extensible)
@@ -218,6 +243,7 @@ Valide un manifeste selon les règles techniques déterministes.
 ## Exemples de requêtes
 
 ### Fast Track simple
+
 ```bash
 curl -X POST http://localhost:8000/pipeline/run \
   -H "Content-Type: application/json" \
@@ -229,6 +255,7 @@ curl -X POST http://localhost:8000/pipeline/run \
 ```
 
 ### Pipeline complet
+
 ```bash
 curl -X POST http://localhost:8000/pipeline/run \
   -H "Content-Type: application/json" \
@@ -240,11 +267,13 @@ curl -X POST http://localhost:8000/pipeline/run \
 ```
 
 ### Récupérer les métriques
+
 ```bash
 curl http://localhost:8000/metrics
 ```
 
 ### Vérifier les alertes
+
 ```bash
 curl http://localhost:8000/alerts
 ```
@@ -252,6 +281,7 @@ curl http://localhost:8000/alerts
 ## Documentation interactive
 
 Une documentation Swagger interactive est disponible à :
+
 ```
 http://localhost:8000/docs
 ```
@@ -268,7 +298,7 @@ Aucune limite actuelle.
 
 ## Support et débogage
 
-- **Logs** : Consultez `logs/aiprod_v33.log`
+- **Logs** : Consultez `logs/AIPROD.log`
 - **État du pipeline** : Utilisez `/pipeline/status`
 - **Métriques** : Consultez `/metrics`
 - **Alertes** : Consultez `/alerts`

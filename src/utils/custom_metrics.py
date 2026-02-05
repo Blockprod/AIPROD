@@ -1,5 +1,5 @@
 """
-AIPROD V33 - Custom Metrics for Cloud Monitoring
+AIPROD - Custom Metrics for Cloud Monitoring
 
 Module pour envoyer des métriques personnalisées à Google Cloud Monitoring.
 Permet le suivi de la performance, qualité et coûts du pipeline.

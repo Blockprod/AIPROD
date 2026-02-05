@@ -1,5 +1,5 @@
 """
-SemanticQA Agent pour AIPROD V33
+SemanticQA Agent pour AIPROD
 Valide la cohérence sémantique des outputs générés avec Gemini.
 """
 

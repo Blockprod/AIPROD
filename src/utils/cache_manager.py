@@ -1,5 +1,5 @@
 """
-CacheManager: cache de cohérence avec TTL pour AIPROD V33
+CacheManager: cache de cohérence avec TTL pour AIPROD
 """
 import time
 from typing import Any, Dict, Optional

@@ -1,5 +1,5 @@
 """
-SoundEffectsAgent pour AIPROD V33
+SoundEffectsAgent pour AIPROD
 Génère des bruitages (SFX) et effets sonores contextuels pour les vidéos.
 Supports: Freesound API (primary), Mock (fallback)
 """

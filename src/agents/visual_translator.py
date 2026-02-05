@@ -1,5 +1,5 @@
 """
-VisualTranslator Agent pour AIPROD V33
+VisualTranslator Agent pour AIPROD
 Traduit et adapte les assets visuels avec Gemini.
 """
 

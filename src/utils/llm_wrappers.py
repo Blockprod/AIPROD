@@ -1,7 +1,7 @@
 """
-LLM Wrappers pour AIPROD V33
+LLM Wrappers pour AIPROD
 Abstraction pour les appels LLM (Gemini, fallbacks)
-Basé sur les configurations du JSON AIPROD_V33.json
+Basé sur les configurations du JSON AIPROD.json
 """
 from typing import Any, Dict, List, Optional
 import asyncio

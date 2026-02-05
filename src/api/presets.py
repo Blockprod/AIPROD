@@ -1,5 +1,5 @@
 """
-AIPROD V33 - Système de Presets
+AIPROD - Système de Presets
 Simplifie l'expérience utilisateur en cachant la complexité des 11 agents.
 """
 from typing import Dict, Any, Optional

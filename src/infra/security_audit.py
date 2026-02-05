@@ -1,5 +1,5 @@
 """
-Security Audit infrastructure for AIPROD V33
+Security Audit infrastructure for AIPROD
 OWASP Top 10 compliance checking and security validation
 """
 

@@ -1,5 +1,5 @@
 #!/bin/bash
-# GCP infrastructure setup for AIPROD V33
+# GCP infrastructure setup for AIPROD
 # This script sets up all required GCP resources, service accounts, and permissions
 # Usage: ./setup-gcp.sh [project_id]
 
@@ -12,7 +12,7 @@ BUCKET_NAME="aiprod-v33-assets"
 TOPIC_NAME="aiprod-pipeline-events"
 SUBSCRIPTION_NAME="aiprod-pipeline-worker"
 
-echo "🔧 Setting up GCP infrastructure for AIPROD V33"
+echo "🔧 Setting up GCP infrastructure for AIPROD"
 echo "   Project: $PROJECT_ID"
 echo "   Region: $REGION"
 
@@ -39,8 +39,8 @@ if gcloud iam service-accounts describe ${SA_NAME}@${PROJECT_ID}.iam.gserviceacc
     echo "   Service account already exists, skipping creation"
 else
     gcloud iam service-accounts create $SA_NAME \
-        --display-name="AIPROD V33 Service Account" \
-        --description="Service account for AIPROD V33 application"
+        --display-name="AIPROD Service Account" \
+        --description="Service account for AIPROD application"
     echo "   ✓ Service account created"
 fi
 
@@ -160,7 +160,7 @@ echo "   - GEMINI_API_KEY (Google Gemini API key)"
 echo "📊 Creating monitoring dashboard..."
 cat > /tmp/dashboard.json << 'EOF'
 {
-  "displayName": "AIPROD V33 Monitoring",
+  "displayName": "AIPROD Monitoring",
   "mosaicLayout": {
     "columns": 12,
     "tiles": [

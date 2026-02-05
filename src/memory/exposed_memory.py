@@ -1,7 +1,7 @@
 """
-ExposedMemory pour AIPROD V33
+ExposedMemory pour AIPROD
 Gère la mémoire exposée à l'ICC (Interface Client Collaboratif)
-Basé sur exposedMemory du JSON AIPROD_V33.json
+Basé sur exposedMemory du JSON AIPROD.json
 """
 from typing import Any, Dict
 from src.utils.monitoring import logger
@@ -9,7 +9,7 @@ from src.utils.monitoring import logger
 class ExposedMemory:
     """
     Gère la mémoire exposée à l'ICC avec permissions d'édition.
-    Selon AIPROD_V33.json exposedMemory.
+    Selon AIPROD.json exposedMemory.
     """
     
     def __init__(self):

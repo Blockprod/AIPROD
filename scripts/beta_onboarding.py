@@ -1,5 +1,5 @@
 """
-AIPROD V33 - Beta Onboarding Script
+AIPROD - Beta Onboarding Script
 Automatise l'onboarding des clients beta avec génération de clés API et configuration GCS
 """
 
@@ -16,7 +16,7 @@ from google.oauth2 import service_account
 
 
 class BetaOnboardingManager:
-    """Gère l'onboarding des clients beta AIPROD V33"""
+    """Gère l'onboarding des clients beta AIPROD"""
 
     def __init__(self, gcp_project: str = "aiprod-484120"):
         """
@@ -264,13 +264,13 @@ class BetaOnboardingManager:
         api = onboarding_data["api"]
         
         email_template = f"""
-Subject: 🎉 Welcome to AIPROD V33 Beta Program!
+Subject: 🎉 Welcome to AIPROD Beta Program!
 
 ---
 
 Hi {client['name']} Team,
 
-We're excited to invite you to the AIPROD V33 Beta Program! 🚀
+We're excited to invite you to the AIPROD Beta Program! 🚀
 
 **Your Beta Access Details:**
 
@@ -314,7 +314,7 @@ We're excited to invite you to the AIPROD V33 Beta Program! 🚀
 📊 First Review: Day 7
 🎯 Monthly Check-in: Day 30
 
-We can't wait to see what you create with AIPROD V33!
+We can't wait to see what you create with AIPROD!
 
 Let's build the future of video generation together. 🎬
 
@@ -373,7 +373,7 @@ def main():
     ]
 
     print("\n" + "="*60)
-    print("🚀 AIPROD V33 - BETA ONBOARDING")
+    print("🚀 AIPROD - BETA ONBOARDING")
     print("="*60)
 
     for client in beta_clients:

@@ -1,5 +1,5 @@
 """
-GCP Client pour AIPROD V33
+GCP Client pour AIPROD
 Interface pour Google Cloud Platform services
 Basé sur googleStackConfiguration du JSON
 """
@@ -15,7 +15,7 @@ except ImportError:
 
 class GCPClient:
     """
-    Client Google Cloud Platform pour AIPROD V33.
+    Client Google Cloud Platform pour AIPROD.
     Gère Vertex AI, Cloud Storage, Cloud Functions, Monitoring.
     """
     

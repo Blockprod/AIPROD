@@ -1,10 +1,10 @@
 #!/bin/bash
-# Script de déploiement AIPROD V33
+# Script de déploiement AIPROD
 
 set -e
 
 echo "========================================="
-echo "AIPROD V33 - Deployment Script"
+echo "AIPROD - Deployment Script"
 echo "========================================="
 
 # Configuration

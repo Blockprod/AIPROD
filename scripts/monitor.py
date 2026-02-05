@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Script de monitoring pour AIPROD V33
+Script de monitoring pour AIPROD
 Récupère et affiche les métriques en temps réel
 """
 
@@ -114,7 +114,7 @@ def format_health(health: Dict[str, Any]) -> str:
 
 def main():
     """Main monitoring loop"""
-    print("🚀 Starting AIPROD V33 Monitor...")
+    print("🚀 Starting AIPROD Monitor...")
     print(f"API URL: {API_BASE_URL}")
     print(f"Refresh interval: {REFRESH_INTERVAL}s")
     print("\nPress Ctrl+C to exit\n")
@@ -126,7 +126,7 @@ def main():
             
             # Header
             print("=" * 50)
-            print("AIPROD V33 - Real-time Monitor")
+            print("AIPROD - Real-time Monitor")
             print(f"Time: {time.strftime('%Y-%m-%d %H:%M:%S')}")
             print("=" * 50)
             

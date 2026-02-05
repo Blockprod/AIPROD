@@ -1,5 +1,5 @@
 """
-AudioGenerator Agent pour AIPROD V33
+AudioGenerator Agent pour AIPROD
 Synthèse vocale (TTS) via ElevenLabs/Google TTS et génération musicale (API externe).
 """
 import os

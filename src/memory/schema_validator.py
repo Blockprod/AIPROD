@@ -1,6 +1,6 @@
 """
-SchemaValidator pour AIPROD V33
-Valide les données contre le memorySchema défini dans AIPROD_V33.json
+SchemaValidator pour AIPROD
+Valide les données contre le memorySchema défini dans AIPROD.json
 """
 from typing import Any, Dict, List
 from pydantic import BaseModel, ValidationError, ConfigDict
@@ -8,7 +8,7 @@ from src.utils.monitoring import logger
 
 class SchemaValidator:
     """
-    Validateur de schéma pour la mémoire AIPROD V33.
+    Validateur de schéma pour la mémoire AIPROD.
     Basé sur le memorySchema du JSON.
     """
     

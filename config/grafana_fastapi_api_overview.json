@@ -1,7 +1,7 @@
 {
   "id": null,
   "uid": null,
-  "title": "AIPROD V33 - Monitoring Complet",
+  "title": "AIPROD - Monitoring Complet",
   "tags": ["fastapi", "prometheus", "pipeline", "quality", "cost", "backend", "cache", "error"],
   "timezone": "browser",
   "schemaVersion": 37,

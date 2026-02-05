@@ -1,4 +1,4 @@
-# AIPROD V33 - Fichiers Générés - Récapitulatif
+# AIPROD - Fichiers Générés - Récapitulatif
 
 Date: 2025-01-05
 Total fichiers générés: 26
@@ -34,7 +34,7 @@ Total fichiers générés: 26
 18. **pyproject.toml** - pytest config, build system, dependencies
 19. **Dockerfile** - Multi-stage Docker build for FastAPI
 20. **docker-compose.yml** - Local dev stack (API + optional PostgreSQL)
-21. **config/v33.json** - Copy of AIPROD_V33.json for runtime config
+21. **config/v33.json** - Copy of AIPROD.json for runtime config
 
 ## ✅ Catégorie 5: Deployment & Scripts (5 fichiers)
 
@@ -57,7 +57,7 @@ Total fichiers générés: 26
 ### Structure Complète
 
 ```
-AIPROD_V33/
+AIPROD/
 ├── src/
 │   ├── agents/           ✅ 5 agents + __init__.py
 │   ├── api/              ✅ FastAPI + functions + __init__.py
@@ -67,7 +67,7 @@ AIPROD_V33/
 ├── tests/                ✅ 46 tests (unit + integration + performance) + __init__.py
 ├── scripts/              ✅ setup_gcp.sh + deploy.sh + monitor.py
 ├── deployments/          ✅ cloudrun.yaml + cloudfunctions.yaml + monitoring.yaml
-├── config/               ✅ v33.json (copy of AIPROD_V33.json)
+├── config/               ✅ v33.json (copy of AIPROD.json)
 ├── .vscode/              ✅ 4 config files (extensions, settings, launch, tasks)
 ├── docs/                 ✅ README + architecture + API docs
 ├── requirements.txt      ✅ 6 dependencies
@@ -86,7 +86,7 @@ AIPROD_V33/
   - Integration tests: 3
   - Performance tests: 2
 
-## Conformité avec AIPROD_V33.json
+## Conformité avec AIPROD.json
 
 Tous les fichiers générés respectent les spécifications du JSON:
 

@@ -3076,7 +3076,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 app = FastAPI(
-    title="AIPROD V33 API",
+    title="AIPROD API",
     description="""
     Audio-Video Pipeline Orchestration System
 
@@ -4651,7 +4651,7 @@ Documenter les SLA (Service Level Agreements) pour chaque tier.
 
 ## Overview
 
-AIPROD V33 provides industry-leading service levels across all tiers.
+AIPROD provides industry-leading service levels across all tiers.
 
 ## Uptime SLA
 

@@ -1,4 +1,4 @@
-# Documentation d'intégration des agents AIPROD_V33
+# Documentation d'intégration des agents AIPROD
 
 ## Objectif
 
