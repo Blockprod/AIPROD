@@ -1,8 +1,10 @@
 <div align="center">
 
-![AIPROD Banner Animation](assets/banner-animation.gif)
+![AIPROD Promotional Teaser](assets/aiprod-teaser.gif)
 
 </div>
+
+<br/>
 
 <br/>
 
