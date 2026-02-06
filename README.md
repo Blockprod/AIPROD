@@ -28,9 +28,9 @@
 
 <div align="center">
 
-[![GitHub Repo Stats](https://github-readme-stats.vercel.app/api?username=Blockprod&repo=AIPROD&show_owner=true&theme=black&hide_border=true&line_height=27)](https://github.com/Blockprod/AIPROD)
+![GitHub Repo Stats](https://github-readme-stats.vercel.app/api?username=Blockprod&show_owner=true&theme=dark&hide_border=true)
 
-[![Project Trophy](https://github-profile-trophy.vercel.app/?username=Blockprod&theme=dark&no-frame=true&row=1&column=7)](https://github.com/Blockprod)
+[![Trophy](https://github-profile-trophy.vercel.app/?username=Blockprod&theme=darkhub&column=8)](https://github.com/Blockprod)
 
 </div>
 
