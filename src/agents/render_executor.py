@@ -12,6 +12,13 @@ from enum import Enum
 from typing import Any, Dict, Optional, List
 import httpx
 
+# CRITICAL: Load .env variables FIRST
+try:
+    from dotenv import load_dotenv
+    load_dotenv(override=False)  # Load .env, don't override existing env vars
+except ImportError:
+    pass  # dotenv not required to be installed
+
 try:
     from runwayml import RunwayML, TaskFailedError
     HAS_RUNWAY = True
@@ -183,9 +190,21 @@ class RenderExecutor:
         """
         logger.info(f"RenderExecutor: Starting multi-backend rendering workflow")
         
+        # CRITICAL: Reload .env at runtime to ensure latest values are used
+        try:
+            from dotenv import load_dotenv
+            load_dotenv(override=True)  # Override with latest .env values
+            # Refresh API key from environment
+            self.runway_api_key = os.getenv("RUNWAYML_API_SECRET") or os.getenv("RUNWAY_API_KEY", "")
+            if self.runway_api_key:
+                self.runway_api_key = self.runway_api_key.strip()
+            logger.info(f"RenderExecutor: Reloaded API keys from .env")
+        except Exception as e:
+            logger.warning(f"RenderExecutor: Could not reload .env: {e}")
+        
         # Fallback mock si pas de clé API
         if not self.runway_api_key or self.runway_api_key == "your-runway-api-key":
-            logger.warning("RenderExecutor: No API key, using mock")
+            logger.warning(f"RenderExecutor: No API key found (key='{self.runway_api_key[:20] if self.runway_api_key else 'EMPTY'}...'), using mock")
             await asyncio.sleep(0.2)
             return {
                 "status": "rendered_mock",

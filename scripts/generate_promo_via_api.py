@@ -8,6 +8,10 @@ import requests
 import json
 import sys
 from pathlib import Path
+import io
+
+# Fix for Windows Unicode output
+sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 
 # API endpoint
 API_URL = "http://localhost:8000/pipeline/run"

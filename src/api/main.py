@@ -3,6 +3,10 @@ API REST FastAPI pour AIPROD
 Endpoints pour l'orchestration du pipeline, gestion des entrées et exposition des résultats.
 """
 
+# Load .env variables FIRST before any imports that use os.getenv()
+from dotenv import load_dotenv
+load_dotenv()
+
 import time
 import json
 import zipfile
