@@ -324,39 +324,12 @@ kubectl logs -f deployment/aiprod
 
 ## ⚙️ Configuration
 
-### Environment Variables
+All configuration is managed via environment variables. A complete list of available variables is provided in `.env.example`.
 
 ```bash
-# API Configuration
-API_HOST=0.0.0.0
-API_PORT=8000
-API_ENV=production
-DEBUG_MODE=false
-
-# Database
-DATABASE_URL=postgresql://user:pass@localhost:5432/aiprod
-REDIS_URL=redis://localhost:6379/0
-
-# Google Cloud
-GCP_PROJECT_ID=your-project-id
-GCP_REGION=us-central1
-GOOGLE_APPLICATION_CREDENTIALS=/path/to/credentials.json
-
-# Firebase
-FIREBASE_PROJECT_ID=your-firebase-project
-FIREBASE_CONFIG_JSON={...}
-
-# Security
-JWT_SECRET=your-secret-key
-JWT_ALGORITHM=HS256
-
-# Features
-ENABLE_MONITORING=true
-ENABLE_COST_TRACKING=true
-ENABLE_QA_VALIDATION=true
+cp .env.example .env
+# Edit .env with your credentials and settings
 ```
-
-For complete configuration, see `.env.example`
 
 ---
 
@@ -417,7 +390,7 @@ For complete configuration, see `.env.example`
 
 ### Get Help
 
-- 📧 **Email**: team@aiprod.ai
+- 📧 **Email**: climax2creative@gmail.com
 - 🐛 **Issues**: [GitHub Issues](https://github.com/Blockprod/AIPROD/issues)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/Blockprod/AIPROD/discussions)
 - 📚 **Documentation**: [docs/](docs/)
@@ -454,11 +427,13 @@ AIPROD is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ## 👥 Team
 
-**AIPROD Team** - Building the future of AI-powered video generation
+**CLIMAX2 CREATIVE** - Building the future of AI-powered video generation
+
+**AIPROD Project**
 
 - 🔗 [GitHub](https://github.com/Blockprod/AIPROD)
 - 🌐 [Website](https://aiprod.ai) _(coming soon)_
-- ✉️ Email: team@aiprod.ai
+- ✉️ Email: climax2creative@gmail.com
 
 ---
 
