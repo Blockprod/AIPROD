@@ -27,13 +27,13 @@
 
 **AIPROD** is a production-ready platform for AI-powered video generation and orchestration. Built with enterprise architecture patterns, it provides:
 
-- ✨ **Intelligent Pipeline Orchestration** - Multi-stage video generation workflow
+- ✨ **Intelligent Pipeline Orchestration** - Multi-stage workflow management
 - 🎬 **4K Video Output** - Professional quality rendering
-- ⚡ **Scalable Infrastructure** - Cloud-native design (Cloud Run, Kubernetes)
-- 🔐 **Enterprise Security** - RBAC, encryption, audit logging
-- 📊 **Real-time Monitoring** - Prometheus, Grafana, structured logging
-- 💰 **Cost Optimization** - Budget tracking and intelligent routing
-- 🚀 **API-First Design** - 100+ REST endpoints for seamless integration
+- ⚡ **Scalable Infrastructure** - Cloud-native design with auto-scaling
+- 🔐 **Enterprise Security** - Role-based access control, encryption, audit trails
+- 📊 **Real-time Monitoring** - Centralized monitoring and observability
+- 💰 **Cost Optimization** - Intelligent budget management and routing
+- 🚀 **API-First Design** - Comprehensive REST API for integration
 
 ### Perfect For
 
@@ -62,7 +62,7 @@ pip install -r requirements.txt
 
 # Configure environment
 cp .env.example .env
-# Edit .env with your GCP credentials, API keys, etc.
+# Edit .env with your credentials and API keys
 ```
 
 ### 2. Initialize Database
@@ -80,73 +80,45 @@ python -m uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
 ### 4. Access Documentation
 
 ```
-🔗 http://localhost:8000/docs        # Interactive API docs (Swagger)
-🔗 http://localhost:8000/redoc       # Alternative docs (ReDoc)
-🔗 http://localhost:8000/health      # Health check
-🔗 http://localhost:8000/metrics     # Prometheus metrics
+🔗 /docs        # Interactive API documentation
+🔗 /redoc       # Alternative documentation view
+🔗 /health      # System health status
 ```
 
 ---
 
 ## 🔌 API Overview
 
-### Core Endpoints
+### Available Endpoints
 
-```
-POST   /api/v1/projects                 # Create a new project
-GET    /api/v1/projects/{id}            # Get project details
-POST   /api/v1/projects/{id}/execute    # Start execution pipeline
-GET    /api/v1/projects/{id}/status     # Get execution status
-GET    /api/v1/projects/{id}/export     # Download output video
-GET    /api/v1/projects                 # List all projects
-DELETE /api/v1/projects/{id}            # Delete a project
-GET    /health                          # Health check
-GET    /metrics                         # Prometheus metrics
-```
+The API provides comprehensive endpoints for video project management:
+
+- Project creation and management
+- Pipeline execution and monitoring
+- Result export and delivery
+- System health and performance metrics
+
+_Full API documentation available at `/docs` (Swagger UI)_
 
 ### Authentication
 
-```bash
-# Get JWT Token via Firebase
-curl -X POST http://localhost:8000/auth/token \
-  -H "Content-Type: application/json" \
-  -d '{"id_token": "your-firebase-token"}'
+Secure authentication is available via:
 
-# Use token in requests
-curl http://localhost:8000/api/v1/projects \
-  -H "Authorization: Bearer {jwt_token}"
+- OAuth 2.0 / JWT tokens
+- API Key authentication
+- Service-to-service credentials
 
-# Or use API Key header
-curl http://localhost:8000/api/v1/projects \
-  -H "X-API-Key: your-api-key"
-```
+_See documentation for detailed authentication setup_
 
-### Example: Create & Execute
+### Typical Workflow
 
-```bash
-# Create project
-PROJECT_ID=$(curl -X POST http://localhost:8000/api/v1/projects \
-  -H "Authorization: Bearer $TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{
-    "name": "My Video Project",
-    "script": "Your video script here...",
-    "settings": {"quality": "4K", "duration": 60}
-  }' | jq -r '.id')
+1. Create a new video project
+2. Configure project settings and parameters
+3. Execute the pipeline
+4. Monitor execution progress
+5. Retrieve and download results
 
-# Execute
-curl -X POST http://localhost:8000/api/v1/projects/$PROJECT_ID/execute \
-  -H "Authorization: Bearer $TOKEN"
-
-# Check status
-curl http://localhost:8000/api/v1/projects/$PROJECT_ID/status \
-  -H "Authorization: Bearer $TOKEN"
-
-# Download when ready
-curl http://localhost:8000/api/v1/projects/$PROJECT_ID/export?format=mp4 \
-  -H "Authorization: Bearer $TOKEN" \
-  -o output.mp4
-```
+_Complete workflow examples available in the API documentation_
 
 ---
 
@@ -154,22 +126,22 @@ curl http://localhost:8000/api/v1/projects/$PROJECT_ID/export?format=mp4 \
 
 AIPROD follows a **layered microservices architecture** with:
 
-- **API Layer** - FastAPI (100+ endpoints)
-- **Orchestration Layer** - State machine for workflow management
+- **API Layer** - REST API with comprehensive endpoint coverage
+- **Orchestration Layer** - Intelligent workflow management
 - **Business Logic Layer** - Specialized processing modules
-- **Infrastructure Layer** - Production hardening (security, monitoring, optimization)
-- **Data Layer** - PostgreSQL, Redis (4-tier caching strategy)
-- **Observability** - Prometheus, Grafana, structured logging
+- **Infrastructure Layer** - Production hardening with security and optimization
+- **Data Layer** - Distributed data storage and caching
+- **Observability** - Centralized monitoring and logging
 
-### Key Design Patterns
+### Architecture Principles
 
-- ✅ State Machine Pattern (core orchestration)
-- ✅ Agent-Based Architecture (modular design)
-- ✅ Middleware Pattern (cross-cutting concerns)
-- ✅ RBAC (4 roles, granular permissions)
-- ✅ Cache-Aside (distributed caching)
-- ✅ Circuit Breaker (fault tolerance)
-- ✅ Async/Await (scalability)
+- ✅ Enterprise design patterns
+- ✅ Modular component architecture
+- ✅ Comprehensive access control
+- ✅ Distributed caching strategy
+- ✅ Fault tolerance and resilience
+- ✅ Asynchronous processing
+- ✅ Cloud-native scalability
 
 ---
 
@@ -192,11 +164,11 @@ open htmlcov/index.html
 
 ### Test Coverage
 
-- ✅ 790+ unit and integration tests
-- ✅ 99.6% pass rate
-- ✅ 92%+ code coverage
-- ✅ Load validated up to 1000+ RPS
-- ✅ Performance benchmarks included
+- ✅ Comprehensive unit and integration tests
+- ✅ Excellent pass rate
+- ✅ High code coverage
+- ✅ Load and performance validated
+- ✅ Continuous quality assurance
 
 ---
 
@@ -204,13 +176,13 @@ open htmlcov/index.html
 
 ### Features
 
-- 🔐 **Authentication** - Firebase + JWT tokens with refresh capability
-- 👥 **Authorization** - Role-Based Access Control (RBAC)
-- 🔒 **Encryption** - TLS/HTTPS, encrypted secrets with GCP Secret Manager
-- 📝 **Audit Logging** - Comprehensive event tracking and compliance
-- 🛡️ **Input Validation** - Pydantic models for strict type checking
-- 🚫 **Rate Limiting** - DDoS protection and API throttling
-- 📊 **OWASP Compliance** - Top 10 security standards implemented
+- 🔐 **Authentication** - Secure token-based authentication with session management
+- 👥 **Authorization** - Role-Based Access Control with granular permissions
+- 🔒 **Encryption** - Transport and data encryption with secure secret management
+- 📝 **Audit Logging** - Complete event tracking for compliance and accountability
+- 🛡️ **Input Validation** - Strict type checking and input sanitization
+- 🚫 **Rate Limiting** - API throttling and DDoS protection
+- 📊 **Security Standards** - Enterprise security best practices implemented
 
 ### RBAC Roles
 
@@ -227,21 +199,21 @@ SERVICE → Service-to-service calls
 
 ### Benchmarks
 
-| Metric                  | Performance | Status       |
-| ----------------------- | ----------- | ------------ |
-| **API Latency (p50)**   | ~45ms       | ✅           |
-| **API Latency (p99)**   | <850ms      | ✅           |
-| **Throughput**          | 1000+ RPS   | ✅ Verified  |
-| **Memory Usage**        | ~380MB      | ✅ Optimized |
-| **CPU Utilization**     | ~65%        | ✅ Efficient |
-| **Database Query Time** | ~32ms       | ✅ Fast      |
-| **Cache Hit Rate**      | 82%         | ✅ Excellent |
+| Metric                | Status |                   |
+| --------------------- | ------ | ----------------- |
+| **API Response Time** | ✅     | Optimized         |
+| **Throughput**        | ✅     | Verified at scale |
+| **Memory Usage**      | ✅     | Optimized         |
+| **CPU Efficiency**    | ✅     | Efficient         |
+| **Query Performance** | ✅     | Fast              |
+| **Cache Efficiency**  | ✅     | Excellent         |
+| **System Stability**  | ✅     | Robust            |
 
 ### Scalability
 
-- **Horizontal** - Stateless API design, Cloud Run ready, multi-instance support
-- **Vertical** - Async/await optimization, connection pooling, caching
-- **Database** - Query optimization, read replicas, zero-downtime migrations
+- **Horizontal** - Stateless design with load distribution capabilities
+- **Vertical** - Optimized resource utilization and efficient processing
+- **Data Layer** - Query optimization and intelligent caching strategies
 
 ---
 
@@ -263,7 +235,7 @@ docker run -p 8000:8000 \
 ### Option 2: Docker Compose
 
 ```bash
-# Start all services (API + PostgreSQL + Redis + Prometheus + Grafana)
+# Start all services with Docker Compose
 docker-compose up -d
 
 # Check status
@@ -276,20 +248,11 @@ docker-compose logs -f api
 docker-compose down
 ```
 
-### Option 3: Google Cloud Run (Recommended)
+### Option 3: Cloud Platform Deployment (Recommended)
 
 ```bash
-gcloud auth login
-gcloud config set project YOUR_PROJECT_ID
-
-gcloud run deploy aiprod-v33 \
-  --source . \
-  --platform managed \
-  --region us-central1 \
-  --memory 2Gi \
-  --cpu 2 \
-  --timeout 3600 \
-  --set-env-vars-file .env.cloud.yaml
+# Deploy to your cloud platform
+# Check documentation for cloud provider specific instructions
 ```
 
 ### Option 4: Kubernetes
@@ -314,11 +277,11 @@ kubectl logs -f deployment/aiprod
 
 ### External Services
 
-- **Google Cloud Project** (Cloud Storage, Secret Manager, Logging)
-- **Firebase Project** (Authentication)
-- **PostgreSQL Database** (12+)
-- **Redis Server** (6.0+)
-- **API Keys** for media processing services
+- **Cloud Provider** (Storage, Configuration, Logging)
+- **Authentication Service** (Third-party auth provider)
+- **Database Server** (Persistent data storage)
+- **Cache Layer** (Performance optimization)
+- **Media Processing APIs** (Third-party services)
 
 ---
 
@@ -444,7 +407,7 @@ AIPROD is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 AIPROD is a **production-grade platform** built with:
 
 - Enterprise architecture patterns
-- Comprehensive testing (1000+ tests)
+- Comprehensive testing with high coverage
 - Production monitoring and logging
 - Security best practices
 - Cloud-native design
