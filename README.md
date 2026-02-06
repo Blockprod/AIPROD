@@ -1,13 +1,16 @@
-<picture>
-  <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/🎬%20Video%20AI%20Pipeline-3A86FF?style=for-the-badge&logo=youtube&logoColor=white">
-  <img alt="AIPROD Banner" src="https://img.shields.io/badge/🎬%20Video%20AI%20Pipeline-3A86FF?style=for-the-badge&logo=youtube&logoColor=white">
-</picture>
-
-<br/>
-
 <div align="center">
 
-### 📝 Scripts → 🤖 AI Orchestration → 🎬 Professional 4K → ✨ Production Ready
+```
+╔═══════════════════════════════════════════════════════════════════════╗
+║                                                                       ║
+║   📝 SCRIPTS  →  🧠 INTELLIGENCE  →  🎬 CREATION  →  ✨ MASTERY    ║
+║                                                                       ║
+║        Artificial Intelligence Transforms Ideas Into Reality        ║
+║                                                                       ║
+║  Your Creative Vision   AI-Powered Processing   4K Production Ready  ║
+║                                                                       ║
+╚═══════════════════════════════════════════════════════════════════════╝
+```
 
 </div>
 
