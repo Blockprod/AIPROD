@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎬 AIPROD v3.3
+# 🎬 AIPROD
 
 ### Enterprise Video AI Pipeline 🚀
 
