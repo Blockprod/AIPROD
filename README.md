@@ -1,16 +1,6 @@
 <div align="center">
 
-```
-╔═══════════════════════════════════════════════════════════════════════╗
-║                                                                       ║
-║   📝 SCRIPTS  →  🧠 INTELLIGENCE  →  🎬 CREATION  →  ✨ MASTERY    ║
-║                                                                       ║
-║        Artificial Intelligence Transforms Ideas Into Reality        ║
-║                                                                       ║
-║  Your Creative Vision   AI-Powered Processing   4K Production Ready  ║
-║                                                                       ║
-╚═══════════════════════════════════════════════════════════════════════╝
-```
+![AIPROD Banner Animation](assets/banner-animation.gif)
 
 </div>
 
