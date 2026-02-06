@@ -24,21 +24,6 @@
 
 ---
 
-## 📊 Key Statistics
-
-<div align="center">
-
-![Tests](https://img.shields.io/badge/Tests-High%20Coverage-brightgreen?style=for-the-badge)
-![Uptime](https://img.shields.io/badge/Uptime-99.9%25-brightgreen?style=for-the-badge)
-![Security](https://img.shields.io/badge/Security-Enterprise%20Grade-blue?style=for-the-badge)
-![Performance](https://img.shields.io/badge/Performance-Optimized-ff6b6b?style=for-the-badge)
-![Scalability](https://img.shields.io/badge/Scalability-Cloud%20Native-important?style=for-the-badge)
-![Architecture](https://img.shields.io/badge/Architecture-Microservices-9b59b6?style=for-the-badge)
-
-</div>
-
----
-
 <h3 align="left">🛠️ Tech Stack & Tools</h3>
 <p align="left">
 <a href="https://www.python.org" target="_blank"><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" alt="Python" width="40" height="40"/></a>
