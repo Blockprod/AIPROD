@@ -47,6 +47,19 @@ class BackendConfig:
         VideoBackend.REPLICATE: {"per_second": 0.05, "base": 0.01},  # ~$0.26 pour 5s
     }
     
+    # Coût en crédits Runway (pour vérification proactive du solde)
+    RUNWAY_CREDIT_COSTS = {
+        "gen4_image": 16,        # ~16 crédits par image
+        "gen4_image_turbo": 8,   # ~8 crédits par image (turbo)
+        "gen4_turbo": 25,        # ~25 crédits par 5s de vidéo
+        "gen3a_turbo": 10,       # ~10 crédits par 5s (ancien modèle, moins cher)
+        "gen4_aleph": 50,        # ~50 crédits (premium)
+    }
+    
+    # Crédit minimum requis pour un pipeline complet (image + vidéo)
+    MIN_CREDITS_FULL_PIPELINE = 35  # gen4_image (16) + gen4_turbo (25) - avec marge
+    MIN_CREDITS_ECONOMY = 18        # gen4_image_turbo (8) + gen3a_turbo (10)
+    
     BACKEND_QUALITY = {
         VideoBackend.RUNWAY: 0.95,  # Meilleure qualité
         VideoBackend.VEO3: 0.92,    # Très haute qualité
@@ -91,6 +104,40 @@ class RenderExecutor:
             VideoBackend.VEO3: 0,
             VideoBackend.REPLICATE: 0,
         }
+        # Cache du solde crédits (évite les appels API répétés)
+        self._cached_credit_balance: Optional[int] = None
+        self._credit_cache_time: float = 0
+        self._CREDIT_CACHE_TTL: float = 300  # 5 min de cache
+
+    def _check_runway_credits(self) -> Optional[int]:
+        """
+        Vérifie le solde de crédits Runway en temps réel.
+        Retourne le nombre de crédits disponibles, ou None si impossible à vérifier.
+        Utilise un cache de 5 minutes pour éviter les appels API excessifs.
+        """
+        # Utiliser le cache si frais
+        if self._cached_credit_balance is not None and (time.time() - self._credit_cache_time) < self._CREDIT_CACHE_TTL:
+            logger.info(f"RenderExecutor: Crédits Runway (cache): {self._cached_credit_balance}")
+            return self._cached_credit_balance
+        
+        if not self.runway_api_key or RunwayML is None:
+            return None
+        
+        try:
+            client = RunwayML(api_key=self.runway_api_key)
+            org = client.organization.retrieve()
+            balance = getattr(org, 'credit_balance', None)
+            
+            if balance is not None:
+                self._cached_credit_balance = int(balance)
+                self._credit_cache_time = time.time()
+                logger.info(f"RenderExecutor: Crédits Runway disponibles: {balance}")
+                return int(balance)
+            
+        except Exception as e:
+            logger.warning(f"RenderExecutor: Impossible de vérifier les crédits Runway: {e}")
+        
+        return None
 
     def _select_backend(
         self, 
@@ -100,10 +147,14 @@ class RenderExecutor:
     ) -> VideoBackend:
         """
         Sélectionne le meilleur backend basé sur:
-        - Budget restant
+        - Solde réel de crédits Runway (vérification proactive)
+        - Budget restant en dollars
         - Qualité requise
         - Priorité vitesse
         - Santé des backends
+        
+        C'est le COEUR de l'optimisation AIPROD: 
+        maximiser la qualité tout en respectant les contraintes de coût.
         """
         available_backends = [
             b for b in BackendConfig.FALLBACK_ORDER 
@@ -111,16 +162,52 @@ class RenderExecutor:
         ]
         
         if not available_backends:
-            # Reset errors if all backends failed
             self._error_counts = {b: 0 for b in VideoBackend}
             available_backends = list(BackendConfig.FALLBACK_ORDER)
         
-        # Si un backend spécifique est demandé
+        # ═══════════════════════════════════════════════════════════════
+        # ÉTAPE 1: Vérification proactive des crédits Runway
+        # ═══════════════════════════════════════════════════════════════
+        if VideoBackend.RUNWAY in available_backends:
+            credits = self._check_runway_credits()
+            
+            if credits is not None:
+                if credits < BackendConfig.MIN_CREDITS_ECONOMY:
+                    # Pas assez de crédits même pour le mode économie
+                    logger.warning(
+                        f"RenderExecutor: Crédits Runway insuffisants ({credits} < "
+                        f"{BackendConfig.MIN_CREDITS_ECONOMY}). "
+                        f"Basculement automatique sur backend alternatif."
+                    )
+                    available_backends = [b for b in available_backends if b != VideoBackend.RUNWAY]
+                    
+                elif credits < BackendConfig.MIN_CREDITS_FULL_PIPELINE:
+                    # Assez pour le mode économie mais pas pour le pipeline complet
+                    logger.info(
+                        f"RenderExecutor: Crédits Runway limités ({credits}). "
+                        f"Activation du mode économie (gen3a_turbo)."
+                    )
+                    # On garde Runway mais on utilisera gen3a_turbo (voir _generate_video_from_image)
+                    self._use_economy_mode = True
+                else:
+                    logger.info(f"RenderExecutor: Crédits Runway suffisants ({credits}). Mode standard.")
+                    self._use_economy_mode = False
+        
+        if not available_backends:
+            logger.error("RenderExecutor: Aucun backend disponible ! Reset et retry.")
+            self._error_counts = {b: 0 for b in VideoBackend}
+            available_backends = list(BackendConfig.FALLBACK_ORDER)
+        
+        # ═══════════════════════════════════════════════════════════════
+        # ÉTAPE 2: Si un backend spécifique est demandé
+        # ═══════════════════════════════════════════════════════════════
         if self.preferred_backend != VideoBackend.AUTO:
             if self.preferred_backend in available_backends:
                 return self.preferred_backend
         
-        # Stratégie de sélection basée sur le budget
+        # ═══════════════════════════════════════════════════════════════
+        # ÉTAPE 3: Stratégie de sélection basée sur le budget ($)
+        # ═══════════════════════════════════════════════════════════════
         if budget_remaining is not None:
             # Budget TRÈS limité: choisir le moins cher, assouplir qualité
             if budget_remaining <= 1.0:
@@ -247,6 +334,10 @@ class RenderExecutor:
             
             # Report metrics
             await self._report_success_metrics(selected_backend, duration, prompt_bundle)
+            
+            # Invalider le cache crédits après génération (solde a changé)
+            self._cached_credit_balance = None
+            self._credit_cache_time = 0
             
             result = {
                 "status": "rendered",
@@ -402,12 +493,17 @@ class RenderExecutor:
 
     def _get_models_for_backend(self, backend: VideoBackend) -> Dict[str, str]:
         """Retourne les modèles utilisés pour un backend."""
+        use_economy = getattr(self, '_use_economy_mode', False)
         models = {
-            VideoBackend.RUNWAY: {"image": "gen4_image", "video": "gen4_turbo"},
-            VideoBackend.VEO3: {"image": "gen4_image", "video": "veo-3"},
-            VideoBackend.REPLICATE: {"image": "gen4_image", "video": "stable-video-diffusion"},
+            VideoBackend.RUNWAY: {
+                "image": "gen4_image",
+                "video": "gen3a_turbo" if use_economy else "gen4_turbo",
+                "mode": "economy" if use_economy else "standard"
+            },
+            VideoBackend.VEO3: {"image": "gen4_image", "video": "veo-3", "mode": "standard"},
+            VideoBackend.REPLICATE: {"image": "gen4_image", "video": "stable-video-diffusion", "mode": "standard"},
         }
-        return models.get(backend, {"image": "unknown", "video": "unknown"})
+        return models.get(backend, {"image": "unknown", "video": "unknown", "mode": "unknown"})
 
     def _estimate_cost(self, backend: VideoBackend, duration: int) -> float:
         """Estime le coût pour un backend donné."""
@@ -499,12 +595,26 @@ class RenderExecutor:
     
     async def _generate_video_from_image(self, image_url: str, prompt: str) -> str:
         """
-        Génère une vidéo basée sur l'image de concept avec gen4_turbo.
-        Cost: 5 credits/second → 25 credits pour 5 secondes
+        Génère une vidéo basée sur l'image de concept.
+        Mode intelligent:
+        - Standard: gen4_turbo (~25 crédits/5s, qualité max)
+        - Économie: gen3a_turbo (~10 crédits/5s, qualité excellente)
+        Le mode est choisi automatiquement selon le solde de crédits.
         """
         if RunwayML is None:
             raise Exception("RunwayML package is not installed. Install with: pip install runwayml")
         client = RunwayML(api_key=self.runway_api_key)
+        
+        # Sélection du modèle selon le mode économie
+        use_economy = getattr(self, '_use_economy_mode', False)
+        model = "gen3a_turbo" if use_economy else "gen4_turbo"
+        credits_estimate = BackendConfig.RUNWAY_CREDIT_COSTS.get(model, 25)
+        
+        logger.info(
+            f"RenderExecutor: Modèle vidéo: {model} "
+            f"({'mode économie' if use_economy else 'mode standard'}) "
+            f"~{credits_estimate} crédits"
+        )
         
         # Améliorer le prompt pour la vidéo
         video_prompt = f"Smooth cinematic camera movement, dynamic storytelling: {prompt}. Professional 4K video, smooth transitions."
@@ -518,7 +628,7 @@ class RenderExecutor:
             task = await loop.run_in_executor(
                 None,
                 lambda: client.image_to_video.create(
-                    model="gen4_turbo",
+                    model=model,
                     prompt_image=image_url,
                     prompt_text=video_prompt,
                     ratio="1280:720",
@@ -526,7 +636,7 @@ class RenderExecutor:
                 )
             )
             
-            logger.info(f"RenderExecutor: Video task created: {task.id}")
+            logger.info(f"RenderExecutor: Video task created: {task.id} (model={model})")
             
             # Wait for task completion
             completed_task = await loop.run_in_executor(
