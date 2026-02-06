@@ -427,7 +427,7 @@ AIPROD is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ## 👥 Team
 
-**CLIMAX2 CREATIVE** - Building the future of AI-powered video generation
+**CLIMAX CREATIVE** - Building the future of AI-powered video generation
 
 **AIPROD Project**
 
@@ -455,7 +455,7 @@ AIPROD is a **production-grade platform** built with:
 
 **Version**: 3.3.0 | **Last Updated**: February 2026 | **Status**: Production Ready ✅
 
-Made with ❤️ by AIPROD Team
+Made with ❤️ by CLIMAX CREATIVE
 
 [⬆️ Back to top](#-aiprod-v33---enterprise-video-ai-pipeline-)
 
