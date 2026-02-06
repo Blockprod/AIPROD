@@ -1,25 +1,54 @@
 <div align="center">
 
-```
-╔════════════════════════════════════════════════════════════════════╗
-║                                                                    ║
-║          🎬 AIPROD v3.3 - Enterprise Video AI Pipeline 🚀         ║
-║                                                                    ║
-║              AI-Powered Video Generation at Scale                  ║
-║                                                                    ║
-╚════════════════════════════════════════════════════════════════════╝
-```
+# 🎬 AIPROD v3.3
+
+### Enterprise Video AI Pipeline 🚀
+
+<img alt="AIPROD" src="https://readme-typing-svg.herokuapp.com?font=Righteous&size=35&duration=3000&pause=1000&lines=Transform+Scripts+Into+4K+Videos;AI-Powered+Orchestration;Production+Ready+Platform&center=true&width=900&height=100">
 
 **Transform creative scripts into professional 4K videos using intelligent orchestration**
 
-[![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-brightgreen?style=flat-square)](#)
-[![Version](https://img.shields.io/badge/version-3.3.0-blue?style=flat-square)](#)
-[![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=flat-square)](#)
-[![FastAPI](https://img.shields.io/badge/FastAPI-0.128.0-009485?style=flat-square)](#)
-[![License](https://img.shields.io/badge/license-MIT-green?style=flat-square)](#)
-[![Enterprise](https://img.shields.io/badge/Enterprise%20Grade-Yes-orange?style=flat-square)](#)
+</div>
+
+---
+
+<div align="center">
+
+[![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-brightgreen?style=for-the-badge&logo=checkmarx)](https://github.com/Blockprod/AIPROD)
+[![Version](https://img.shields.io/badge/version-3.3.0-blue?style=for-the-badge)](https://github.com/Blockprod/AIPROD/releases)
+[![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=for-the-badge&logo=python)](https://www.python.org)
+[![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)](LICENSE)
+[![Enterprise](https://img.shields.io/badge/Enterprise%20Grade-Yes-orange?style=for-the-badge&logo=rocket)](https://github.com/Blockprod/AIPROD)
 
 </div>
+
+---
+
+## 📊 Project Statistics
+
+<div align="center">
+
+[![GitHub Repo Stats](https://github-readme-stats.vercel.app/api?username=Blockprod&repo=AIPROD&show_owner=true&theme=black&hide_border=true&line_height=27)](https://github.com/Blockprod/AIPROD)
+
+[![Project Trophy](https://github-profile-trophy.vercel.app/?username=Blockprod&theme=dark&no-frame=true&row=1&column=7)](https://github.com/Blockprod)
+
+</div>
+
+---
+
+<h3 align="left">🛠️ Tech Stack & Tools</h3>
+<p align="left">
+<a href="https://www.python.org" target="_blank"><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" alt="Python" width="40" height="40"/></a>
+<a href="https://fastapi.tiangolo.com" target="_blank"><img src="https://cdn.jsdelivr.net/npm/simple-icons@3.13.0/icons/fastapi.svg" alt="FastAPI" width="40" height="40"/></a>
+<a href="https://www.postgresql.org" target="_blank"><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/postgresql/postgresql-original-wordmark.svg" alt="PostgreSQL" width="40" height="40"/></a>
+<a href="https://redis.io" target="_blank"><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/redis/redis-original-wordmark.svg" alt="Redis" width="40" height="40"/></a>
+<a href="https://www.docker.com" target="_blank"><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/docker/docker-original-wordmark.svg" alt="Docker" width="40" height="40"/></a>
+<a href="https://kubernetes.io" target="_blank"><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/kubernetes/kubernetes-plain-wordmark.svg" alt="Kubernetes" width="40" height="40"/></a>
+<a href="https://cloud.google.com" target="_blank"><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/googlecloud/googlecloud-original-wordmark.svg" alt="Google Cloud" width="40" height="40"/></a>
+<a href="https://www.terraform.io" target="_blank"><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/terraform/terraform-original-wordmark.svg" alt="Terraform" width="40" height="40"/></a>
+<a href="https://prometheus.io" target="_blank"><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/prometheus/prometheus-original-wordmark.svg" alt="Prometheus" width="40" height="40"/></a>
+<a href="https://grafana.com" target="_blank"><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/grafana/grafana-original-wordmark.svg" alt="Grafana" width="40" height="40"/></a>
+</p>
 
 ---
 
@@ -351,6 +380,13 @@ cp .env.example .env
 
 ## 💬 Support & Community
 
+<h3 align="center">🤝 Connect With Us</h3>
+<p align="center">
+<a href="mailto:climax2creative@gmail.com" target="blank"><img align="center" src="https://cdn.jsdelivr.net/npm/simple-icons@3.0.1/icons/gmail.svg" alt="Email" height="40" width="50" /></a>
+<a href="https://github.com/Blockprod" target="blank"><img align="center" src="https://cdn.jsdelivr.net/npm/simple-icons@3.0.1/icons/github.svg" alt="GitHub" height="40" width="50" /></a>
+<a href="https://github.com/Blockprod/AIPROD/issues" target="blank"><img align="center" src="https://cdn.jsdelivr.net/npm/simple-icons@3.0.1/icons/github.svg" alt="GitHub Issues" height="40" width="50" /></a>
+</p>
+
 ### Get Help
 
 - 📧 **Email**: climax2creative@gmail.com
@@ -370,15 +406,51 @@ When reporting bugs, please include:
 
 ### Contributing
 
-Contributions welcome! Please:
+<h3 align="center">🎯 How to Contribute</h3>
 
-1. Fork the repository
-2. Create a feature branch
-3. Make your changes
-4. Add tests
-5. Submit a pull request
+We welcome contributions from the community! Here's how you can help:
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+**Steps:**
+
+1. 🍴 Fork the repository
+2. 🌿 Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. ✏️ Make your changes
+4. ✅ Add tests and ensure they pass
+5. 📝 Submit a pull request
+
+**Guidelines:**
+
+- Follow the existing code style
+- Write clear commit messages
+- Add tests for new features
+- Update documentation as needed
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
+
+---
+
+<div align="center">
+
+### ✨ Project Highlights
+
+|        🎬 Feature         | ⚡ Performance |   🔐 Security    |  📈 Scalability  |
+| :-----------------------: | :------------: | :--------------: | :--------------: |
+|    4K Video Generation    |   Optimized    | Enterprise Grade |   Cloud Native   |
+|   Multi-stage Pipeline    |    Verified    | OWASP Compliant  | Horizontal Scale |
+| Intelligent Orchestration |      Fast      |    Encrypted     |   Auto-scaling   |
+|   Real-time Monitoring    |   Real-time    |  Audit Logging   |   Distributed    |
+
+---
+
+<h3>💡 Why AIPROD?</h3>
+
+> **Production-Grade Platform** built with enterprise architecture patterns, comprehensive testing, security best practices, and cloud-native design
+
+✅ Proven in production environments  
+✅ Enterprise security compliance  
+✅ Comprehensive monitoring & observability  
+✅ Scalable & highly available  
+✅ Community supported & actively maintained
 
 ---
 
@@ -390,36 +462,33 @@ AIPROD is licensed under the MIT License. See [LICENSE](LICENSE) for details.
 
 ## 👥 Team
 
-**CLIMAX CREATIVE** - Building the future of AI-powered video generation
+<h3 align="center">🚀 CLIMAX CREATIVE - Building the Future</h3>
+
+<div align="center">
+
+Transforming creative visions into reality through intelligent AI-powered video generation.
 
 **AIPROD Project**
 
-- 🔗 [GitHub](https://github.com/Blockprod/AIPROD)
-- 🌐 [Website](https://aiprod.ai) _(coming soon)_
-- ✉️ Email: climax2creative@gmail.com
+[![GitHub](https://img.shields.io/badge/GitHub-Blockprod/AIPROD-black?style=for-the-badge&logo=github)](https://github.com/Blockprod/AIPROD)
+[![Email](https://img.shields.io/badge/Email-climax2creative@gmail.com-red?style=for-the-badge&logo=gmail)](mailto:climax2creative@gmail.com)
+
+---
+
+<img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" alt="Python" width="30" height="30" style="margin: 0 10px;">
+<img src="https://cdn.jsdelivr.net/npm/simple-icons@3.13.0/icons/fastapi.svg" alt="FastAPI" width="30" height="30" style="margin: 0 10px;">
+<img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/postgresql/postgresql-original-wordmark.svg" alt="PostgreSQL" width="30" height="30" style="margin: 0 10px;">
+<img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/docker/docker-original-wordmark.svg" alt="Docker" width="30" height="30" style="margin: 0 10px;">
+<img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/kubernetes/kubernetes-plain-wordmark.svg" alt="Kubernetes" width="30" height="30" style="margin: 0 10px;">
+
+</div>
 
 ---
 
 <div align="center">
 
-### About This Project
+### Made with ❤️ by CLIMAX CREATIVE
 
-AIPROD is a **production-grade platform** built with:
+**Version**: 3.3.0 | **Status**: Production Ready ✅ | **Updated**: February 2026
 
-- Enterprise architecture patterns
-- Comprehensive testing with high coverage
-- Production monitoring and logging
-- Security best practices
-- Cloud-native design
-
-**Current Status**: Actively maintained and used in production
-
----
-
-**Version**: 3.3.0 | **Last Updated**: February 2026 | **Status**: Production Ready ✅
-
-Made with ❤️ by CLIMAX CREATIVE
-
-[⬆️ Back to top](#-aiprod-v33---enterprise-video-ai-pipeline-)
-
-</div>
+[⬆️ Back to top](#)
