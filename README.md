@@ -1,3 +1,71 @@
+<svg width="100%" height="180" viewBox="0 0 1920 180" xmlns="http://www.w3.org/2000/svg" style="background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);">
+  <defs>
+    <linearGradient id="cinemaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF006E;stop-opacity:1" />
+      <stop offset="25%" style="stop-color:#FB5607;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#FFBE0B;stop-opacity:1" />
+      <stop offset="75%" style="stop-color:#3A86FF;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#8338EC;stop-opacity:1" />
+    </linearGradient>
+    
+    <filter id="cinemaGlow">
+      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Film strip top -->
+  <rect x="20" y="10" width="1880" height="20" fill="#1a1a1a" rx="3"/>
+  <circle cx="50" cy="20" r="6" fill="#333" opacity="0.8"/>
+  <circle cx="100" cy="20" r="6" fill="#333" opacity="0.8"/>
+  <circle cx="150" cy="20" r="6" fill="#333" opacity="0.8"/>
+  <circle cx="200" cy="20" r="6" fill="#333" opacity="0.8"/>
+  <circle cx="250" cy="20" r="6" fill="#333" opacity="0.8"/>
+  <circle cx="1720" cy="20" r="6" fill="#333" opacity="0.8"/>
+  <circle cx="1770" cy="20" r="6" fill="#333" opacity="0.8"/>
+  <circle cx="1820" cy="20" r="6" fill="#333" opacity="0.8"/>
+  <circle cx="1870" cy="20" r="6" fill="#333" opacity="0.8"/>
+
+  <!-- Main content area with gradient border -->
+  <rect x="40" y="40" width="1840" height="110" fill="none" stroke="url(#cinemaGradient)" stroke-width="3" rx="8" filter="url(#cinemaGlow)"/>
+  
+  <!-- Background -->
+  <rect x="42" y="42" width="1836" height="106" fill="#0a0a0a" rx="6"/>
+
+  <!-- Play button icon (large) -->
+  <circle cx="120" cy="95" r="45" fill="url(#cinemaGradient)" opacity="0.9" filter="url(#cinemaGlow)"/>
+  <polygon points="105,75 105,115 145,95" fill="white" opacity="0.95"/>
+
+  <!-- Main text: 4K ULTRA -->
+
+<text x="250" y="70" font-size="48" font-weight="bold" fill="url(#cinemaGradient)" font-family="Arial, sans-serif" letter-spacing="3">4K ULTRA</text>
+
+  <!-- Subtitle: VIDEO GENERATION -->
+
+<text x="250" y="105" font-size="32" fill="#FFBE0B" font-family="Arial, sans-serif" letter-spacing="2">VIDEO GENERATION</text>
+
+  <!-- Right side: AI POWERED -->
+
+<text x="1400" y="75" font-size="36" fill="#3A86FF" font-family="Arial, sans-serif" font-weight="bold" text-anchor="end">AI POWERED</text>
+<rect x="1410" y="82" width="400" height="3" fill="url(#cinemaGradient)"/>
+<text x="1400" y="110" font-size="18" fill="#FF006E" font-family="Arial, sans-serif" text-anchor="end" letter-spacing="1">INTELLIGENT PIPELINE</text>
+
+  <!-- Film strip bottom -->
+  <rect x="20" y="150" width="1880" height="20" fill="#1a1a1a" rx="3"/>
+  <circle cx="50" cy="160" r="6" fill="#333" opacity="0.8"/>
+  <circle cx="100" cy="160" r="6" fill="#333" opacity="0.8"/>
+  <circle cx="150" cy="160" r="6" fill="#333" opacity="0.8"/>
+  <circle cx="200" cy="160" r="6" fill="#333" opacity="0.8"/>
+  <circle cx="250" cy="160" r="6" fill="#333" opacity="0.8"/>
+  <circle cx="1720" cy="160" r="6" fill="#333" opacity="0.8"/>
+  <circle cx="1770" cy="160" r="6" fill="#333" opacity="0.8"/>
+  <circle cx="1820" cy="160" r="6" fill="#333" opacity="0.8"/>
+  <circle cx="1870" cy="160" r="6" fill="#333" opacity="0.8"/>
+</svg>
+
 <div align="center">
 
 # 🎬 AIPROD
