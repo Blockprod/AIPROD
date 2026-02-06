@@ -1,60 +1,52 @@
-<svg width="100%" height="140" viewBox="0 0 1920 140" xmlns="http://www.w3.org/2000/svg" style="background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);">
+<svg width="100%" height="120" viewBox="0 0 1920 120" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <linearGradient id="videoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#FF006E;stop-opacity:1" />
-      <stop offset="25%" style="stop-color:#FB5607;stop-opacity:1" />
-      <stop offset="50%" style="stop-color:#FFBE0B;stop-opacity:1" />
-      <stop offset="75%" style="stop-color:#3A86FF;stop-opacity:1" />
-      <stop offset="100%" style="stop-color:#8338EC;stop-opacity:1" />
+      <stop offset="0%" style="stop-color:#FF006E" />
+      <stop offset="25%" style="stop-color:#FB5607" />
+      <stop offset="50%" style="stop-color:#FFBE0B" />
+      <stop offset="75%" style="stop-color:#3A86FF" />
+      <stop offset="100%" style="stop-color:#8338EC" />
     </linearGradient>
-    
-    <filter id="glow">
-      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-      <feMerge>
-        <feMergeNode in="coloredBlur"/>
-        <feMergeNode in="SourceGraphic"/>
-      </feMerge>
-    </filter>
   </defs>
 
-  <!-- Background dark -->
-  <rect width="1920" height="140" fill="#0a0a0a"/>
+  <!-- Background -->
+  <rect width="1920" height="120" fill="#0a0a0a"/>
 
-  <!-- Stage 1: Scripts Input -->
-  <circle cx="300" cy="70" r="50" fill="#FF006E" opacity="0.85" filter="url(#glow)"/>
-  <text x="300" y="85" font-size="60" fill="white" text-anchor="middle" dominant-baseline="middle">📝</text>
+  <!-- Stage 1: Scripts -->
+  <circle cx="300" cy="60" r="40" fill="#FF006E"/>
+  <text x="300" y="75" font-size="50" fill="white" text-anchor="middle" dominant-baseline="middle">📝</text>
 
   <!-- Arrow 1 -->
-  <line x1="360" y1="70" x2="500" y2="70" stroke="url(#videoGradient)" stroke-width="4" stroke-linecap="round" filter="url(#glow)"/>
-  <polygon points="520,70 500,60 500,80" fill="url(#videoGradient)" filter="url(#glow)"/>
+  <line x1="350" y1="60" x2="470" y2="60" stroke="url(#videoGradient)" stroke-width="3" stroke-linecap="round"/>
+  <polygon points="490,60 470,50 470,70" fill="url(#videoGradient)"/>
 
-  <!-- Stage 2: AI Processing -->
-  <circle cx="680" cy="70" r="50" fill="#8338EC" opacity="0.85" filter="url(#glow)"/>
-  <text x="680" y="85" font-size="60" fill="white" text-anchor="middle" dominant-baseline="middle">🤖</text>
+  <!-- Stage 2: AI -->
+  <circle cx="650" cy="60" r="40" fill="#8338EC"/>
+  <text x="650" y="75" font-size="50" fill="white" text-anchor="middle" dominant-baseline="middle">🤖</text>
 
   <!-- Arrow 2 -->
-  <line x1="740" y1="70" x2="880" y2="70" stroke="url(#videoGradient)" stroke-width="4" stroke-linecap="round" filter="url(#glow)"/>
-  <polygon points="900,70 880,60 880,80" fill="url(#videoGradient)" filter="url(#glow)"/>
+  <line x1="700" y1="60" x2="820" y2="60" stroke="url(#videoGradient)" stroke-width="3" stroke-linecap="round"/>
+  <polygon points="840,60 820,50 820,70" fill="url(#videoGradient)"/>
 
-  <!-- Stage 3: Video Creation -->
-  <circle cx="1060" cy="70" r="50" fill="#3A86FF" opacity="0.85" filter="url(#glow)"/>
-  <text x="1060" y="85" font-size="60" fill="white" text-anchor="middle" dominant-baseline="middle">🎬</text>
+  <!-- Stage 3: Video -->
+  <circle cx="1000" cy="60" r="40" fill="#3A86FF"/>
+  <text x="1000" y="75" font-size="50" fill="white" text-anchor="middle" dominant-baseline="middle">🎬</text>
 
   <!-- Arrow 3 -->
-  <line x1="1120" y1="70" x2="1260" y2="70" stroke="url(#videoGradient)" stroke-width="4" stroke-linecap="round" filter="url(#glow)"/>
-  <polygon points="1280,70 1260,60 1260,80" fill="url(#videoGradient)" filter="url(#glow)"/>
+  <line x1="1050" y1="60" x2="1170" y2="60" stroke="url(#videoGradient)" stroke-width="3" stroke-linecap="round"/>
+  <polygon points="1190,60 1170,50 1170,70" fill="url(#videoGradient)"/>
 
-  <!-- Stage 4: 4K Output -->
-  <circle cx="1440" cy="70" r="50" fill="#FFBE0B" opacity="0.85" filter="url(#glow)"/>
-  <text x="1440" y="85" font-size="60" fill="white" text-anchor="middle" dominant-baseline="middle">✨</text>
+  <!-- Stage 4: Excellence -->
+  <circle cx="1350" cy="60" r="40" fill="#FFBE0B"/>
+  <text x="1350" y="75" font-size="50" fill="white" text-anchor="middle" dominant-baseline="middle">✨</text>
 
   <!-- Arrow 4 -->
-  <line x1="1500" y1="70" x2="1640" y2="70" stroke="url(#videoGradient)" stroke-width="4" stroke-linecap="round" filter="url(#glow)"/>
-  <polygon points="1660,70 1640,60 1640,80" fill="url(#videoGradient)" filter="url(#glow)"/>
+  <line x1="1400" y1="60" x2="1520" y2="60" stroke="url(#videoGradient)" stroke-width="3" stroke-linecap="round"/>
+  <polygon points="1540,60 1520,50 1520,70" fill="url(#videoGradient)"/>
 
-  <!-- Stage 5: Production Ready -->
-  <circle cx="1820" cy="70" r="50" fill="#FB5607" opacity="0.85" filter="url(#glow)"/>
-  <text x="1820" y="85" font-size="60" fill="white" text-anchor="middle" dominant-baseline="middle">🚀</text>
+  <!-- Stage 5: Launch -->
+  <circle cx="1700" cy="60" r="40" fill="#FB5607"/>
+  <text x="1700" y="75" font-size="50" fill="white" text-anchor="middle" dominant-baseline="middle">🚀</text>
 </svg>
 
 <div align="center">
