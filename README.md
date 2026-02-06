@@ -1,6 +1,6 @@
-<svg width="100%" height="180" viewBox="0 0 1920 180" xmlns="http://www.w3.org/2000/svg" style="background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);">
+<svg width="100%" height="140" viewBox="0 0 1920 140" xmlns="http://www.w3.org/2000/svg" style="background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);">
   <defs>
-    <linearGradient id="cinemaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+    <linearGradient id="videoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
       <stop offset="0%" style="stop-color:#FF006E;stop-opacity:1" />
       <stop offset="25%" style="stop-color:#FB5607;stop-opacity:1" />
       <stop offset="50%" style="stop-color:#FFBE0B;stop-opacity:1" />
@@ -8,8 +8,8 @@
       <stop offset="100%" style="stop-color:#8338EC;stop-opacity:1" />
     </linearGradient>
     
-    <filter id="cinemaGlow">
-      <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
       <feMerge>
         <feMergeNode in="coloredBlur"/>
         <feMergeNode in="SourceGraphic"/>
@@ -17,53 +17,44 @@
     </filter>
   </defs>
 
-  <!-- Film strip top -->
-  <rect x="20" y="10" width="1880" height="20" fill="#1a1a1a" rx="3"/>
-  <circle cx="50" cy="20" r="6" fill="#333" opacity="0.8"/>
-  <circle cx="100" cy="20" r="6" fill="#333" opacity="0.8"/>
-  <circle cx="150" cy="20" r="6" fill="#333" opacity="0.8"/>
-  <circle cx="200" cy="20" r="6" fill="#333" opacity="0.8"/>
-  <circle cx="250" cy="20" r="6" fill="#333" opacity="0.8"/>
-  <circle cx="1720" cy="20" r="6" fill="#333" opacity="0.8"/>
-  <circle cx="1770" cy="20" r="6" fill="#333" opacity="0.8"/>
-  <circle cx="1820" cy="20" r="6" fill="#333" opacity="0.8"/>
-  <circle cx="1870" cy="20" r="6" fill="#333" opacity="0.8"/>
+  <!-- Background dark -->
+  <rect width="1920" height="140" fill="#0a0a0a"/>
 
-  <!-- Main content area with gradient border -->
-  <rect x="40" y="40" width="1840" height="110" fill="none" stroke="url(#cinemaGradient)" stroke-width="3" rx="8" filter="url(#cinemaGlow)"/>
-  
-  <!-- Background -->
-  <rect x="42" y="42" width="1836" height="106" fill="#0a0a0a" rx="6"/>
+  <!-- Stage 1: Scripts Input -->
+  <circle cx="300" cy="70" r="50" fill="#FF006E" opacity="0.85" filter="url(#glow)"/>
+  <text x="300" y="85" font-size="60" fill="white" text-anchor="middle" dominant-baseline="middle">📝</text>
 
-  <!-- Play button icon (large) -->
-  <circle cx="120" cy="95" r="45" fill="url(#cinemaGradient)" opacity="0.9" filter="url(#cinemaGlow)"/>
-  <polygon points="105,75 105,115 145,95" fill="white" opacity="0.95"/>
+  <!-- Arrow 1 -->
+  <line x1="360" y1="70" x2="500" y2="70" stroke="url(#videoGradient)" stroke-width="4" stroke-linecap="round" filter="url(#glow)"/>
+  <polygon points="520,70 500,60 500,80" fill="url(#videoGradient)" filter="url(#glow)"/>
 
-  <!-- Main text: 4K ULTRA -->
+  <!-- Stage 2: AI Processing -->
+  <circle cx="680" cy="70" r="50" fill="#8338EC" opacity="0.85" filter="url(#glow)"/>
+  <text x="680" y="85" font-size="60" fill="white" text-anchor="middle" dominant-baseline="middle">🤖</text>
 
-<text x="250" y="70" font-size="48" font-weight="bold" fill="url(#cinemaGradient)" font-family="Arial, sans-serif" letter-spacing="3">4K ULTRA</text>
+  <!-- Arrow 2 -->
+  <line x1="740" y1="70" x2="880" y2="70" stroke="url(#videoGradient)" stroke-width="4" stroke-linecap="round" filter="url(#glow)"/>
+  <polygon points="900,70 880,60 880,80" fill="url(#videoGradient)" filter="url(#glow)"/>
 
-  <!-- Subtitle: VIDEO GENERATION -->
+  <!-- Stage 3: Video Creation -->
+  <circle cx="1060" cy="70" r="50" fill="#3A86FF" opacity="0.85" filter="url(#glow)"/>
+  <text x="1060" y="85" font-size="60" fill="white" text-anchor="middle" dominant-baseline="middle">🎬</text>
 
-<text x="250" y="105" font-size="32" fill="#FFBE0B" font-family="Arial, sans-serif" letter-spacing="2">VIDEO GENERATION</text>
+  <!-- Arrow 3 -->
+  <line x1="1120" y1="70" x2="1260" y2="70" stroke="url(#videoGradient)" stroke-width="4" stroke-linecap="round" filter="url(#glow)"/>
+  <polygon points="1280,70 1260,60 1260,80" fill="url(#videoGradient)" filter="url(#glow)"/>
 
-  <!-- Right side: AI POWERED -->
+  <!-- Stage 4: 4K Output -->
+  <circle cx="1440" cy="70" r="50" fill="#FFBE0B" opacity="0.85" filter="url(#glow)"/>
+  <text x="1440" y="85" font-size="60" fill="white" text-anchor="middle" dominant-baseline="middle">✨</text>
 
-<text x="1400" y="75" font-size="36" fill="#3A86FF" font-family="Arial, sans-serif" font-weight="bold" text-anchor="end">AI POWERED</text>
-<rect x="1410" y="82" width="400" height="3" fill="url(#cinemaGradient)"/>
-<text x="1400" y="110" font-size="18" fill="#FF006E" font-family="Arial, sans-serif" text-anchor="end" letter-spacing="1">INTELLIGENT PIPELINE</text>
+  <!-- Arrow 4 -->
+  <line x1="1500" y1="70" x2="1640" y2="70" stroke="url(#videoGradient)" stroke-width="4" stroke-linecap="round" filter="url(#glow)"/>
+  <polygon points="1660,70 1640,60 1640,80" fill="url(#videoGradient)" filter="url(#glow)"/>
 
-  <!-- Film strip bottom -->
-  <rect x="20" y="150" width="1880" height="20" fill="#1a1a1a" rx="3"/>
-  <circle cx="50" cy="160" r="6" fill="#333" opacity="0.8"/>
-  <circle cx="100" cy="160" r="6" fill="#333" opacity="0.8"/>
-  <circle cx="150" cy="160" r="6" fill="#333" opacity="0.8"/>
-  <circle cx="200" cy="160" r="6" fill="#333" opacity="0.8"/>
-  <circle cx="250" cy="160" r="6" fill="#333" opacity="0.8"/>
-  <circle cx="1720" cy="160" r="6" fill="#333" opacity="0.8"/>
-  <circle cx="1770" cy="160" r="6" fill="#333" opacity="0.8"/>
-  <circle cx="1820" cy="160" r="6" fill="#333" opacity="0.8"/>
-  <circle cx="1870" cy="160" r="6" fill="#333" opacity="0.8"/>
+  <!-- Stage 5: Production Ready -->
+  <circle cx="1820" cy="70" r="50" fill="#FB5607" opacity="0.85" filter="url(#glow)"/>
+  <text x="1820" y="85" font-size="60" fill="white" text-anchor="middle" dominant-baseline="middle">🚀</text>
 </svg>
 
 <div align="center">
