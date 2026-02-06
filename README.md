@@ -1,6 +1,9 @@
 <div align="center">
 
-![AIPROD Promotional Teaser](assets/aiprod-teaser.gif)
+<video width="900" height="auto" controls autoplay muted loop>
+  <source src="https://storage.googleapis.com/aiprod-v33-assets/videos/unknown/output.mp4" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
 
 </div>
 
