@@ -1,53 +1,17 @@
-<svg width="100%" height="120" viewBox="0 0 1920 120" xmlns="http://www.w3.org/2000/svg">
-  <defs>
-    <linearGradient id="videoGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" style="stop-color:#FF006E" />
-      <stop offset="25%" style="stop-color:#FB5607" />
-      <stop offset="50%" style="stop-color:#FFBE0B" />
-      <stop offset="75%" style="stop-color:#3A86FF" />
-      <stop offset="100%" style="stop-color:#8338EC" />
-    </linearGradient>
-  </defs>
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="https://img.shields.io/badge/🎬%20Video%20AI%20Pipeline-3A86FF?style=for-the-badge&logo=youtube&logoColor=white">
+  <img alt="AIPROD Banner" src="https://img.shields.io/badge/🎬%20Video%20AI%20Pipeline-3A86FF?style=for-the-badge&logo=youtube&logoColor=white">
+</picture>
 
-  <!-- Background -->
-  <rect width="1920" height="120" fill="#0a0a0a"/>
+<br/>
 
-  <!-- Stage 1: Scripts -->
-  <circle cx="300" cy="60" r="40" fill="#FF006E"/>
-  <text x="300" y="75" font-size="50" fill="white" text-anchor="middle" dominant-baseline="middle">📝</text>
+<div align="center">
 
-  <!-- Arrow 1 -->
-  <line x1="350" y1="60" x2="470" y2="60" stroke="url(#videoGradient)" stroke-width="3" stroke-linecap="round"/>
-  <polygon points="490,60 470,50 470,70" fill="url(#videoGradient)"/>
+### 📝 Scripts → 🤖 AI Orchestration → 🎬 Professional 4K → ✨ Production Ready
 
-  <!-- Stage 2: AI -->
-  <circle cx="650" cy="60" r="40" fill="#8338EC"/>
-  <text x="650" y="75" font-size="50" fill="white" text-anchor="middle" dominant-baseline="middle">🤖</text>
+</div>
 
-  <!-- Arrow 2 -->
-  <line x1="700" y1="60" x2="820" y2="60" stroke="url(#videoGradient)" stroke-width="3" stroke-linecap="round"/>
-  <polygon points="840,60 820,50 820,70" fill="url(#videoGradient)"/>
-
-  <!-- Stage 3: Video -->
-  <circle cx="1000" cy="60" r="40" fill="#3A86FF"/>
-  <text x="1000" y="75" font-size="50" fill="white" text-anchor="middle" dominant-baseline="middle">🎬</text>
-
-  <!-- Arrow 3 -->
-  <line x1="1050" y1="60" x2="1170" y2="60" stroke="url(#videoGradient)" stroke-width="3" stroke-linecap="round"/>
-  <polygon points="1190,60 1170,50 1170,70" fill="url(#videoGradient)"/>
-
-  <!-- Stage 4: Excellence -->
-  <circle cx="1350" cy="60" r="40" fill="#FFBE0B"/>
-  <text x="1350" y="75" font-size="50" fill="white" text-anchor="middle" dominant-baseline="middle">✨</text>
-
-  <!-- Arrow 4 -->
-  <line x1="1400" y1="60" x2="1520" y2="60" stroke="url(#videoGradient)" stroke-width="3" stroke-linecap="round"/>
-  <polygon points="1540,60 1520,50 1520,70" fill="url(#videoGradient)"/>
-
-  <!-- Stage 5: Launch -->
-  <circle cx="1700" cy="60" r="40" fill="#FB5607"/>
-  <text x="1700" y="75" font-size="50" fill="white" text-anchor="middle" dominant-baseline="middle">🚀</text>
-</svg>
+<br/>
 
 <div align="center">
 
