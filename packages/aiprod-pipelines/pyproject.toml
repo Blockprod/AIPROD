@@ -1,0 +1,11 @@
+[project]
+name = "aiprod-pipelines"
+version = "1.0.0"
+description = "AIPROD Pipelines - Video Generation Inference Pipelines"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["aiprod-core", "av", "tqdm", "pillow"]
+
+[build-system]
+requires = ["uv_build>=0.9.8,<0.10.0"]
+build-backend = "uv_build"

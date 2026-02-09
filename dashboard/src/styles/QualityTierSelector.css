@@ -1,0 +1,212 @@
+/* Quality Tier Selector Component Styles */
+
+.quality-tier-selector {
+  background: linear-gradient(135deg, #f3f4f6 0%, #f9fafb 100%);
+  border-radius: 12px;
+  padding: 32px;
+  margin-bottom: 32px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.tier-selector-header {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.tier-selector-header h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 12px 0;
+}
+
+.tier-selector-subtitle {
+  font-size: 16px;
+  color: #6b7280;
+  margin: 0;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Tier Buttons Container */
+.tier-buttons-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin-bottom: 32px;
+}
+
+.tier-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 24px;
+  background: white;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: 600;
+  position: relative;
+}
+
+.tier-button:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+}
+
+.tier-button.active {
+  transform: scale(1.02);
+}
+
+.tier-button-good {
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+.tier-button-high {
+  border-color: #dc2626;
+  color: #dc2626;
+}
+
+.tier-button-ultra {
+  border-color: #a855f7;
+  color: #a855f7;
+}
+
+.tier-icon {
+  font-size: 32px;
+}
+
+.tier-content {
+  text-align: center;
+}
+
+.tier-name {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.tier-label {
+  font-size: 12px;
+  opacity: 0.7;
+  margin: 0;
+}
+
+.tier-check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: currentColor;
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+}
+
+/* Tier Details */
+.tier-details {
+  margin-top: 32px;
+}
+
+.tier-detail-card {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  border-left: 4px solid;
+  transition: all 0.3s ease;
+  display: none;
+}
+
+.tier-detail-card.visible {
+  display: block;
+  animation: slideIn 0.3s ease;
+}
+
+.tier-detail-card.hidden {
+  display: none;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.tier-detail-card h3 {
+  margin: 0 0 20px 0;
+  font-size: 18px;
+  color: #111827;
+}
+
+.tier-specs-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.spec-group {
+  padding: 16px;
+  background: #f9fafb;
+  border-radius: 8px;
+}
+
+.spec-group h4 {
+  margin: 0 0 12px 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.spec-group ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.spec-group li {
+  padding: 6px 0;
+  font-size: 13px;
+  color: #6b7280;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.spec-group li:last-child {
+  border-bottom: none;
+}
+
+.spec-group strong {
+  color: #111827;
+  font-weight: 600;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .quality-tier-selector {
+    padding: 20px;
+  }
+
+  .tier-selector-header h2 {
+    font-size: 22px;
+  }
+
+  .tier-buttons-container {
+    grid-template-columns: 1fr;
+  }
+
+  .tier-specs-grid {
+    grid-template-columns: 1fr;
+  }
+}

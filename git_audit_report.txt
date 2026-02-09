@@ -1,0 +1,119 @@
+﻿╔════════════════════════════════════════════════════════════════════════════════╗
+║           RAPPORT D'AUDIT GIT - SECRETS EXPOSÉS                               ║
+║           Généré: 07/02/2026 11:43:11                    ║
+╚════════════════════════════════════════════════════════════════════════════════╝
+
+📋 RÉSUMÉ EXÉCUTIF
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Secrets Trouvés dans l'Historique Git: 2
+   🔴 Clés API exposées partiellement: 2
+   🟢 Clés complètes trouvées: 0
+   ⚠️  Risque Estimé: MOYEN (panification visible)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+🔍 DÉTAILS DES DÉCOUVERTES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+FINDING 1: GEMINI API KEY (Partielle)
+────────────────────────────────────────────────────────────────────────────────
+  Fichier: BACKEND_ACTIVATION_GUIDE.md
+  Commit: 65385cd
+  Date: Fri Feb 6 14:54:16 2026 +0100
+  Exposition: AIzaSyAU... (préfixe visible)
+  Clé complète: ❌ NON EXPOSÉE (truncated)
+  Risque: 🟡 MOYEN - Le préfixe expose le type de clé
+  Détail:
+    - Utilisée dans la documentation de configuration
+    - Aperçu truncated à 8 caractères
+    - Clé complète de 39 caractères n'était pas visible
+    - Auteur: AIPROD Developer
+
+FINDING 2: RUNWAY ML API KEY (Partielle)
+────────────────────────────────────────────────────────────────────────────────
+  Fichier: BACKEND_ACTIVATION_GUIDE.md
+  Commit: 65385cd
+  Date: Fri Feb 6 14:54:16 2026 +0100
+  Exposition: key_50d32d... (préfixe visible)
+  Clé complète: ❌ NON EXPOSÉE (truncated)
+  Risque: 🟡 MOYEN - Le préfixe expose le type de clé
+  Détail:
+    - Utilisée dans la documentation de configuration
+    - Aperçu truncated (ellipsis visible)
+    - Clé complète de 200+ caractères n'était pas visible
+    - Auteur: AIPROD Developer
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ VÉRIFICATIONS ADDITIONNELLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Secrets Non Trouvés dans Git (Bon Signe ✅):
+  ✅ REPLICATE_API_KEY (r8_ONdtNc6FWMeD3qIOogZevepbJxCyL3s2QyFeJ): ABSENT
+  ✅ ELEVENLABS_API_KEY (sk_a0800ff879f2147af1744bca1fa663a831f9abb38ca3c49d): ABSENT
+  ✅ DATABASE PASSWORD (Sommetdumonde1986): ABSENT
+
+Clés Complètes Trouvées: ❌ NON
+  - Aucune clé API complète n'a été exposée dans l'historique git
+  - Seuls les préfixes/aperçus avant truncation sont visibles
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+⚠️  RECOMMANDATIONS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PRIORITÉ 1 (IMMÉDIATE): Actions Recommandées
+─────────────────────────────────────────────────────────────────────────────
+  1. ⚠️  Supprimez BACKEND_ACTIVATION_GUIDE.md de l'historique git
+     Raison: Contient des aperçus de clés qui révèlent les types d'API
+     Commande: git filter-branch --tree-filter 'rm -f BACKEND_ACTIVATION_GUIDE.md' -- --all
+     
+  2. 🔄 OPTIONNEL: Rotation des clés comme mesure préventive
+     - Bien que les clés complètes ne soient pas exposées
+     - Les préfixes pourraient être combinés avec d'autres infos
+     - Rotation mitige tout risque résiduel
+
+PRIORITÉ 2 (COURT TERME): Prévention Future
+─────────────────────────────────────────────────────────────────────────────
+  1. ✅ Ajouter '.env' au .gitignore (déjà fait)
+  2. ✅ Ajouter règles regex aux pre-commit hooks
+  3. ✅ Activer git-secrets pour détection automatique
+  4. ✅ Utiliser Google Secret Manager pour production
+
+PRIORITÉ 3 (MOYEN TERME): Monitoring
+─────────────────────────────────────────────────────────────────────────────
+  1. Surveiller les logs d'accès API pour activités suspectes
+  2. Mettre en place des alertes sur les clés listées
+  3. Auditer les appels API récents pour détection d'abus
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📊 TIMELINE CHRONOLOGIQUE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  2026-02-06 14:54 | Commit 65385cd
+                   └─ BACKEND_ACTIVATION_GUIDE.md créé avec aperçus clés
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ CONCLUSION
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Niveau de Sévérité Globał: 🟡 MOYEN
+
+  ✅ Les clés API complètes NE SONT PAS exposées
+  ✅ Aucun mot de passe de base de données trouvé
+  ✅ Aucune information de connexion Cloud SQL exposée
+  
+  ⚠️  Les aperçus de clés révèlent les préfixes (risque théorique)
+  ⚠️  BACKEND_ACTIVATION_GUIDE.md doit être retiré de git
+
+Comportement Recommandé:
+  1. Retirez BACKEND_ACTIVATION_GUIDE.md de l'historique git (IMMÉDIAT)
+  2. Rotation optionnelle des clés (mesure de sécurité proactive)
+  3. Déployez des règles de détection de secrets dans CI/CD
+  4. Continuez la surveillance régulière
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
