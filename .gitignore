@@ -1,89 +1,41 @@
-# Environment files
-.env
-.env.local
-.env.*.local
-
-# Python
+# Python-generated files
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
+*.py[oc]
 build/
-develop-eggs/
 dist/
-downloads/
-eggs/
-.eggs/
-lib/
-lib64/
-parts/
-sdist/
-var/
 wheels/
-pip-wheel-metadata/
-share/python-wheels/
-*.egg-info/
-.installed.cfg
-*.egg
-MANIFEST
+checkpoints/
+*.egg-info
 
 # Virtual environments
-venv/
-.venv/
-.venv311/
-ENV/
-env/
+.venv
+.python-version
 
-# IDE
-.vscode/
+# IDE settings
 .idea/
-*.swp
-*.swo
-*~
+.vscode/
+
+# Other files
 .DS_Store
+tmp
+.wandb
 
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-.tox/
+# Model checkpoints
+*.ckpt
+*.pt
+*.safetensors
+*.sft
 
-# Logs
-logs/
-*.log
-
-# Docker
-.dockerignore
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
-
-# Credentials
-credentials/
-secrets/
-*.pem
-*.key
-
-# Cache
-.cache/
-*.cache
-
-# OS
-.DS_Store
-Thumbs.db
-
-# Project specific
-.pytest_cache/
-.venv311/
-__pycache__/
-*.pyc
-
-# Terraform local files
-.terraform/
-terraform.tfstate*
-*.tfplan
-tfplan
-
+# Media files
+*.gif
+*.heic
+*.heif
+*.jpg
+*.jpeg
+*.json
+*.m4a
+*.mov
+*.mp4
+*.png
+*.wav
+*.webp

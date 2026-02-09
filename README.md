@@ -1,575 +1,116 @@
-<div align="center">
+# AIPROD - Professional Video Generation Platform
 
-# 🎬 AIPROD
+[![Built on LTX-2](https://img.shields.io/badge/Powered%20By-LTX--2-181717?logo=google-chrome)](#)
+[![Organization](https://img.shields.io/badge/Project-AIPROD-blue)](#)
+[![Tech Stack](https://img.shields.io/badge/Stack-Python%20%7C%20PyTorch%20%7C%20FastAPI-orange)](#)
 
-## Enterprise AI Video Production Pipeline
-
-<img alt="AIPROD" src="https://readme-typing-svg.herokuapp.com?font=Righteous&size=35&duration=3000&pause=1000&lines=Transform+Scripts+Into+4K+Videos;AI-Powered+Cost+Optimization;Multi-Backend+Orchestration;Production+Ready+Platform&center=true&width=900&height=100">
-
-<br/>
-
-> _🎥 Cette vidéo a été générée par AIPROD lui-même — via Google Veo 2, sélectionné automatiquement_
-> _par le moteur d'optimisation des coûts (Runway ML crédits insuffisants → fallback Veo 2, 92% qualité, $0)_
-
-<img src="assets/promo/aiprod_promo.gif" alt="AIPROD Promo - Généré par IA" width="800">
-
-<br/>
-
-> **Transformez vos scripts créatifs en vidéos 4K professionnelles grâce à une orchestration intelligente multi-backend avec optimisation automatique des coûts**
-
-</div>
-
-<br/>
+**AIPROD** is a professional video generation platform built on the LTX-2 foundation model, enhanced with API orchestration, intelligent GPU management, real-time preview streaming, and advanced analytics for enterprise use cases.
 
 <div align="center">
-
-### 🏆 Status & Quick Info
-
-[![Production Ready](https://img.shields.io/badge/Status-Production%20Ready-brightgreen?style=for-the-badge&logo=checkmarx)](https://github.com/Blockprod/AIPROD)
-[![Version](https://img.shields.io/badge/version-3.3.0-blue?style=for-the-badge&logo=github)](https://github.com/Blockprod/AIPROD/releases)
-[![Python](https://img.shields.io/badge/python-3.10%2B-3776ab?style=for-the-badge&logo=python)](https://www.python.org)
-[![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge&logo=opensourceinitiative)](LICENSE)
-[![Enterprise](https://img.shields.io/badge/Enterprise%20Grade-✓-orange?style=for-the-badge&logo=rocket)](https://github.com/Blockprod/AIPROD)
-
+  <video src="https://github.com/user-attachments/assets/4414adc0-086c-43de-b367-9362eeb20228" width="70%" poster=""> </video>
 </div>
-
-<br/>
-<div align="center">
-
-### 🛠️ Built With
-
-<p>
-<a href="https://www.python.org" target="_blank"><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/python/python-original.svg" alt="Python" width="50" height="50"/></a>
-&nbsp;&nbsp;
-<a href="https://fastapi.tiangolo.com" target="_blank"><img src="https://cdn.jsdelivr.net/npm/simple-icons@3.13.0/icons/fastapi.svg" alt="FastAPI" width="50" height="50"/></a>
-&nbsp;&nbsp;
-<a href="https://www.postgresql.org" target="_blank"><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/postgresql/postgresql-original-wordmark.svg" alt="PostgreSQL" width="50" height="50"/></a>
-&nbsp;&nbsp;
-<a href="https://redis.io" target="_blank"><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/redis/redis-original-wordmark.svg" alt="Redis" width="50" height="50"/></a>
-&nbsp;&nbsp;
-<a href="https://www.docker.com" target="_blank"><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/docker/docker-original-wordmark.svg" alt="Docker" width="50" height="50"/></a>
-</p>
-
-<p>
-<a href="https://kubernetes.io" target="_blank"><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/kubernetes/kubernetes-plain-wordmark.svg" alt="Kubernetes" width="50" height="50"/></a>
-&nbsp;&nbsp;
-<a href="https://cloud.google.com" target="_blank"><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/googlecloud/googlecloud-original-wordmark.svg" alt="Google Cloud" width="50" height="50"/></a>
-&nbsp;&nbsp;
-<a href="https://www.terraform.io" target="_blank"><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/terraform/terraform-original-wordmark.svg" alt="Terraform" width="50" height="50"/></a>
-&nbsp;&nbsp;
-<a href="https://prometheus.io" target="_blank"><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/prometheus/prometheus-original-wordmark.svg" alt="Prometheus" width="50" height="50"/></a>
-&nbsp;&nbsp;
-<a href="https://grafana.com" target="_blank"><img src="https://raw.githubusercontent.com/devicons/devicon/master/icons/grafana/grafana-original-wordmark.svg" alt="Grafana" width="50" height="50"/></a>
-</p>
-
-</div>
-
----
-
-<br/>
-
-## ✨ Why AIPROD?
-
-<table>
-  <tr>
-    <td align="center" width="33%">
-      <h4>⚡ Fast</h4>
-      <p>Intelligent Pipeline Orchestration<br/>Multi-stage workflow management</p>
-    </td>
-    <td align="center" width="33%">
-      <h4>🎬 Professional</h4>
-      <p>4K Video Output<br/>Professional quality rendering</p>
-    </td>
-    <td align="center" width="33%">
-      <h4>🔐 Secure</h4>
-      <p>Enterprise Security<br/>Complete access control & encryption</p>
-    </td>
-  </tr>
-  <tr>
-    <td align="center">
-      <h4>� Cost-Intelligent</h4>
-      <p>Smart Backend Selection<br/>Vérifie les crédits en temps réel, bascule automatiquement</p>
-    </td>
-    <td align="center">
-      <h4>📊 Observable</h4>
-      <p>Real-time Monitoring<br/>Centralized observability</p>
-    </td>
-    <td align="center">
-      <h4>🔄 Multi-Backend</h4>
-      <p>Runway ML · Google Veo · Replicate<br/>Fallback automatique sans perte de qualité</p>
-    </td>
-  </tr>
-</table>
-
-<br/>
-
-### 💰 Optimisation Intelligente des Coûts — Le Cœur d'AIPROD
-
-AIPROD ne se contente pas de générer des vidéos. Il **optimise automatiquement chaque décision** pour minimiser les coûts sans impacter la qualité :
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                    MOTEUR D'OPTIMISATION AIPROD                 │
-├─────────────────────────────────────────────────────────────────┤
-│                                                                 │
-│  1. Vérification proactive du solde crédits (Runway API)        │
-│     └─ Cache 5 min, invalidé après chaque génération            │
-│                                                                 │
-│  2. Sélection automatique du backend optimal :                  │
-│     ┌───────────────┬──────────┬─────────┬──────────────────┐   │
-│     │ Backend       │ Qualité  │ Coût    │ Condition        │   │
-│     ├───────────────┼──────────┼─────────┼──────────────────┤   │
-│     │ Runway gen4   │ 95%      │ ~$30    │ 35+ crédits      │   │
-│     │ Runway gen3a  │ ~90%     │ ~$18    │ 18-34 crédits    │   │
-│     │ Google Veo 3  │ 92%      │ $2.60   │ Auto-fallback    │   │
-│     │ Replicate     │ 75%      │ $0.26   │ Budget < $1      │   │
-│     └───────────────┴──────────┴─────────┴──────────────────┘   │
-│                                                                 │
-│  3. Fallback automatique inter-backends (zéro interruption)     │
-│     └─ 3 erreurs consécutives → backend marqué indisponible     │
-│                                                                 │
-│  Résultat : Jusqu'à 92% d'économie sans perte de qualité        │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-<br/>
-
-### 🎯 Perfect For
-
-```
-🎬  Studios & Creative Agencies    📱  Content Creators
-🏢  Enterprise Teams                💼  SaaS Platforms
-🤖  AI/ML Developers                📺  Broadcasting Networks
-```
-
-<br/>
-
----
 
 ## 🚀 Quick Start
 
-### 1. Clone & Setup
-
 ```bash
-git clone https://github.com/Blockprod/AIPROD.git
+# Clone the repository
+git clone https://github.com/averr/AIPROD.git
 cd AIPROD
 
-# Create virtual environment
-python -m venv .venv
-source .venv/bin/activate  # or .\.venv\Scripts\Activate.ps1 on Windows
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Configure environment
-cp .env.example .env
-# Edit .env with your credentials and API keys
+# Set up the environment
+uv sync --frozen
+source .venv/bin/activate
 ```
 
-### 2. Initialize Database
+### Required Models
 
-```bash
-alembic upgrade head
-```
+Download the following models from the [LTX-2 HuggingFace repository](https://huggingface.co/Lightricks/LTX-2):
 
-### 3. Start Server
+**LTX-2 Model Checkpoint** (choose and download one of the following)
+  * [`ltx-2-19b-dev-fp8.safetensors`](https://huggingface.co/Lightricks/LTX-2/blob/main/ltx-2-19b-dev-fp8.safetensors) - [Download](https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-19b-dev-fp8.safetensors)
 
-```bash
-python -m uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
-```
+  * [`ltx-2-19b-dev.safetensors`](https://huggingface.co/Lightricks/LTX-2/blob/main/ltx-2-19b-dev.safetensors) - [Download](https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-19b-dev.safetensors)
+  * [`ltx-2-19b-distilled.safetensors`](https://huggingface.co/Lightricks/LTX-2/blob/main/ltx-2-19b-distilled.safetensors) - [Download](https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-19b-distilled.safetensors)
+  * [`ltx-2-19b-distilled-fp8.safetensors`](https://huggingface.co/Lightricks/LTX-2/blob/main/ltx-2-19b-distilled-fp8.safetensors) - [Download](https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-19b-distilled-fp8.safetensors)
 
-### 4. Access Documentation
+**Spatial Upscaler** - Required for current two-stage pipeline implementations in this repository
+  * [`ltx-2-spatial-upscaler-x2-1.0.safetensors`](https://huggingface.co/Lightricks/LTX-2/blob/main/ltx-2-spatial-upscaler-x2-1.0.safetensors) - [Download](https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-spatial-upscaler-x2-1.0.safetensors)
 
-```
-🔗 /docs        # Interactive API documentation
-🔗 /redoc       # Alternative documentation view
-🔗 /health      # System health status
-```
+**Temporal Upscaler** - Supported by the model and will be required for future pipeline implementations
+  * [`ltx-2-temporal-upscaler-x2-1.0.safetensors`](https://huggingface.co/Lightricks/LTX-2/blob/main/ltx-2-temporal-upscaler-x2-1.0.safetensors) - [Download](https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-temporal-upscaler-x2-1.0.safetensors)
 
----
+**Distilled LoRA** - Required for current two-stage pipeline implementations in this repository (except DistilledPipeline and ICLoraPipeline)
+  * [`ltx-2-19b-distilled-lora-384.safetensors`](https://huggingface.co/Lightricks/LTX-2/blob/main/ltx-2-19b-distilled-lora-384.safetensors) - [Download](https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-19b-distilled-lora-384.safetensors)
 
-## 🔌 API Overview
+**Gemma Text Encoder** (download all assets from the repository)
+  * [`Gemma 3`](https://huggingface.co/google/gemma-3-12b-it-qat-q4_0-unquantized/tree/main)
 
-### Core Capabilities
+**LoRAs**
+  * [`LTX-2-19b-IC-LoRA-Canny-Control`](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Canny-Control) - [Download](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Canny-Control/resolve/main/ltx-2-19b-ic-lora-canny-control.safetensors)
+  * [`LTX-2-19b-IC-LoRA-Depth-Control`](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Depth-Control) - [Download](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Depth-Control/resolve/main/ltx-2-19b-ic-lora-depth-control.safetensors)
+  * [`LTX-2-19b-IC-LoRA-Detailer`](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Detailer) - [Download](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Detailer/resolve/main/ltx-2-19b-ic-lora-detailer.safetensors)
+  * [`LTX-2-19b-IC-LoRA-Pose-Control`](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Pose-Control) - [Download](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Pose-Control/resolve/main/ltx-2-19b-ic-lora-pose-control.safetensors)
+  * [`LTX-2-19b-LoRA-Camera-Control-Dolly-In`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-In) - [Download](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-In/resolve/main/ltx-2-19b-lora-camera-control-dolly-in.safetensors)
+  * [`LTX-2-19b-LoRA-Camera-Control-Dolly-Left`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-Left) - [Download](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-Left/resolve/main/ltx-2-19b-lora-camera-control-dolly-left.safetensors)
+  * [`LTX-2-19b-LoRA-Camera-Control-Dolly-Out`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-Out) - [Download](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-Out/resolve/main/ltx-2-19b-lora-camera-control-dolly-out.safetensors)
+  * [`LTX-2-19b-LoRA-Camera-Control-Dolly-Right`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-Right) - [Download](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-Right/resolve/main/ltx-2-19b-lora-camera-control-dolly-right.safetensors)
+  * [`LTX-2-19b-LoRA-Camera-Control-Jib-Down`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Jib-Down) - [Download](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Jib-Down/resolve/main/ltx-2-19b-lora-camera-control-jib-down.safetensors)
+  * [`LTX-2-19b-LoRA-Camera-Control-Jib-Up`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Jib-Up) - [Download](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Jib-Up/resolve/main/ltx-2-19b-lora-camera-control-jib-up.safetensors)
+  * [`LTX-2-19b-LoRA-Camera-Control-Static`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Static) - [Download](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Static/resolve/main/ltx-2-19b-lora-camera-control-static.safetensors)
 
-|          🎬 Projects           |    ⚙️ Pipeline    |       📥 Results       |        📊 Monitoring         |
-| :----------------------------: | :---------------: | :--------------------: | :--------------------------: |
-| Create & manage video projects | Execute workflows | Export & deliver media | Health & performance metrics |
+### Available Pipelines
 
-### Authentication Methods
+* **[TI2VidTwoStagesPipeline](packages/ltx-pipelines/src/ltx_pipelines/ti2vid_two_stages.py)** - Production-quality text/image-to-video with 2x upsampling (recommended)
+* **[TI2VidOneStagePipeline](packages/ltx-pipelines/src/ltx_pipelines/ti2vid_one_stage.py)** - Single-stage generation for quick prototyping
+* **[DistilledPipeline](packages/ltx-pipelines/src/ltx_pipelines/distilled.py)** - Fastest inference with 8 predefined sigmas
+* **[ICLoraPipeline](packages/ltx-pipelines/src/ltx_pipelines/ic_lora.py)** - Video-to-video and image-to-video transformations
+* **[KeyframeInterpolationPipeline](packages/ltx-pipelines/src/ltx_pipelines/keyframe_interpolation.py)** - Interpolate between keyframe images
 
-|  🔐 OAuth 2.0  |      🔑 API Keys      | 🤝 Service Account |
-| :------------: | :-------------------: | :----------------: |
-| JWT Token Flow | Direct authentication |  Server-to-server  |
+### ⚡ Optimization Tips
 
-### Typical Workflow
+* **Use DistilledPipeline** - Fastest inference with only 8 predefined sigmas (8 steps stage 1, 4 steps stage 2)
+* **Enable FP8 transformer** - Enables lower memory footprint: `--enable-fp8` (CLI) or `fp8transformer=True` (Python)
+* **Install attention optimizations** - Use xFormers (`uv sync --extra xformers`) or [Flash Attention 3](https://github.com/Dao-AILab/flash-attention) for Hopper GPUs
+* **Use gradient estimation** - Reduce inference steps from 40 to 20-30 while maintaining quality (see [pipeline documentation](packages/ltx-pipelines/README.md#denoising-loop-optimization))
+* **Skip memory cleanup** - If you have sufficient VRAM, disable automatic memory cleanup between stages for faster processing
+* **Choose single-stage pipeline** - Use `TI2VidOneStagePipeline` for faster generation when high resolution isn't required
 
-```
-1️⃣  Create Project  →  2️⃣  Configure Settings  →  3️⃣  Execute Pipeline
-                  ↓
-          6️⃣  Download Results  ←  5️⃣  Retrieve Output  ←  4️⃣  Monitor Progress
-```
+## ✍️ Prompting for LTX-2
 
-**Full documentation**: [📖 API Docs](/docs/api)
+When writing prompts, focus on detailed, chronological descriptions of actions and scenes. Include specific movements, appearances, camera angles, and environmental details - all in a single flowing paragraph. Start directly with the action, and keep descriptions literal and precise. Think like a cinematographer describing a shot list. Keep within 200 words. For best results, build your prompts using this structure:
 
----
+- Start with main action in a single sentence
+- Add specific details about movements and gestures
+- Describe character/object appearances precisely
+- Include background and environment details
+- Specify camera angles and movements
+- Describe lighting and colors
+- Note any changes or sudden events
 
-## 🎥 Comment Cette Vidéo a Été Générée
+For additional guidance on writing a prompt please refer to <https://ltx.video/blog/how-to-prompt-for-ltx-2>
 
-> **La vidéo promotionnelle ci-dessus a été générée par AIPROD lui-même.**
+### Automatic Prompt Enhancement
 
-Voici exactement ce qui s'est passé :
+LTX-2 pipelines support automatic prompt enhancement via an `enhance_prompt` parameter.
 
-```
-📊 Solde Runway ML vérifié automatiquement : 7 crédits
-⚠️  Minimum requis (gen4_turbo) : 35 crédits
-🔄 Décision du moteur d'optimisation : basculement sur Google Veo 2
-✅ Vidéo générée via Gemini API + Veo 2 en ~48 secondes
-💰 Coût final : $0 (inclus dans le quota gratuit Gemini API)
-🎬 Qualité : 1280x720, 24fps, 5 secondes, codec H.264
-```
+## 🔌 ComfyUI Integration
 
-| Étape                       | Action du moteur AIPROD                |
-| --------------------------- | -------------------------------------- |
-| 1. **Vérification crédits** | API Runway → 7 crédits (insuffisant)   |
-| 2. **Sélection backend**    | Runway ❌ → Veo 2 ✅ (92% qualité, $0) |
-| 3. **Génération**           | Prompt → Veo 2 → MP4 1.65MB            |
-| 4. **Livraison**            | Conversion GIF + intégration README    |
+To use our model with ComfyUI, please follow the instructions at <https://github.com/Lightricks/ComfyUI-LTXVideo/>.
 
-**C'est exactement la proposition de valeur d'AIPROD** : optimisation transparente des coûts, zéro interruption, zéro compromis sur la qualité.
+## 📦 Packages
 
----
+This repository is organized as a monorepo with three main packages:
 
-## 🏗️ Architecture
+* **[ltx-core](packages/ltx-core/)** - Core model implementation, inference stack, and utilities
+* **[ltx-pipelines](packages/ltx-pipelines/)** - High-level pipeline implementations for text-to-video, image-to-video, and other generation modes
+* **[ltx-trainer](packages/ltx-trainer/)** - Training and fine-tuning tools for LoRA, full fine-tuning, and IC-LoRA
 
-AIPROD features a **production-grade layered microservices design**:
-
-|         Layer         | Purpose             |                Features                 |
-| :-------------------: | :------------------ | :-------------------------------------: |
-|      **🌐 API**       | Request handling    |    REST endpoints, validation, auth     |
-| **⚙️ Orchestration**  | Workflow management |  Pipeline execution, state management   |
-| **💼 Business Logic** | Core processing     | Specialized algorithms, transformations |
-| **🛡️ Infrastructure** | Production support  |    Security, optimization, hardening    |
-|      **🗄️ Data**      | Storage & caching   |      Distributed data, Redis cache      |
-| **📊 Observability**  | Monitoring          |       Logging, metrics, alerting        |
-
-### Design Principles
-
-✅ Enterprise patterns | ✅ Modular components | ✅ Access control  
-✅ Distributed caching | ✅ Fault tolerance | ✅ Async processing  
-✅ Cloud-native scaling
-
----
-
-## 🧪 Testing
-
-### Test Categories
-
-|      📦 Unit      |  🔗 Integration  |        📈 Load         |       📋 Compliance       |
-| :---------------: | :--------------: | :--------------------: | :-----------------------: |
-| Component testing | Workflow testing | Performance validation | Security & quality checks |
-
-### Running Tests
-
-```bash
-# All tests with coverage
-pytest tests -v --cov=src --cov-report=html
-
-# By category
-pytest tests/unit -v          # Unit tests
-pytest tests/integration -v   # Integration tests
-pytest tests/load -v          # Load testing
-```
-
-### Quality Metrics
-
-✅ High code coverage | ✅ Excellent pass rate | ✅ Load validated  
-✅ Performance proven | ✅ Security verified | ✅ Continuous checks
-
----
-
-## 🔒 Security
-
-### Security Features
-
-|      🔐 Auth       |     👥 AuthZ     |   🔒 Encryption   |     📝 Audit     |
-| :----------------: | :--------------: | :---------------: | :--------------: |
-|  Token-based auth  | RBAC + granular  | Transport + data  |  Event tracking  |
-| Session management | Role permissions | Secret management | Compliance ready |
-
-|      🛡️ Input      |  🚫 Rate Limit  |    📊 Standards    |   📋 Compliance   |
-| :----------------: | :-------------: | :----------------: | :---------------: |
-|   Type checking    | DDoS protection |   Best practices   | Enterprise secure |
-| Input sanitization | API throttling  | Industry standards |     Auditable     |
-
-### Access Control Levels
-
-| Role           | Permissions                |    Use Case    |
-| :------------- | :------------------------- | :------------: |
-| **ADMIN** 👑   | Full system access         | Administrators |
-| **USER** 👤    | Create/manage own projects | Regular users  |
-| **VIEWER** 👁️  | Read-only access           |  Stakeholders  |
-| **SERVICE** 🤖 | Service-to-service calls   |  Integrations  |
-
----
-
-## 📊 Performance
-
-### Performance Metrics
-
-| 🚀 Metric         |    Status    |     Details      |
-| :---------------- | :----------: | :--------------: |
-| **Response Time** | ✅ Optimized |  < 100ms median  |
-| **Throughput**    | ✅ Verified  | Tested at scale  |
-| **Memory**        | ✅ Optimized | Efficient usage  |
-| **CPU**           | ✅ Efficient |   Low overhead   |
-| **Queries**       |   ✅ Fast    | Indexed & cached |
-| **Cache**         | ✅ Excellent |  95%+ hit rate   |
-| **Stability**     |  ✅ Robust   |   99.9% uptime   |
-
-### Scaling Strategy
-
-🔄 **Horizontal** - Stateless API layer with load distribution  
-📈 **Vertical** - Optimized resource & efficient processing  
-💾 **Data Layer** - Query optimization & intelligent caching
-
----
-
-## 🐳 Deployment
-
-### Deployment Options
-
-|    🐳 Docker     |  📦 Compose   |  ☁️ Cloud  | ⚙️ Kubernetes |
-| :--------------: | :-----------: | :--------: | :-----------: |
-| Single container | Multi-service | Serverless |  K8s cluster  |
-
-<details><summary><b>1️⃣ Docker Build & Run</b></summary>
-
-```bash
-# Build image
-docker build -t aiprod-v33:latest .
-
-# Run container
-docker run -p 8000:8000 \
-  --env-file .env \
-  -v $(pwd)/logs:/app/logs \
-  aiprod-v33:latest
-```
-
-</details>
-
-<details><summary><b>2️⃣ Docker Compose (Recommended for local)</b></summary>
-
-```bash
-# Start all services
-docker-compose up -d
-
-# Check status
-docker-compose ps
-
-# View logs
-docker-compose logs -f api
-```
-
-</details>
-
-<details><summary><b>3️⃣ Cloud Platforms</b></summary>
-
-```bash
-# See cloud-specific deployment guides
-# GCP Cloud Run, AWS ECS, Azure Container Instances, etc.
-```
-
-</details>
-
-<details><summary><b>4️⃣ Kubernetes</b></summary>
-
-```bash
-kubectl apply -f deployments/kubernetes/
-kubectl get pods -l app=aiprod
-```
-
-</details>
-
----
-
-## 📋 System Requirements
-
-<table align="center">
-  <tr align="center">
-    <td><strong>OS</strong><br/>Linux • macOS<br/>Windows (WSL2)</td>
-    <td><strong>Python</strong><br/>3.10+</td>
-    <td><strong>Docker</strong><br/>20.10+<br/>(Optional)</td>
-    <td><strong>RAM</strong><br/>8GB min<br/>16GB recommended</td>
-  </tr>
-</table>
-
-### External Services Required
-
-- ☁️ **Cloud Provider** — Storage, Logging, Configuration
-- 🔐 **Authentication Service** — Third-party auth provider
-- 🗄️ **Database** — Persistent data storage
-- ⚡ **Cache Layer** — Performance optimization
-- 🎬 **Media APIs** — Third-party processing services
-
----
-
-## ⚙️ Quick Configuration
-
-```bash
-cp .env.example .env
-# Edit .env with your credentials
-```
-
----
+Each package has its own README and documentation. See the [Documentation](#-documentation) section below.
 
 ## 📚 Documentation
 
-<div align="center">
+Each package includes comprehensive documentation:
 
-|               📖                |            🏗️             |          🔌           |          🔒           |
-| :-----------------------------: | :-----------------------: | :-------------------: | :-------------------: |
-| [**Quick Start**](docs/guides/) | [**Architecture**](docs/) | [**API Docs**](docs/) | [**Security**](docs/) |
-|      Getting started guide      |  System design patterns   |    REST endpoints     |    Best practices     |
-
-|           🚀            |        🆘        |                 📝                  |           🔄           |
-| :---------------------: | :--------------: | :---------------------------------: | :--------------------: |
-| [**Deployment**](docs/) | [**FAQ**](docs/) | [**Contributing**](CONTRIBUTING.md) | [**Changelog**](docs/) |
-|   Deploy to any cloud   | Common questions |         Join our community          |       What's new       |
-
-</div>
-
----
-
-## 🔄 Disaster Recovery
-
-### SLA Goals
-
-|      Metric       |   Target   | Status |
-| :---------------: | :--------: | :----: |
-| **Availability**  |   99.9%    |   ✅   |
-|     **MTTR**      | < 1 minute |   ✅   |
-|      **RTO**      | 30-120 sec |   ✅   |
-|      **RPO**      | 5 minutes  |   ✅   |
-| **Auto Failover** |    Yes     |   ✅   |
-
-### Recovery Capabilities
-
-- ✅ Multi-region failover support
-- ✅ Automatic backup and restore
-- ✅ Circuit breaker for graceful degradation
-- ✅ State persistence across regions
-- ✅ Zero-downtime deployments
-
----
-
-## 📊 Roadmap
-
-### Current Release ✅
-
-| Feature                |   Status    | Details                 |
-| :--------------------- | :---------: | :---------------------- |
-| 🎬 Core orchestration  | ✅ Complete | Multi-stage pipelines   |
-| 🔐 Enterprise security | ✅ Complete | RBAC, encryption, audit |
-| 📊 Advanced monitoring | ✅ Complete | Prometheus, Grafana     |
-| ☁️ Cloud-native design | ✅ Complete | Kubernetes ready        |
-| 🧬 Quality assurance   | ✅ Complete | Comprehensive testing   |
-
-### Coming Soon 🚀
-
-|    👥 Collaboration     |  🧠 ML Optimization  |  🔗 Integrations   |  🎨 Custom Models   |
-| :---------------------: | :------------------: | :----------------: | :-----------------: |
-| Real-time collaboration | Advanced ML features | Extended ecosystem | Train custom models |
-
-### Future Vision 💭
-
-🎯 White-label solutions | 🌐 Global distribution | 🚀 Advanced automation  
-📱 Mobile-first experience | 🤖 AI-driven optimization | 🔐 Enhanced security
-
----
-
-## 💬 Support & Community
-
-<h3 align="center">🤝 Connect With Us</h3>
-<p align="center">
-<a href="mailto:climax2creative@gmail.com" target="blank"><img align="center" src="https://cdn.jsdelivr.net/npm/simple-icons@3.0.1/icons/gmail.svg" alt="Email" height="40" width="50" /></a>
-<a href="https://github.com/Blockprod" target="blank"><img align="center" src="https://cdn.jsdelivr.net/npm/simple-icons@3.0.1/icons/github.svg" alt="GitHub" height="40" width="50" /></a>
-<a href="https://github.com/Blockprod/AIPROD/issues" target="blank"><img align="center" src="https://cdn.jsdelivr.net/npm/simple-icons@3.0.1/icons/github.svg" alt="GitHub Issues" height="40" width="50" /></a>
-</p>
-
-### 🔍 Get Help
-
-|     💮 Method     | Link                                                                  |     When to Use      |
-| :---------------: | :-------------------------------------------------------------------- | :------------------: |
-|   📧 **Email**    | climax2creative@gmail.com                                             |   Direct inquiries   |
-|   🐛 **Issues**   | [GitHub Issues](https://github.com/Blockprod/AIPROD/issues)           |     Bug reports      |
-| 🗢️ **Discussions** | [GitHub Discussions](https://github.com/Blockprod/AIPROD/discussions) |  Questions & ideas   |
-|    📚 **Docs**    | [docs/](docs/)                                                        | Learning & reference |
-
-### 📝 Report Issues
-
-When reporting bugs, include:
-
-1. 📄 Steps to reproduce
-2. ⚠️ Expected vs actual behavior
-3. 💻 System info (OS, Python, etc.)
-4. 📋 Relevant logs/errors
-5. 📸 Screenshots if applicable
-
-### 🎯 How to Contribute
-
-We welcome community contributions! Here's how:
-
-| Step | Action          | Command                        |
-| :--: | :-------------- | :----------------------------- |
-|  1️⃣  | Fork repository | GitHub Fork button             |
-|  2️⃣  | Create branch   | `git checkout -b feature/name` |
-|  3️⃣  | Make changes    | Edit files                     |
-|  4️⃣  | Add tests       | `pytest tests -v`              |
-|  5️⃣  | Submit PR       | GitHub Pull Request            |
-
-**Guidelines:**
-
-- 🎨 Follow existing code style
-- 📝 Clear commit messages
-- 🧪 Tests for new features
-- 📚 Update docs
-
-See [CONTRIBUTING.md](CONTRIBUTING.md) for detailed guidelines.
-
----
-
-<div align="center">
-
-## � Project Highlights
-
-|     🎬 Feature     | ⚡ Performance |   🔐 Security    | 📈 Scalability |
-| :----------------: | :------------: | :--------------: | :------------: |
-| **4K Generation**  |   Optimized    | Enterprise Grade |  Cloud Native  |
-| **Multi-Pipeline** |    Verified    | OWASP Compliant  |   Horizontal   |
-| **Orchestration**  |      Fast      |    Encrypted     |  Auto-scaling  |
-|   **Monitoring**   |   Real-time    |  Audit Logging   |  Distributed   |
-
----
-
-### 🎬 Transforming creative visions into reality through intelligent AI-powered video generation
-
-### 🔗 Connect & Share
-
-[![GitHub Repo](https://img.shields.io/badge/GitHub-Blockprod%2FAIPROD-black?style=for-the-badge&logo=github)](https://github.com/Blockprod/AIPROD)
-[![Email Contact](https://img.shields.io/badge/Email-climax2creative%40gmail.com-red?style=for-the-badge&logo=gmail)](mailto:climax2creative@gmail.com)
-[![Report Issue](https://img.shields.io/badge/Issues-Report%20Bug-orange?style=for-the-badge&logo=github)](https://github.com/Blockprod/AIPROD/issues)
-
----
-
-### 📜 License & Credits
-
-Licensed under the [MIT License](LICENSE) | Made with ❤️ by [CLIMAX CREATIVE](https://github.com/Blockprod)
-
-**Version**: 3.3.0 | **Status**: Production Ready ✅ | **Updated**: February 2026
-
-<br/>
-
-[⬆️ Back to top](#-aiprod)
-
-</div>
+* **[LTX-Core README](packages/ltx-core/README.md)** - Core model implementation, inference stack, and utilities
+* **[LTX-Pipelines README](packages/ltx-pipelines/README.md)** - High-level pipeline implementations and usage guides
+* **[LTX-Trainer README](packages/ltx-trainer/README.md)** - Training and fine-tuning documentation with detailed guides
