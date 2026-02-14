@@ -1,5 +1,8 @@
 # Scripts - AIPROD
 
+> **⚠️ PROPRIETARY - CONFIDENTIAL**  
+> Scripts propriétaires **Blockprod**.
+
 Scripts utilitaires organisés par catégorie.
 
 ## 📁 Structure
@@ -62,4 +65,4 @@ python scripts/data/process_dataset.py \
 
 ---
 
-*Created: 2026-02-10*
+*© 2026 Blockprod. All rights reserved.*

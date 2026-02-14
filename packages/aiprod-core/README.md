@@ -1,6 +1,9 @@
 # AIPROD-Core
 
-The foundational library for the AIPROD Audio-Video generation model. This package contains the raw model definitions, component implementations, and loading logic used by `AIPROD-pipelines` and `AIPROD-trainer`.
+> **⚠️ PROPRIETARY - CONFIDENTIAL**  
+> This package is part of the AIPROD project by **Blockprod**. All rights reserved. Do not distribute.
+
+The foundational library for the AIPROD Audio-Video generation model. This package contains the proprietary model definitions, component implementations, and loading logic used by `AIPROD-pipelines` and `AIPROD-trainer`.
 
 ## 📦 What's Inside?
 

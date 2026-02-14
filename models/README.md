@@ -1,5 +1,8 @@
 # Models - AIPROD
 
+> **⚠️ PROPRIETARY - CONFIDENTIAL**  
+> Modèles propriétaires **Blockprod**. Ne pas distribuer.
+
 Gestion des checkpoints et modèles du projet.
 
 ## 📁 Structure
@@ -20,31 +23,22 @@ models/
     └── README.md
 ```
 
-## 📥 Modèles Pré-requis
+## 📥 Modèles Propriétaires
+
+> **⚠️ CONFIDENTIEL** - Ces modèles sont la propriété exclusive de Blockprod.
 
 ### AIPROD Model
-```bash
-# Télécharger depuis HuggingFace
-huggingface-cli download Lightricks/AIPROD \
-  --local-dir models/pretrained/ \
-  --repo-type model
-```
 
-**Variantes disponibles:**
+**Variantes disponibles (interne uniquement) :**
 - `AIPROD-19b-dev.safetensors` (full precision, 40GB)
 - `AIPROD-19b-dev-fp8.safetensors` (quantized, 20GB)
 - `AIPROD-19b-distilled.safetensors` (distilled, 10GB)
 
 ### Upscalers
-```bash
-# Spatial Upscaler
-wget https://huggingface.co/Lightricks/AIPROD/resolve/main/AIPROD-spatial-upscaler-x2-1.0.safetensors \
-  -O models/pretrained/spatial-upscaler-x2-1.0.safetensors
+- `spatial-upscaler-x2-1.0.safetensors` (6GB)
+- `temporal-upscaler-x2-1.0.safetensors` (6GB)
 
-# Temporal Upscaler
-wget https://huggingface.co/Lightricks/AIPROD/resolve/main/AIPROD-temporal-upscaler-x2-1.0.safetensors \
-  -O models/pretrained/temporal-upscaler-x2-1.0.safetensors
-```
+Contacter l'équipe Blockprod pour l'accès aux modèles.
 
 ## 💾 Checkpoint Management
 
@@ -85,4 +79,4 @@ rm -rf models/cache/*
 
 ---
 
-*Created: 2026-02-10*
+*© 2026 Blockprod. All rights reserved.*

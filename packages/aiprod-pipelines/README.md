@@ -1,6 +1,9 @@
 # AIPROD Pipelines
 
-High-level pipeline implementations for generating audio-video content with Lightricks' **AIPROD** model. This package provides ready-to-use pipelines for text-to-video, image-to-video, video-to-video, and keyframe interpolation tasks.
+> **⚠️ PROPRIETARY - CONFIDENTIAL**  
+> This package is part of the AIPROD project by **Blockprod**. All rights reserved. Do not distribute.
+
+High-level pipeline implementations for generating audio-video content with the **AIPROD** model. This package provides ready-to-use pipelines for text-to-video, image-to-video, video-to-video, and keyframe interpolation tasks.
 
 Pipelines are built using building blocks from [`AIPROD-core`](../AIPROD-core/) (schedulers, guiders, noisers, patchifiers) and handle the complete inference flow including model loading, encoding, decoding, and file I/O.
 

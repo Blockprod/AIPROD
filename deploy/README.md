@@ -1,5 +1,8 @@
 # Deployment - AIPROD
 
+> **⚠️ PROPRIETARY - CONFIDENTIAL**  
+> Infrastructure de déploiement propriétaire **Blockprod**.
+
 Ce dossier contient tous les fichiers et scripts de déploiement.
 
 ## 📁 Structure
@@ -71,4 +74,4 @@ curl https://aiprod-merger-xxx.run.app/health
 
 ---
 
-*Created: 2026-02-10*
+*© 2026 Blockprod. All rights reserved.*

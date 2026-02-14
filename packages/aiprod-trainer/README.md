@@ -1,7 +1,10 @@
 # AIPROD Trainer
 
+> **⚠️ PROPRIETARY - CONFIDENTIAL**  
+> This package is part of the AIPROD project by **Blockprod**. All rights reserved. Do not distribute.
+
 This package provides tools and scripts for training and fine-tuning
-Lightricks' **AIPROD** audio-video generation model. It enables LoRA training, full
+the **AIPROD** audio-video generation model. It enables LoRA training, full
 fine-tuning, and training of video-to-video transformations (IC-LoRA) on custom datasets.
 
 ---
@@ -33,32 +36,8 @@ All detailed guides and technical documentation are in the [docs](./docs/) direc
 
 ---
 
-## 🤝 Contributing
+## 📝 License
 
-We welcome contributions from the community! Here's how you can help:
+**Proprietary** - © 2026 Blockprod. All rights reserved.
 
-- **Share Your Work**: If you've trained interesting LoRAs or achieved cool results, please share them with the
-  community.
-- **Report Issues**: Found a bug or have a suggestion? Open an issue on GitHub.
-- **Submit PRs**: Help improve the codebase with bug fixes or general improvements.
-- **Feature Requests**: Have ideas for new features? Let us know through GitHub issues.
-
----
-
-## 💬 Join the Community
-
-Have questions, want to share your results, or need real-time help?
-
-Join our [community Discord server](https://discord.gg/AIPRODplatform) to connect with other users and the development
-team!
-
-- Get troubleshooting help
-- Share your training results and workflows
-- Collaborate on new ideas and features
-- Stay up to date with announcements and updates
-
-We look forward to seeing you there!
-
----
-
-Happy training! 🎉
+This software is proprietary and confidential. Unauthorized copying, distribution, or modification is strictly prohibited.

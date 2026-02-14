@@ -1,5 +1,8 @@
 # Configuration - AIPROD
 
+> **⚠️ PROPRIETARY - CONFIDENTIAL**  
+> Configuration propriétaire **Blockprod**.
+
 Ce dossier centralise toute la configuration du projet AIPROD.
 
 ## 📁 Structure
@@ -70,4 +73,4 @@ gcloud run deploy aiprod-merger \
 
 ---
 
-*Created: 2026-02-10*
+*© 2026 Blockprod. All rights reserved.*

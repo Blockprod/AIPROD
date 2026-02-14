@@ -1,5 +1,8 @@
 # Tests - aiprod-core
 
+> **⚠️ PROPRIETARY - CONFIDENTIAL**  
+> Tests propriétaires **Blockprod**.
+
 Unit tests et integration tests pour le module aiprod-core.
 
 ## 📁 Structure
@@ -91,4 +94,4 @@ async def test_async_operation():
 
 ---
 
-*Created: 2026-02-10*
+*© 2026 Blockprod. All rights reserved.*
