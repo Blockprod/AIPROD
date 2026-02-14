@@ -1,116 +1,293 @@
-# AIPROD - Professional Video Generation Platform
+# AIPROD - Internal Documentation
 
-[![Built on LTX-2](https://img.shields.io/badge/Powered%20By-LTX--2-181717?logo=google-chrome)](#)
-[![Organization](https://img.shields.io/badge/Project-AIPROD-blue)](#)
-[![Tech Stack](https://img.shields.io/badge/Stack-Python%20%7C%20PyTorch%20%7C%20FastAPI-orange)](#)
+> **⚠️ PRIVATE PROJECT - CONFIDENTIAL**  
+> This repository contains proprietary code and innovations. Do not share externally.
 
-**AIPROD** is a professional video generation platform built on the LTX-2 foundation model, enhanced with API orchestration, intelligent GPU management, real-time preview streaming, and advanced analytics for enterprise use cases.
+## 📋 Table of Contents
 
-<div align="center">
-  <video src="https://github.com/user-attachments/assets/4414adc0-086c-43de-b367-9362eeb20228" width="70%" poster=""> </video>
-</div>
+- [System Requirements](#-system-requirements)
+- [Installation](#-installation)
+- [Configuration](#-configuration)
+- [Usage Examples](#-usage-examples)
+- [Available Pipelines](#-available-pipelines)
+- [Packages](#-packages)
+- [Troubleshooting](#-troubleshooting)
 
-## 🚀 Quick Start
+## 💻 System Requirements
+
+### Minimum
+- **GPU**: NVIDIA GPU with 24GB VRAM (RTX 3090, RTX 4090, A5000)
+- **RAM**: 32GB system memory
+- **Storage**: 100GB+ free space
+- **OS**: Linux (Ubuntu 20.04+), Windows 10/11
+- **Python**: 3.11.x (required)
+- **CUDA**: 11.8+ or 12.1+
+
+### Recommended
+- **GPU**: NVIDIA H100, A100 (80GB), RTX 6000 Ada (48GB)
+- **RAM**: 64GB+ system memory
+- **Storage**: NVMe SSD
+
+## 🚀 Installation
+
+### Standard Installation
 
 ```bash
-# Clone the repository
-git clone https://github.com/averr/AIPROD.git
+# Clone repository
+git clone <private-repo-url>
 cd AIPROD
 
-# Set up the environment
-uv sync --frozen
-source .venv/bin/activate
+# Create virtual environment (Python 3.11 required)
+python3.11 -m venv .venv_311
+source .venv_311/bin/activate  # Linux/Mac
+# OR
+.venv_311\Scripts\activate  # Windows
+
+# Install dependencies
+pip install --upgrade pip
+pip install -r requirements.txt
+
+# Install packages in editable mode
+pip install -e packages/aiprod-core
+pip install -e packages/aiprod-pipelines
+pip install -e packages/aiprod-trainer
 ```
 
-### Required Models
+### Optional Optimizations
 
-Download the following models from the [LTX-2 HuggingFace repository](https://huggingface.co/Lightricks/LTX-2):
+```bash
+# xFormers (recommended for most GPUs)
+pip install xformers
 
-**LTX-2 Model Checkpoint** (choose and download one of the following)
-  * [`ltx-2-19b-dev-fp8.safetensors`](https://huggingface.co/Lightricks/LTX-2/blob/main/ltx-2-19b-dev-fp8.safetensors) - [Download](https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-19b-dev-fp8.safetensors)
+# Flash Attention 3 (H100/H200 only)
+pip install flash-attn --no-build-isolation
+```
 
-  * [`ltx-2-19b-dev.safetensors`](https://huggingface.co/Lightricks/LTX-2/blob/main/ltx-2-19b-dev.safetensors) - [Download](https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-19b-dev.safetensors)
-  * [`ltx-2-19b-distilled.safetensors`](https://huggingface.co/Lightricks/LTX-2/blob/main/ltx-2-19b-distilled.safetensors) - [Download](https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-19b-distilled.safetensors)
-  * [`ltx-2-19b-distilled-fp8.safetensors`](https://huggingface.co/Lightricks/LTX-2/blob/main/ltx-2-19b-distilled-fp8.safetensors) - [Download](https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-19b-distilled-fp8.safetensors)
+## ⚙️ Configuration
 
-**Spatial Upscaler** - Required for current two-stage pipeline implementations in this repository
-  * [`ltx-2-spatial-upscaler-x2-1.0.safetensors`](https://huggingface.co/Lightricks/LTX-2/blob/main/ltx-2-spatial-upscaler-x2-1.0.safetensors) - [Download](https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-spatial-upscaler-x2-1.0.safetensors)
+### 1. Environment Setup
 
-**Temporal Upscaler** - Supported by the model and will be required for future pipeline implementations
-  * [`ltx-2-temporal-upscaler-x2-1.0.safetensors`](https://huggingface.co/Lightricks/LTX-2/blob/main/ltx-2-temporal-upscaler-x2-1.0.safetensors) - [Download](https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-temporal-upscaler-x2-1.0.safetensors)
+```bash
+cp .env.example .env
+```
 
-**Distilled LoRA** - Required for current two-stage pipeline implementations in this repository (except DistilledPipeline and ICLoraPipeline)
-  * [`ltx-2-19b-distilled-lora-384.safetensors`](https://huggingface.co/Lightricks/LTX-2/blob/main/ltx-2-19b-distilled-lora-384.safetensors) - [Download](https://huggingface.co/Lightricks/LTX-2/resolve/main/ltx-2-19b-distilled-lora-384.safetensors)
+Edit `.env`:
 
-**Gemma Text Encoder** (download all assets from the repository)
-  * [`Gemma 3`](https://huggingface.co/google/gemma-3-12b-it-qat-q4_0-unquantized/tree/main)
+```bash
+# Model paths
+MODEL_DIR=/path/to/your/models
+OUTPUT_DIR=/path/to/outputs
 
-**LoRAs**
-  * [`LTX-2-19b-IC-LoRA-Canny-Control`](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Canny-Control) - [Download](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Canny-Control/resolve/main/ltx-2-19b-ic-lora-canny-control.safetensors)
-  * [`LTX-2-19b-IC-LoRA-Depth-Control`](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Depth-Control) - [Download](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Depth-Control/resolve/main/ltx-2-19b-ic-lora-depth-control.safetensors)
-  * [`LTX-2-19b-IC-LoRA-Detailer`](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Detailer) - [Download](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Detailer/resolve/main/ltx-2-19b-ic-lora-detailer.safetensors)
-  * [`LTX-2-19b-IC-LoRA-Pose-Control`](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Pose-Control) - [Download](https://huggingface.co/Lightricks/LTX-2-19b-IC-LoRA-Pose-Control/resolve/main/ltx-2-19b-ic-lora-pose-control.safetensors)
-  * [`LTX-2-19b-LoRA-Camera-Control-Dolly-In`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-In) - [Download](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-In/resolve/main/ltx-2-19b-lora-camera-control-dolly-in.safetensors)
-  * [`LTX-2-19b-LoRA-Camera-Control-Dolly-Left`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-Left) - [Download](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-Left/resolve/main/ltx-2-19b-lora-camera-control-dolly-left.safetensors)
-  * [`LTX-2-19b-LoRA-Camera-Control-Dolly-Out`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-Out) - [Download](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-Out/resolve/main/ltx-2-19b-lora-camera-control-dolly-out.safetensors)
-  * [`LTX-2-19b-LoRA-Camera-Control-Dolly-Right`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-Right) - [Download](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Dolly-Right/resolve/main/ltx-2-19b-lora-camera-control-dolly-right.safetensors)
-  * [`LTX-2-19b-LoRA-Camera-Control-Jib-Down`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Jib-Down) - [Download](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Jib-Down/resolve/main/ltx-2-19b-lora-camera-control-jib-down.safetensors)
-  * [`LTX-2-19b-LoRA-Camera-Control-Jib-Up`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Jib-Up) - [Download](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Jib-Up/resolve/main/ltx-2-19b-lora-camera-control-jib-up.safetensors)
-  * [`LTX-2-19b-LoRA-Camera-Control-Static`](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Static) - [Download](https://huggingface.co/Lightricks/LTX-2-19b-LoRA-Camera-Control-Static/resolve/main/ltx-2-19b-lora-camera-control-static.safetensors)
+# GPU settings
+CUDA_VISIBLE_DEVICES=0
 
-### Available Pipelines
+# Optional: HuggingFace token
+HF_TOKEN=your_token_here
 
-* **[TI2VidTwoStagesPipeline](packages/ltx-pipelines/src/ltx_pipelines/ti2vid_two_stages.py)** - Production-quality text/image-to-video with 2x upsampling (recommended)
-* **[TI2VidOneStagePipeline](packages/ltx-pipelines/src/ltx_pipelines/ti2vid_one_stage.py)** - Single-stage generation for quick prototyping
-* **[DistilledPipeline](packages/ltx-pipelines/src/ltx_pipelines/distilled.py)** - Fastest inference with 8 predefined sigmas
-* **[ICLoraPipeline](packages/ltx-pipelines/src/ltx_pipelines/ic_lora.py)** - Video-to-video and image-to-video transformations
-* **[KeyframeInterpolationPipeline](packages/ltx-pipelines/src/ltx_pipelines/keyframe_interpolation.py)** - Interpolate between keyframe images
+# Optional: WandB for training
+WANDB_API_KEY=your_key_here
+WANDB_PROJECT=aiprod-training
+```
 
-### ⚡ Optimization Tips
+### 2. Download Models
 
-* **Use DistilledPipeline** - Fastest inference with only 8 predefined sigmas (8 steps stage 1, 4 steps stage 2)
-* **Enable FP8 transformer** - Enables lower memory footprint: `--enable-fp8` (CLI) or `fp8transformer=True` (Python)
-* **Install attention optimizations** - Use xFormers (`uv sync --extra xformers`) or [Flash Attention 3](https://github.com/Dao-AILab/flash-attention) for Hopper GPUs
-* **Use gradient estimation** - Reduce inference steps from 40 to 20-30 while maintaining quality (see [pipeline documentation](packages/ltx-pipelines/README.md#denoising-loop-optimization))
-* **Skip memory cleanup** - If you have sufficient VRAM, disable automatic memory cleanup between stages for faster processing
-* **Choose single-stage pipeline** - Use `TI2VidOneStagePipeline` for faster generation when high resolution isn't required
+Download required models from HuggingFace:
+- AIPROD checkpoint (choose one): dev, dev-fp8, distilled, distilled-fp8
+- Spatial upscaler: AIPROD-spatial-upscaler-x2-1.0.safetensors
+- Gemma text encoder: gemma-3-12b-it-qat-q4_0-unquantized
+- Optional LoRAs for specific controls
 
-## ✍️ Prompting for LTX-2
+Place models in `models/` directory:
+```
+models/
+├── aiprod2/
+│   ├── AIPROD-19b-dev-fp8.safetensors
+│   └── AIPROD-spatial-upscaler-x2-1.0.safetensors
+└── gemma-3-12b-it/
+    └── (gemma model files)
+```
 
-When writing prompts, focus on detailed, chronological descriptions of actions and scenes. Include specific movements, appearances, camera angles, and environmental details - all in a single flowing paragraph. Start directly with the action, and keep descriptions literal and precise. Think like a cinematographer describing a shot list. Keep within 200 words. For best results, build your prompts using this structure:
+### 3. Verify Installation
 
-- Start with main action in a single sentence
-- Add specific details about movements and gestures
-- Describe character/object appearances precisely
-- Include background and environment details
-- Specify camera angles and movements
-- Describe lighting and colors
-- Note any changes or sudden events
+```bash
+python -c "import aiprod_core; import aiprod_pipelines; print('✓ OK')"
+python -c "import torch; print(f'CUDA: {torch.cuda.is_available()}')"
+```
 
-For additional guidance on writing a prompt please refer to <https://ltx.video/blog/how-to-prompt-for-ltx-2>
+## 📝 Usage Examples
 
-### Automatic Prompt Enhancement
+### Text-to-Video
 
-LTX-2 pipelines support automatic prompt enhancement via an `enhance_prompt` parameter.
+```python
+from aiprod_pipelines import TI2VidTwoStagesPipeline
 
-## 🔌 ComfyUI Integration
+pipeline = TI2VidTwoStagesPipeline(
+    ckpt_dir="models/aiprod2",
+    text_encoder_dir="models/gemma-3-12b-it",
+    fp8_transformer=True
+)
 
-To use our model with ComfyUI, please follow the instructions at <https://github.com/Lightricks/ComfyUI-LTXVideo/>.
+video = pipeline(
+    prompt="Your video description here",
+    height=480,
+    width=832,
+    num_frames=121,
+    guidance_scale=3.0,
+    seed=42
+)
+
+pipeline.save_video(video, "output.mp4", fps=24)
+```
+
+### Image-to-Video
+
+```python
+from PIL import Image
+
+image = Image.open("input.jpg")
+
+video = pipeline(
+    prompt="Describe the animation",
+    image=image,
+    num_frames=121,
+    guidance_scale=3.0
+)
+
+pipeline.save_video(video, "animated.mp4", fps=24)
+```
+
+### Fast Generation
+
+```python
+from aiprod_pipelines import DistilledPipeline
+
+pipeline = DistilledPipeline(
+    ckpt_dir="models/aiprod2",
+    text_encoder_dir="models/gemma-3-12b-it",
+    fp8_transformer=True
+)
+
+video = pipeline(
+    prompt="Your prompt",
+    height=480,
+    width=832,
+    num_frames=121
+)
+```
+
+## 🔧 Available Pipelines
+
+- **TI2VidTwoStagesPipeline** - Two-stage generation with upsampling
+- **TI2VidOneStagePipeline** - Single-stage for prototyping
+- **DistilledPipeline** - Fast inference
+- **ICLoraPipeline** - Video-to-video transformations
+- **KeyframeInterpolationPipeline** - Keyframe interpolation
+
+See package documentation for detailed usage.
 
 ## 📦 Packages
 
-This repository is organized as a monorepo with three main packages:
+```
+packages/
+├── aiprod-core/         # Core model implementation
+├── aiprod-pipelines/    # Pipeline implementations
+└── aiprod-trainer/      # Training tools
+```
 
-* **[ltx-core](packages/ltx-core/)** - Core model implementation, inference stack, and utilities
-* **[ltx-pipelines](packages/ltx-pipelines/)** - High-level pipeline implementations for text-to-video, image-to-video, and other generation modes
-* **[ltx-trainer](packages/ltx-trainer/)** - Training and fine-tuning tools for LoRA, full fine-tuning, and IC-LoRA
+Each package has its own README:
+- [aiprod-core/README.md](packages/aiprod-core/README.md)
+- [aiprod-pipelines/README.md](packages/aiprod-pipelines/README.md)
+- [aiprod-trainer/README.md](packages/aiprod-trainer/README.md)
 
-Each package has its own README and documentation. See the [Documentation](#-documentation) section below.
+## 🔧 Troubleshooting
 
-## 📚 Documentation
+### CUDA Out of Memory
 
-Each package includes comprehensive documentation:
+```python
+# Enable FP8 mode
+pipeline = TI2VidTwoStagesPipeline(
+    ckpt_dir="models/aiprod2",
+    fp8_transformer=True  # Reduces VRAM usage
+)
 
-* **[LTX-Core README](packages/ltx-core/README.md)** - Core model implementation, inference stack, and utilities
-* **[LTX-Pipelines README](packages/ltx-pipelines/README.md)** - High-level pipeline implementations and usage guides
-* **[LTX-Trainer README](packages/ltx-trainer/README.md)** - Training and fine-tuning documentation with detailed guides
+# Reduce resolution
+video = pipeline(
+    prompt="...",
+    height=384,  # Lower resolution
+    width=640,
+    num_frames=61  # Fewer frames
+)
+```
+
+### Import Errors
+
+```bash
+# Verify Python version
+python --version  # Must be 3.11.x
+
+# Reinstall packages
+pip install -e packages/aiprod-core
+pip install -e packages/aiprod-pipelines
+pip install -e packages/aiprod-trainer
+
+# Test
+python -c "from aiprod_core import model; print('✓')"
+```
+
+### Model Loading Issues
+
+```bash
+# Check model files
+ls -lh models/aiprod2/*.safetensors
+
+# Verify paths in .env
+cat .env | grep MODEL_DIR
+```
+
+### Slow Performance
+
+```python
+# Use fast pipeline
+from aiprod_pipelines import DistilledPipeline
+
+# Enable FP8
+pipeline = DistilledPipeline(fp8_transformer=True)
+
+# Reduce steps
+video = pipeline(
+    prompt="...",
+    num_inference_steps=20  # Faster
+)
+```
+
+### Windows Permission Issues
+
+```powershell
+# Run as Administrator
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+
+# Activate environment
+.venv_311\Scripts\Activate.ps1
+```
+
+## 📚 Additional Documentation
+
+- **Configuration**: [config/README.md](config/README.md)
+- **Deployment**: [deploy/README.md](deploy/README.md)
+- **Scripts**: [scripts/README.md](scripts/README.md)
+- **Training**: [packages/aiprod-trainer/docs/](packages/aiprod-trainer/docs/)
+
+## 🔒 Confidentiality Notice
+
+This project contains proprietary algorithms and optimizations. All code, documentation, and generated outputs are confidential. Do not:
+- Share code or documentation externally
+- Discuss technical details publicly
+- Upload models or code to public repositories
+- Share performance metrics or benchmarks
+
+For questions or issues, contact the internal team only.
+
+---
+
+**Last Updated**: February 10, 2026  
+**For Internal Use Only**
