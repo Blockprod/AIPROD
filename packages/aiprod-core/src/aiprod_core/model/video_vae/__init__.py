@@ -1,24 +1,26 @@
-"""Video VAE package."""
+# Copyright (c) 2025-2026 AIPROD. All rights reserved.
+# AIPROD Proprietary Software — See LICENSE for terms.
 
-from aiprod_core.model.video_vae.model_configurator import (
-    VAE_DECODER_COMFY_KEYS_FILTER,
-    VAE_ENCODER_COMFY_KEYS_FILTER,
-    VideoDecoderConfigurator,
-    VideoEncoderConfigurator,
-)
-from aiprod_core.model.video_vae.tiling import SpatialTilingConfig, TemporalTilingConfig, TilingConfig
-from aiprod_core.model.video_vae.video_vae import VideoDecoder, VideoEncoder, decode_video, get_video_chunks_number
+"""
+HWVAE — Hierarchical Wavelet Video Auto-Encoder
+
+AIPROD's proprietary video VAE using wavelet decomposition for
+multi-scale latent compression.
+
+Key differences from standard video VAEs:
+    - Wavelet-based spatial decomposition (not plain conv downsampling)
+    - Hierarchical latent space (coarse + fine details)
+    - Separable 2D+1D convolutions (not causal 3D convolutions)
+    - Configurable compression ratios per axis
+    - Progressive encoding with skip connections
+"""
+
+from .encoder import HWVAEEncoder
+from .decoder import HWVAEDecoder
+from .config import HWVAEConfig
 
 __all__ = [
-    "VAE_DECODER_COMFY_KEYS_FILTER",
-    "VAE_ENCODER_COMFY_KEYS_FILTER",
-    "SpatialTilingConfig",
-    "TemporalTilingConfig",
-    "TilingConfig",
-    "VideoDecoder",
-    "VideoDecoderConfigurator",
-    "VideoEncoder",
-    "VideoEncoderConfigurator",
-    "decode_video",
-    "get_video_chunks_number",
+    "HWVAEEncoder",
+    "HWVAEDecoder",
+    "HWVAEConfig",
 ]

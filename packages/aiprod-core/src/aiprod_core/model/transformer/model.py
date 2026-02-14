@@ -1,468 +1,214 @@
-from enum import Enum
+# Copyright (c) 2025-2026 AIPROD. All rights reserved.
+# AIPROD Proprietary Software — See LICENSE for terms.
+
+"""
+SHDT Model — Scalable Hybrid Diffusion Transformer
+
+The main denoising model for AIPROD's video generation pipeline.
+Uses a dual-stream spatial-temporal architecture with configurable depth.
+"""
+
+from __future__ import annotations
+
+from dataclasses import dataclass, field
+from typing import Optional, Literal
 
 import torch
+import torch.nn as nn
 
-from aiprod_core.guidance.perturbations import BatchedPerturbationConfig
-from aiprod_core.model.transformer.adaln import AdaLayerNormSingle
-from aiprod_core.model.transformer.attention import AttentionCallable, AttentionFunction
-from aiprod_core.model.transformer.modality import Modality
-from aiprod_core.model.transformer.rope import AIPRODRopeType
-from aiprod_core.model.transformer.text_projection import PixArtAlphaTextProjection
-from aiprod_core.model.transformer.transformer import BasicAVTransformerBlock, TransformerConfig
-from aiprod_core.model.transformer.transformer_args import (
-    MultiModalTransformerArgsPreprocessor,
-    TransformerArgs,
-    TransformerArgsPreprocessor,
-)
-from aiprod_core.utils import to_denoised
+from .block import SHDTBlock
+from .position import LearnedPositionalEncoding3D
+from .norm import AdaptiveRMSNorm
 
 
-class AIPRODModelType(Enum):
-    AudioVideo = "AIPROD av model"
-    VideoOnly = "AIPROD video only model"
-    AudioOnly = "AIPROD audio only model"
+@dataclass
+class SHDTConfig:
+    """Configuration for the Scalable Hybrid Diffusion Transformer.
 
-    def is_video_enabled(self) -> bool:
-        return self in (AIPRODModelType.AudioVideo, AIPRODModelType.VideoOnly)
-
-    def is_audio_enabled(self) -> bool:
-        return self in (AIPRODModelType.AudioVideo, AIPRODModelType.AudioOnly)
-
-
-class AIPRODModel(torch.nn.Module):
+    Design choices distinct from existing architectures:
+        - `num_layers` is not hardcoded — allows scaling from tiny (8) to large (64)
+        - `num_kv_heads` enables GQA (fewer KV heads than Q heads)
+        - `dual_stream_ratio` controls spatial vs temporal layer allocation
+        - `adaptive_compute` enables dynamic depth per-sample
     """
-    AIPROD model transformer implementation.
-    This class implements the transformer blocks for the AIPROD model.
+    # Core dimensions
+    hidden_dim: int = 2048
+    num_heads: int = 16
+    num_kv_heads: int = 4          # GQA: fewer KV heads for efficiency
+    head_dim: int = 128
+    num_layers: int = 32
+    ff_multiplier: float = 4.0
+
+    # Dual-stream control
+    dual_stream_ratio: float = 0.5  # fraction of layers that are spatial-only
+    cross_stream_interval: int = 4   # cross-attention between streams every N layers
+
+    # Input specs
+    latent_channels: int = 64
+    text_embed_dim: int = 2048      # from LLM bridge output
+    max_caption_tokens: int = 512
+
+    # Video dimensions (latent space)
+    max_frames: int = 64
+    max_height: int = 128
+    max_width: int = 128
+
+    # Advanced features
+    adaptive_compute: bool = False   # dynamic depth per frame
+    dropout: float = 0.0
+    precision: Literal["fp32", "fp16", "bf16"] = "bf16"
+
+    @property
+    def ff_dim(self) -> int:
+        return int(self.hidden_dim * self.ff_multiplier)
+
+    @property
+    def num_spatial_layers(self) -> int:
+        return int(self.num_layers * self.dual_stream_ratio)
+
+    @property
+    def num_temporal_layers(self) -> int:
+        return self.num_layers - self.num_spatial_layers
+
+
+class SHDTModel(nn.Module):
+    """Scalable Hybrid Diffusion Transformer — AIPROD's proprietary backbone.
+
+    Architecture:
+        1. Patch embedding: latent [B,C,T,H,W] → token sequence [B,N,D]
+        2. Timestep + text conditioning via adaptive normalization
+        3. Dual-stream processing:
+           - Spatial stream: self-attention within each frame
+           - Temporal stream: self-attention across frames at each position
+           - Cross-stream attention every `cross_stream_interval` layers
+        4. Cross-attention to text embeddings at every layer
+        5. Output projection back to latent space
+
+    This is fundamentally different from single-stream DiT architectures.
     """
 
-    def __init__(  # noqa: PLR0913
-        self,
-        *,
-        model_type: AIPRODModelType = AIPRODModelType.AudioVideo,
-        num_attention_heads: int = 32,
-        attention_head_dim: int = 128,
-        in_channels: int = 128,
-        out_channels: int = 128,
-        num_layers: int = 48,
-        cross_attention_dim: int = 4096,
-        norm_eps: float = 1e-06,
-        attention_type: AttentionFunction | AttentionCallable = AttentionFunction.DEFAULT,
-        caption_channels: int = 3840,
-        positional_embedding_theta: float = 10000.0,
-        positional_embedding_max_pos: list[int] | None = None,
-        timestep_scale_multiplier: int = 1000,
-        use_middle_indices_grid: bool = True,
-        audio_num_attention_heads: int = 32,
-        audio_attention_head_dim: int = 64,
-        audio_in_channels: int = 128,
-        audio_out_channels: int = 128,
-        audio_cross_attention_dim: int = 2048,
-        audio_positional_embedding_max_pos: list[int] | None = None,
-        av_ca_timestep_scale_multiplier: int = 1,
-        rope_type: AIPRODRopeType = AIPRODRopeType.INTERLEAVED,
-        double_precision_rope: bool = False,
-    ):
+    def __init__(self, config: SHDTConfig):
         super().__init__()
-        self._enable_gradient_checkpointing = False
-        self.use_middle_indices_grid = use_middle_indices_grid
-        self.rope_type = rope_type
-        self.double_precision_rope = double_precision_rope
-        self.timestep_scale_multiplier = timestep_scale_multiplier
-        self.positional_embedding_theta = positional_embedding_theta
-        self.model_type = model_type
-        cross_pe_max_pos = None
-        if model_type.is_video_enabled():
-            if positional_embedding_max_pos is None:
-                positional_embedding_max_pos = [20, 2048, 2048]
-            self.positional_embedding_max_pos = positional_embedding_max_pos
-            self.num_attention_heads = num_attention_heads
-            self.inner_dim = num_attention_heads * attention_head_dim
-            self._init_video(
-                in_channels=in_channels,
-                out_channels=out_channels,
-                caption_channels=caption_channels,
-                norm_eps=norm_eps,
+        self.config = config
+
+        # ── Patch embedding (latent channels → hidden dim) ──
+        self.patch_embed = nn.Sequential(
+            nn.Linear(config.latent_channels, config.hidden_dim),
+            AdaptiveRMSNorm(config.hidden_dim),
+        )
+
+        # ── Positional encoding (learned, 3D) ──
+        self.pos_encoding = LearnedPositionalEncoding3D(
+            dim=config.hidden_dim,
+            max_t=config.max_frames,
+            max_h=config.max_height,
+            max_w=config.max_width,
+        )
+
+        # ── Timestep embedding ──
+        self.timestep_embed = nn.Sequential(
+            nn.Linear(256, config.hidden_dim),
+            nn.SiLU(),
+            nn.Linear(config.hidden_dim, config.hidden_dim),
+        )
+
+        # ── Text projection (from LLM Bridge output) ──
+        self.text_proj = nn.Linear(config.text_embed_dim, config.hidden_dim)
+
+        # ── Transformer blocks (dual-stream) ──
+        self.blocks = nn.ModuleList([
+            SHDTBlock(
+                hidden_dim=config.hidden_dim,
+                num_heads=config.num_heads,
+                num_kv_heads=config.num_kv_heads,
+                head_dim=config.head_dim,
+                ff_dim=config.ff_dim,
+                layer_idx=i,
+                is_cross_stream=(i % config.cross_stream_interval == 0),
+                dropout=config.dropout,
             )
+            for i in range(config.num_layers)
+        ])
 
-        if model_type.is_audio_enabled():
-            if audio_positional_embedding_max_pos is None:
-                audio_positional_embedding_max_pos = [20]
-            self.audio_positional_embedding_max_pos = audio_positional_embedding_max_pos
-            self.audio_num_attention_heads = audio_num_attention_heads
-            self.audio_inner_dim = self.audio_num_attention_heads * audio_attention_head_dim
-            self._init_audio(
-                in_channels=audio_in_channels,
-                out_channels=audio_out_channels,
-                caption_channels=caption_channels,
-                norm_eps=norm_eps,
-            )
+        # ── Output projection (hidden dim → latent channels) ──
+        self.out_norm = AdaptiveRMSNorm(config.hidden_dim)
+        self.out_proj = nn.Linear(config.hidden_dim, config.latent_channels)
 
-        if model_type.is_video_enabled() and model_type.is_audio_enabled():
-            cross_pe_max_pos = max(self.positional_embedding_max_pos[0], self.audio_positional_embedding_max_pos[0])
-            self.av_ca_timestep_scale_multiplier = av_ca_timestep_scale_multiplier
-            self.audio_cross_attention_dim = audio_cross_attention_dim
-            self._init_audio_video(num_scale_shift_values=4)
+        # Initialize weights
+        self._init_weights()
 
-        self._init_preprocessors(cross_pe_max_pos)
-        # Initialize transformer blocks
-        self._init_transformer_blocks(
-            num_layers=num_layers,
-            attention_head_dim=attention_head_dim if model_type.is_video_enabled() else 0,
-            cross_attention_dim=cross_attention_dim,
-            audio_attention_head_dim=audio_attention_head_dim if model_type.is_audio_enabled() else 0,
-            audio_cross_attention_dim=audio_cross_attention_dim,
-            norm_eps=norm_eps,
-            attention_type=attention_type,
-        )
+    def _init_weights(self):
+        """Custom weight initialization for stable diffusion training."""
+        for module in self.modules():
+            if isinstance(module, nn.Linear):
+                nn.init.xavier_uniform_(module.weight, gain=0.02)
+                if module.bias is not None:
+                    nn.init.zeros_(module.bias)
 
-    def _init_video(
-        self,
-        in_channels: int,
-        out_channels: int,
-        caption_channels: int,
-        norm_eps: float,
-    ) -> None:
-        """Initialize video-specific components."""
-        # Video input components
-        self.patchify_proj = torch.nn.Linear(in_channels, self.inner_dim, bias=True)
+    def _get_timestep_embedding(self, timesteps: torch.Tensor) -> torch.Tensor:
+        """Sinusoidal timestep embedding with learned projection.
 
-        self.adaln_single = AdaLayerNormSingle(self.inner_dim)
-
-        # Video caption projection
-        self.caption_projection = PixArtAlphaTextProjection(
-            in_features=caption_channels,
-            hidden_size=self.inner_dim,
-        )
-
-        # Video output components
-        self.scale_shift_table = torch.nn.Parameter(torch.empty(2, self.inner_dim))
-        self.norm_out = torch.nn.LayerNorm(self.inner_dim, elementwise_affine=False, eps=norm_eps)
-        self.proj_out = torch.nn.Linear(self.inner_dim, out_channels)
-
-    def _init_audio(
-        self,
-        in_channels: int,
-        out_channels: int,
-        caption_channels: int,
-        norm_eps: float,
-    ) -> None:
-        """Initialize audio-specific components."""
-
-        # Audio input components
-        self.audio_patchify_proj = torch.nn.Linear(in_channels, self.audio_inner_dim, bias=True)
-
-        self.audio_adaln_single = AdaLayerNormSingle(
-            self.audio_inner_dim,
-        )
-
-        # Audio caption projection
-        self.audio_caption_projection = PixArtAlphaTextProjection(
-            in_features=caption_channels,
-            hidden_size=self.audio_inner_dim,
-        )
-
-        # Audio output components
-        self.audio_scale_shift_table = torch.nn.Parameter(torch.empty(2, self.audio_inner_dim))
-        self.audio_norm_out = torch.nn.LayerNorm(self.audio_inner_dim, elementwise_affine=False, eps=norm_eps)
-        self.audio_proj_out = torch.nn.Linear(self.audio_inner_dim, out_channels)
-
-    def _init_audio_video(
-        self,
-        num_scale_shift_values: int,
-    ) -> None:
-        """Initialize audio-video cross-attention components."""
-        self.av_ca_video_scale_shift_adaln_single = AdaLayerNormSingle(
-            self.inner_dim,
-            embedding_coefficient=num_scale_shift_values,
-        )
-
-        self.av_ca_audio_scale_shift_adaln_single = AdaLayerNormSingle(
-            self.audio_inner_dim,
-            embedding_coefficient=num_scale_shift_values,
-        )
-
-        self.av_ca_a2v_gate_adaln_single = AdaLayerNormSingle(
-            self.inner_dim,
-            embedding_coefficient=1,
-        )
-
-        self.av_ca_v2a_gate_adaln_single = AdaLayerNormSingle(
-            self.audio_inner_dim,
-            embedding_coefficient=1,
-        )
-
-    def _init_preprocessors(
-        self,
-        cross_pe_max_pos: int | None = None,
-    ) -> None:
-        """Initialize preprocessors for AIPROD."""
-
-        if self.model_type.is_video_enabled() and self.model_type.is_audio_enabled():
-            self.video_args_preprocessor = MultiModalTransformerArgsPreprocessor(
-                patchify_proj=self.patchify_proj,
-                adaln=self.adaln_single,
-                caption_projection=self.caption_projection,
-                cross_scale_shift_adaln=self.av_ca_video_scale_shift_adaln_single,
-                cross_gate_adaln=self.av_ca_a2v_gate_adaln_single,
-                inner_dim=self.inner_dim,
-                max_pos=self.positional_embedding_max_pos,
-                num_attention_heads=self.num_attention_heads,
-                cross_pe_max_pos=cross_pe_max_pos,
-                use_middle_indices_grid=self.use_middle_indices_grid,
-                audio_cross_attention_dim=self.audio_cross_attention_dim,
-                timestep_scale_multiplier=self.timestep_scale_multiplier,
-                double_precision_rope=self.double_precision_rope,
-                positional_embedding_theta=self.positional_embedding_theta,
-                rope_type=self.rope_type,
-                av_ca_timestep_scale_multiplier=self.av_ca_timestep_scale_multiplier,
-            )
-            self.audio_args_preprocessor = MultiModalTransformerArgsPreprocessor(
-                patchify_proj=self.audio_patchify_proj,
-                adaln=self.audio_adaln_single,
-                caption_projection=self.audio_caption_projection,
-                cross_scale_shift_adaln=self.av_ca_audio_scale_shift_adaln_single,
-                cross_gate_adaln=self.av_ca_v2a_gate_adaln_single,
-                inner_dim=self.audio_inner_dim,
-                max_pos=self.audio_positional_embedding_max_pos,
-                num_attention_heads=self.audio_num_attention_heads,
-                cross_pe_max_pos=cross_pe_max_pos,
-                use_middle_indices_grid=self.use_middle_indices_grid,
-                audio_cross_attention_dim=self.audio_cross_attention_dim,
-                timestep_scale_multiplier=self.timestep_scale_multiplier,
-                double_precision_rope=self.double_precision_rope,
-                positional_embedding_theta=self.positional_embedding_theta,
-                rope_type=self.rope_type,
-                av_ca_timestep_scale_multiplier=self.av_ca_timestep_scale_multiplier,
-            )
-        elif self.model_type.is_video_enabled():
-            self.video_args_preprocessor = TransformerArgsPreprocessor(
-                patchify_proj=self.patchify_proj,
-                adaln=self.adaln_single,
-                caption_projection=self.caption_projection,
-                inner_dim=self.inner_dim,
-                max_pos=self.positional_embedding_max_pos,
-                num_attention_heads=self.num_attention_heads,
-                use_middle_indices_grid=self.use_middle_indices_grid,
-                timestep_scale_multiplier=self.timestep_scale_multiplier,
-                double_precision_rope=self.double_precision_rope,
-                positional_embedding_theta=self.positional_embedding_theta,
-                rope_type=self.rope_type,
-            )
-        elif self.model_type.is_audio_enabled():
-            self.audio_args_preprocessor = TransformerArgsPreprocessor(
-                patchify_proj=self.audio_patchify_proj,
-                adaln=self.audio_adaln_single,
-                caption_projection=self.audio_caption_projection,
-                inner_dim=self.audio_inner_dim,
-                max_pos=self.audio_positional_embedding_max_pos,
-                num_attention_heads=self.audio_num_attention_heads,
-                use_middle_indices_grid=self.use_middle_indices_grid,
-                timestep_scale_multiplier=self.timestep_scale_multiplier,
-                double_precision_rope=self.double_precision_rope,
-                positional_embedding_theta=self.positional_embedding_theta,
-                rope_type=self.rope_type,
-            )
-
-    def _init_transformer_blocks(
-        self,
-        num_layers: int,
-        attention_head_dim: int,
-        cross_attention_dim: int,
-        audio_attention_head_dim: int,
-        audio_cross_attention_dim: int,
-        norm_eps: float,
-        attention_type: AttentionFunction | AttentionCallable,
-    ) -> None:
-        """Initialize transformer blocks for AIPROD."""
-        video_config = (
-            TransformerConfig(
-                dim=self.inner_dim,
-                heads=self.num_attention_heads,
-                d_head=attention_head_dim,
-                context_dim=cross_attention_dim,
-            )
-            if self.model_type.is_video_enabled()
-            else None
-        )
-        audio_config = (
-            TransformerConfig(
-                dim=self.audio_inner_dim,
-                heads=self.audio_num_attention_heads,
-                d_head=audio_attention_head_dim,
-                context_dim=audio_cross_attention_dim,
-            )
-            if self.model_type.is_audio_enabled()
-            else None
-        )
-        self.transformer_blocks = torch.nn.ModuleList(
-            [
-                BasicAVTransformerBlock(
-                    idx=idx,
-                    video=video_config,
-                    audio=audio_config,
-                    rope_type=self.rope_type,
-                    norm_eps=norm_eps,
-                    attention_function=attention_type,
-                )
-                for idx in range(num_layers)
-            ]
-        )
-
-    def set_gradient_checkpointing(self, enable: bool) -> None:
-        """Enable or disable gradient checkpointing for transformer blocks.
-        Gradient checkpointing trades compute for memory by recomputing activations
-        during the backward pass instead of storing them. This can significantly
-        reduce memory usage at the cost of ~20-30% slower training.
         Args:
-            enable: Whether to enable gradient checkpointing
+            timesteps: [B] tensor of noise levels in [0, 1].
+
+        Returns:
+            [B, D] timestep embedding.
         """
-        self._enable_gradient_checkpointing = enable
+        half_dim = 128
+        freqs = torch.exp(
+            -torch.arange(half_dim, device=timesteps.device, dtype=torch.float32)
+            * (torch.log(torch.tensor(10000.0)) / half_dim)
+        )
+        args = timesteps[:, None].float() * freqs[None, :]
+        embedding = torch.cat([torch.cos(args), torch.sin(args)], dim=-1)
+        return self.timestep_embed(embedding)
 
-    def _process_transformer_blocks(
+    def forward(
         self,
-        video: TransformerArgs | None,
-        audio: TransformerArgs | None,
-        perturbations: BatchedPerturbationConfig,
-    ) -> tuple[TransformerArgs, TransformerArgs]:
-        """Process transformer blocks for AIPRODAV."""
-
-        # Process transformer blocks
-        for block in self.transformer_blocks:
-            if self._enable_gradient_checkpointing and self.training:
-                # Use gradient checkpointing to save memory during training.
-                # With use_reentrant=False, we can pass dataclasses directly -
-                # PyTorch will track all tensor leaves in the computation graph.
-                video, audio = torch.utils.checkpoint.checkpoint(
-                    block,
-                    video,
-                    audio,
-                    perturbations,
-                    use_reentrant=False,
-                )
-            else:
-                video, audio = block(
-                    video=video,
-                    audio=audio,
-                    perturbations=perturbations,
-                )
-
-        return video, audio
-
-    def _process_output(
-        self,
-        scale_shift_table: torch.Tensor,
-        norm_out: torch.nn.LayerNorm,
-        proj_out: torch.nn.Linear,
-        x: torch.Tensor,
-        embedded_timestep: torch.Tensor,
+        latent: torch.Tensor,
+        timestep: torch.Tensor,
+        text_embeds: torch.Tensor,
+        text_mask: Optional[torch.Tensor] = None,
     ) -> torch.Tensor:
-        """Process output for AIPRODV."""
-        # Apply scale-shift modulation
-        scale_shift_values = (
-            scale_shift_table[None, None].to(device=x.device, dtype=x.dtype) + embedded_timestep[:, :, None]
-        )
-        shift, scale = scale_shift_values[:, :, 0], scale_shift_values[:, :, 1]
+        """Forward pass — predict noise/velocity from noisy latent.
 
-        x = norm_out(x)
-        x = x * (1 + scale) + shift
-        x = proj_out(x)
+        Args:
+            latent: [B, C, T, H, W] noisy latent video.
+            timestep: [B] noise level for each sample.
+            text_embeds: [B, S, D_text] text conditioning from LLM Bridge.
+            text_mask: [B, S] attention mask for text tokens.
+
+        Returns:
+            [B, C, T, H, W] predicted noise/velocity.
+        """
+        B, C, T, H, W = latent.shape
+
+        # Reshape to token sequence: [B, C, T, H, W] → [B, T*H*W, C]
+        x = latent.permute(0, 2, 3, 4, 1).reshape(B, T * H * W, C)
+
+        # Patch embedding + positional encoding
+        x = self.patch_embed(x)
+        x = x + self.pos_encoding(T, H, W, device=x.device, dtype=x.dtype)
+
+        # Conditioning
+        t_embed = self._get_timestep_embedding(timestep)
+        text_ctx = self.text_proj(text_embeds)
+
+        # Process through transformer blocks
+        for block in self.blocks:
+            x = block(
+                x,
+                t_embed=t_embed,
+                text_ctx=text_ctx,
+                text_mask=text_mask,
+                video_shape=(T, H, W),
+            )
+
+        # Output projection
+        x = self.out_norm(x, t_embed)
+        x = self.out_proj(x)
+
+        # Reshape back: [B, T*H*W, C] → [B, C, T, H, W]
+        x = x.reshape(B, T, H, W, C).permute(0, 4, 1, 2, 3)
+
         return x
-
-    def forward(
-        self, video: Modality | None, audio: Modality | None, perturbations: BatchedPerturbationConfig
-    ) -> tuple[torch.Tensor, torch.Tensor]:
-        """
-        Forward pass for AIPROD models.
-        Returns:
-            Processed output tensors
-        """
-        if not self.model_type.is_video_enabled() and video is not None:
-            raise ValueError("Video is not enabled for this model")
-        if not self.model_type.is_audio_enabled() and audio is not None:
-            raise ValueError("Audio is not enabled for this model")
-
-        video_args = self.video_args_preprocessor.prepare(video) if video is not None else None
-        audio_args = self.audio_args_preprocessor.prepare(audio) if audio is not None else None
-        # Process transformer blocks
-        video_out, audio_out = self._process_transformer_blocks(
-            video=video_args,
-            audio=audio_args,
-            perturbations=perturbations,
-        )
-
-        # Process output
-        vx = (
-            self._process_output(
-                self.scale_shift_table, self.norm_out, self.proj_out, video_out.x, video_out.embedded_timestep
-            )
-            if video_out is not None
-            else None
-        )
-        ax = (
-            self._process_output(
-                self.audio_scale_shift_table,
-                self.audio_norm_out,
-                self.audio_proj_out,
-                audio_out.x,
-                audio_out.embedded_timestep,
-            )
-            if audio_out is not None
-            else None
-        )
-        return vx, ax
-
-
-class LegacyX0Model(torch.nn.Module):
-    """
-    Legacy X0 model implementation.
-    Returns fully denoised output based on the velocities produced by the base model.
-    """
-
-    def __init__(self, velocity_model: AIPRODModel):
-        super().__init__()
-        self.velocity_model = velocity_model
-
-    def forward(
-        self,
-        video: Modality | None,
-        audio: Modality | None,
-        perturbations: BatchedPerturbationConfig,
-        sigma: float,
-    ) -> tuple[torch.Tensor | None, torch.Tensor | None]:
-        """
-        Denoise the video and audio according to the sigma.
-        Returns:
-            Denoised video and audio
-        """
-        vx, ax = self.velocity_model(video, audio, perturbations)
-        denoised_video = to_denoised(video.latent, vx, sigma) if vx is not None else None
-        denoised_audio = to_denoised(audio.latent, ax, sigma) if ax is not None else None
-        return denoised_video, denoised_audio
-
-
-class X0Model(torch.nn.Module):
-    """
-    X0 model implementation.
-    Returns fully denoised outputs based on the velocities produced by the base model.
-    Applies scaled denoising to the video and audio according to the timesteps = sigma * denoising_mask.
-    """
-
-    def __init__(self, velocity_model: AIPRODModel):
-        super().__init__()
-        self.velocity_model = velocity_model
-
-    def forward(
-        self,
-        video: Modality | None,
-        audio: Modality | None,
-        perturbations: BatchedPerturbationConfig,
-    ) -> tuple[torch.Tensor | None, torch.Tensor | None]:
-        """
-        Denoise the video and audio according to the sigma.
-        Returns:
-            Denoised video and audio
-        """
-        vx, ax = self.velocity_model(video, audio, perturbations)
-        denoised_video = to_denoised(video.latent, vx, video.timesteps) if vx is not None else None
-        denoised_audio = to_denoised(audio.latent, ax, audio.timesteps) if ax is not None else None
-        return denoised_video, denoised_audio

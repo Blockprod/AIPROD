@@ -1,62 +1,75 @@
-from pathlib import Path
+# Copyright (c) 2025-2026 AIPROD. All rights reserved.
+# AIPROD Proprietary Software — See LICENSE for terms.
+
+"""
+AIPROD Utilities
+
+General-purpose utility functions for tensor operations,
+file I/O, and configuration management.
+"""
+
+from __future__ import annotations
+
 from typing import Any
+from pathlib import Path
 
 import torch
 
 
-def rms_norm(x: torch.Tensor, weight: torch.Tensor | None = None, eps: float = 1e-6) -> torch.Tensor:
-    """Root-mean-square (RMS) normalize `x` over its last dimension.
-    Thin wrapper around `torch.nn.functional.rms_norm` that infers the normalized
-    shape and forwards `weight` and `eps`.
-    """
-    return torch.nn.functional.rms_norm(x, (x.shape[-1],), weight=weight, eps=eps)
+def count_parameters(model: torch.nn.Module) -> dict[str, int]:
+    """Count model parameters (total, trainable, frozen).
 
+    Args:
+        model: PyTorch module.
 
-def check_config_value(config: dict, key: str, expected: Any) -> None:  # noqa: ANN401
-    actual = config.get(key)
-    if actual != expected:
-        raise ValueError(f"Config value {key} is {actual}, expected {expected}")
-
-
-def to_velocity(
-    sample: torch.Tensor,
-    sigma: float | torch.Tensor,
-    denoised_sample: torch.Tensor,
-    calc_dtype: torch.dtype = torch.float32,
-) -> torch.Tensor:
-    """
-    Convert the sample and its denoised version to velocity.
     Returns:
-        Velocity
+        Dict with 'total', 'trainable', 'frozen' counts.
     """
-    if isinstance(sigma, torch.Tensor):
-        sigma = sigma.to(calc_dtype).item()
-    if sigma == 0:
-        raise ValueError("Sigma can't be 0.0")
-    return ((sample.to(calc_dtype) - denoised_sample.to(calc_dtype)) / sigma).to(sample.dtype)
+    total = sum(p.numel() for p in model.parameters())
+    trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
+    return {
+        "total": total,
+        "trainable": trainable,
+        "frozen": total - trainable,
+    }
 
 
-def to_denoised(
-    sample: torch.Tensor,
-    velocity: torch.Tensor,
-    sigma: float | torch.Tensor,
-    calc_dtype: torch.dtype = torch.float32,
-) -> torch.Tensor:
+def format_param_count(count: int) -> str:
+    """Format a parameter count as human-readable string.
+
+    Examples: 1_500_000 → '1.5M', 2_300_000_000 → '2.3B'
     """
-    Convert the sample and its denoising velocity to denoised sample.
+    if count >= 1e9:
+        return f"{count / 1e9:.1f}B"
+    elif count >= 1e6:
+        return f"{count / 1e6:.1f}M"
+    elif count >= 1e3:
+        return f"{count / 1e3:.1f}K"
+    return str(count)
+
+
+def find_checkpoint(directory: str | Path, pattern: str = "*.pt") -> Path | None:
+    """Find the latest checkpoint file in a directory.
+
+    Args:
+        directory: Path to search.
+        pattern: Glob pattern for checkpoint files.
+
     Returns:
-        Denoised sample
+        Path to the latest checkpoint, or None if not found.
     """
-    if isinstance(sigma, torch.Tensor):
-        sigma = sigma.to(calc_dtype)
-    return (sample.to(calc_dtype) - velocity.to(calc_dtype) * sigma).to(sample.dtype)
+    directory = Path(directory)
+    if not directory.exists():
+        return None
+
+    checkpoints = sorted(directory.glob(pattern), key=lambda p: p.stat().st_mtime)
+    return checkpoints[-1] if checkpoints else None
 
 
-def find_matching_file(root_path: str, pattern: str) -> Path:
-    """
-    Recursively search for files matching a glob pattern and return the first match.
-    """
-    matches = list(Path(root_path).rglob(pattern))
-    if not matches:
-        raise FileNotFoundError(f"No files matching pattern '{pattern}' found under {root_path}")
-    return matches[0]
+def seed_everything(seed: int) -> None:
+    """Set random seed for reproducibility across all libraries."""
+    import random
+    random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed_all(seed)

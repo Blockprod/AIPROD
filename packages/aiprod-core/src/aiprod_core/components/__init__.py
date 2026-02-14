@@ -1,10 +1,21 @@
+# Copyright (c) 2025-2026 AIPROD. All rights reserved.
+# AIPROD Proprietary Software — See LICENSE for terms.
+
 """
-Diffusion pipeline components.
-Submodules:
-    diffusion_steps - Diffusion stepping algorithms (EulerDiffusionStep)
-    guiders         - Guidance strategies (CFGGuider, STGGuider, APG variants)
-    noisers         - Noise samplers (GaussianNoiser)
-    patchifiers     - Latent patchification (VideoLatentPatchifier, AudioPatchifier)
-    protocols       - Protocol definitions (Patchifier, etc.)
-    schedulers      - Sigma schedulers (AIPROD2Scheduler, LinearQuadraticScheduler)
+AIPROD Components — Scheduler, Guider, Diffusion Steps
+
+Core building blocks for the diffusion pipeline:
+    - AdaptiveFlowScheduler: learned noise scheduling
+    - ClassifierFreeGuider: CFG with configurable rescaling
+    - EulerFlowStep: single denoising step using Euler method
 """
+
+from .scheduler import AdaptiveFlowScheduler
+from .guider import ClassifierFreeGuider
+from .diffusion_step import EulerFlowStep
+
+__all__ = [
+    "AdaptiveFlowScheduler",
+    "ClassifierFreeGuider",
+    "EulerFlowStep",
+]

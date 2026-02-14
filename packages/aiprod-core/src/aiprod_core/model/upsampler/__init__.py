@@ -1,10 +1,11 @@
-"""Latent upsampler model components."""
+# Copyright (c) 2025-2026 AIPROD. All rights reserved.
+# AIPROD Proprietary Software — See LICENSE for terms.
 
-from aiprod_core.model.upsampler.model import LatentUpsampler, upsample_video
-from aiprod_core.model.upsampler.model_configurator import LatentUpsamplerConfigurator
+"""
+Latent Upsampler — Learnable latent super-resolution
 
-__all__ = [
-    "LatentUpsampler",
-    "LatentUpsamplerConfigurator",
-    "upsample_video",
-]
+Upsamples low-resolution latents to higher resolution before
+VAE decoding, enabling generation at lower compute cost.
+
+TODO: Implement in Phase 1
+"""

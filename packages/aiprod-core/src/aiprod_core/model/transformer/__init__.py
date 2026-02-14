@@ -1,24 +1,47 @@
-"""Transformer model components."""
+# Copyright (c) 2025-2026 AIPROD. All rights reserved.
+# AIPROD Proprietary Software — See LICENSE for terms.
 
-from aiprod_core.model.transformer.modality import Modality
-from aiprod_core.model.transformer.model import AIPRODModel, X0Model
-from aiprod_core.model.transformer.model_configurator import (
-    AIPRODV_MODEL_COMFY_RENAMING_MAP,
-    AIPRODV_MODEL_COMFY_RENAMING_WITH_TRANSFORMER_LINEAR_DOWNCAST_MAP,
-    UPCAST_DURING_INFERENCE,
-    AIPRODModelConfigurator,
-    AIPRODVideoOnlyModelConfigurator,
-    UpcastWithStochasticRounding,
+"""
+SHDT — Scalable Hybrid Diffusion Transformer
+
+AIPROD's proprietary video denoising backbone.
+
+Key architectural differences from prior work:
+    - Configurable depth/width (not hardcoded 48-layer)
+    - Dual-stream design: separate spatial and temporal attention paths
+      that merge via cross-attention (not interleaved single-stream)
+    - Grouped Query Attention (GQA) for memory efficiency
+    - Learned positional encoding (not fixed RoPE frequencies)
+    - Dynamic compute allocation per frame complexity
+    - Native multi-resolution support via adaptive patching
+
+Design Philosophy:
+    The SHDT processes video latents as a sequence of spatial-temporal
+    patches. Unlike single-stream transformers that flatten all dimensions,
+    SHDT maintains separate spatial and temporal representations that
+    interact through cross-attention, enabling better long-range temporal
+    coherence while keeping memory manageable.
+"""
+
+from .model import SHDTModel, SHDTConfig
+from .block import SHDTBlock
+from .attention import (
+    GroupedQueryAttention,
+    SpatialAttention,
+    TemporalAttention,
+    CrossModalAttention,
 )
+from .position import LearnedPositionalEncoding3D
+from .norm import AdaptiveRMSNorm
 
 __all__ = [
-    "AIPRODV_MODEL_COMFY_RENAMING_MAP",
-    "AIPRODV_MODEL_COMFY_RENAMING_WITH_TRANSFORMER_LINEAR_DOWNCAST_MAP",
-    "UPCAST_DURING_INFERENCE",
-    "AIPRODModel",
-    "AIPRODModelConfigurator",
-    "AIPRODVideoOnlyModelConfigurator",
-    "Modality",
-    "UpcastWithStochasticRounding",
-    "X0Model",
+    "SHDTModel",
+    "SHDTConfig",
+    "SHDTBlock",
+    "GroupedQueryAttention",
+    "SpatialAttention",
+    "TemporalAttention",
+    "CrossModalAttention",
+    "LearnedPositionalEncoding3D",
+    "AdaptiveRMSNorm",
 ]

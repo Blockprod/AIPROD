@@ -1,27 +1,20 @@
-"""Audio VAE model components."""
+# Copyright (c) 2025-2026 AIPROD. All rights reserved.
+# AIPROD Proprietary Software — See LICENSE for terms.
 
-from aiprod_core.model.audio_vae.audio_vae import AudioDecoder, AudioEncoder, decode_audio
-from aiprod_core.model.audio_vae.model_configurator import (
-    AUDIO_VAE_DECODER_COMFY_KEYS_FILTER,
-    AUDIO_VAE_ENCODER_COMFY_KEYS_FILTER,
-    VOCODER_COMFY_KEYS_FILTER,
-    AudioDecoderConfigurator,
-    AudioEncoderConfigurator,
-    VocoderConfigurator,
-)
-from aiprod_core.model.audio_vae.ops import AudioProcessor
-from aiprod_core.model.audio_vae.vocoder import Vocoder
+"""
+NAC — Neural Audio Codec
 
-__all__ = [
-    "AUDIO_VAE_DECODER_COMFY_KEYS_FILTER",
-    "AUDIO_VAE_ENCODER_COMFY_KEYS_FILTER",
-    "VOCODER_COMFY_KEYS_FILTER",
-    "AudioDecoder",
-    "AudioDecoderConfigurator",
-    "AudioEncoder",
-    "AudioEncoderConfigurator",
-    "AudioProcessor",
-    "Vocoder",
-    "VocoderConfigurator",
-    "decode_audio",
-]
+AIPROD's proprietary audio encoding/decoding, using a residual
+vector-quantized (RVQ) codec architecture. Distinct from HiFi-GAN
+vocoder-based approaches.
+
+Key features:
+    - RVQ-based discrete audio tokens (not continuous latents)
+    - Multi-band spectral processing
+    - Configurable bitrate (1.5-24 kbps)
+    - 48kHz support
+"""
+
+from .codec import AudioEncoder, AudioDecoder, NACConfig
+
+__all__ = ["AudioEncoder", "AudioDecoder", "NACConfig"]
