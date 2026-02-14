@@ -1,41 +1,174 @@
-# Python-generated files
+﻿# ============================================================================
+# PYTHON
+# ============================================================================
 __pycache__/
-*.py[oc]
+*.py[cod]
+*$py.class
+*.so
+.Python
 build/
+develop-eggs/
 dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
 wheels/
-checkpoints/
-*.egg-info
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
-# Virtual environments
-.venv
-.python-version
+# ============================================================================
+# VIRTUAL ENVIRONMENTS
+# ============================================================================
+.venv/
+.venv_311/
+.env
+.env.local
+.env.*.local
+venv/
+ENV/
+env/
 
-# IDE settings
+# ============================================================================
+# IDE & EDITOR
+# ============================================================================
 .idea/
 .vscode/
-
-# Other files
+*.swp
+*.swo
+*~
 .DS_Store
-tmp
-.wandb
+.project
+.pydevproject
+.settings/
+*.sublime-project
+*.sublime-workspace
+.vim/
 
-# Model checkpoints
+# ============================================================================
+# TESTING
+# ============================================================================
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.hypothesis/
+*.cover
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# ============================================================================
+# BUILD & DEPLOYMENT
+# ============================================================================
+*.whl
+checkpoint*/
 *.ckpt
 *.pt
-*.safetensors
-*.sft
+*.pth
 
-# Media files
+# ============================================================================
+# DATA & MEDIA
+# ============================================================================
 *.gif
 *.heic
 *.heif
 *.jpg
 *.jpeg
-*.json
+*.png
+*.webp
 *.m4a
+*.wav
+*.mp3
 *.mov
 *.mp4
-*.png
-*.wav
-*.webp
+*.avi
+*.mkv
+
+# Large files
+*.safetensors
+*.sft
+*.bin
+
+# ============================================================================
+# LOGS & MONITORING
+# ============================================================================
+*.log
+logs/
+.wandb/
+runs/
+mlruns/
+
+# ============================================================================
+# LOCAL DATA
+# ============================================================================
+data/
+tmp/
+temp/
+.cache/
+
+# ============================================================================
+# CREDENTIALS & SECRETS
+# ============================================================================
+.env
+.env.local
+*.key
+*.pem
+credentials.json
+secrets.json
+
+# ============================================================================
+# MODELS - SELECTIVE
+# ============================================================================
+# Cache models (auto-download)
+models/cache/**/*.safetensors
+models/cache/**/*.pt
+
+# Checkpoints (auto-generated)
+models/checkpoints/**/
+
+# But keep directory structure
+!models/cache/
+!models/checkpoints/
+!models/pretrained/
+
+# ============================================================================
+# RUNTIME
+# ============================================================================
+*.pid
+*.sock
+*.db
+*.sqlite
+*.sqlite3
+
+# ============================================================================
+# OS SPECIFIC
+# ============================================================================
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# ============================================================================
+# PROJECT SPECIFIC
+# ============================================================================
+.venv_311/
+node_modules/
+
+# Temporary files
+*.tmp
+*.bak
+*.orig
+.temp/

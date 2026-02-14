@@ -1,0 +1,44 @@
+# AIPROD monorepo - third-party libraries found by full import scan
+accelerate
+aiohttp
+av
+bitsandbytes
+boto3
+cachetools
+einops
+fastapi
+google-cloud-storage
+huggingface-hub
+imageio
+librosa
+lpips
+matplotlib
+memory-profiler
+numpy
+opencv-python
+optimum-quanto
+pandas
+peft
+pillow
+pillow-heif
+pydantic
+pytest
+pyyaml
+rich
+safetensors
+scenedetect
+scipy
+torch
+torchaudio
+torchvision
+tqdm
+transformers
+typer
+wandb
+zstandard
+xformers
+
+# Windows environment note:
+# - flash-attn: Not available on Windows (build system limitation). Use xformers instead.
+# - triton: Not available on Windows (requires Linux/NVIDIA platform).
+# - For GPU acceleration on Windows, xformers provides efficient attention implementations.
