@@ -1,7 +1,8 @@
 # Deployment - AIPROD
 
-> **⚠️ PROPRIETARY - CONFIDENTIAL**  
-> Infrastructure de déploiement propriétaire **Blockprod**.
+> **⚠️ PROPRIETARY - STRICTLY CONFIDENTIAL**  
+> © 2026 Blockprod. All rights reserved.  
+> Unauthorized access, copying, or distribution is strictly prohibited.
 
 Ce dossier contient tous les fichiers et scripts de déploiement.
 

@@ -1,7 +1,8 @@
 # AIPROD Trainer
 
-> **⚠️ PROPRIETARY - CONFIDENTIAL**  
-> This package is part of the AIPROD project by **Blockprod**. All rights reserved. Do not distribute.
+> **⚠️ PROPRIETARY - STRICTLY CONFIDENTIAL**  
+> © 2026 Blockprod. All rights reserved.  
+> Unauthorized access, copying, or distribution is strictly prohibited.
 
 This package provides tools and scripts for training and fine-tuning
 the **AIPROD** audio-video generation model. It enables LoRA training, full

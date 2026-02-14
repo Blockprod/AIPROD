@@ -1,7 +1,8 @@
 # Configuration - AIPROD
 
-> **⚠️ PROPRIETARY - CONFIDENTIAL**  
-> Configuration propriétaire **Blockprod**.
+> **⚠️ PROPRIETARY - STRICTLY CONFIDENTIAL**  
+> © 2026 Blockprod. All rights reserved.  
+> Unauthorized access, copying, or distribution is strictly prohibited.
 
 Ce dossier centralise toute la configuration du projet AIPROD.
 
