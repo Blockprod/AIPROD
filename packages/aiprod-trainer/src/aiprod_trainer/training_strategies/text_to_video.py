@@ -12,7 +12,7 @@ import torch
 from pydantic import Field
 from torch import Tensor
 
-from aiprod_core.model.transformer.modality import Modality
+from aiprod_core.model.transformer import Modality
 from aiprod_trainer import logger
 from aiprod_trainer.timestep_samplers import TimestepSampler
 from aiprod_trainer.training_strategies.base_strategy import (
@@ -100,7 +100,8 @@ class TextToVideoStrategy(TrainingStrategy):
         width = latents["width"][0].item()
 
         # Patchify latents: [B, C, F, H, W] -> [B, seq_len, C]
-        video_latents = self._video_patchifier.patchify(video_latents)
+        B_lat, C_lat, F_lat, H_lat, W_lat = video_latents.shape
+        video_latents = video_latents.permute(0, 2, 3, 4, 1).reshape(B_lat, F_lat * H_lat * W_lat, C_lat)
 
         # Handle FPS with backward compatibility
         fps = latents.get("fps", None)
@@ -146,9 +147,6 @@ class TextToVideoStrategy(TrainingStrategy):
         # Compute video targets (velocity prediction)
         video_targets = video_noise - video_latents
 
-        # Create per-token timesteps
-        video_timesteps = self._create_per_token_timesteps(video_conditioning_mask, sigmas.squeeze())
-
         # Generate video positions using AIPROD_core's native implementation
         video_positions = self._get_video_positions(
             num_frames=num_frames,
@@ -160,14 +158,16 @@ class TextToVideoStrategy(TrainingStrategy):
             dtype=dtype,
         )
 
+        # Create denoise_mask: 1.0 for tokens to denoise, 0.0 for conditioning
+        video_denoise_mask = (~video_conditioning_mask).float().unsqueeze(-1)  # [B, seq, 1]
+
         # Create video Modality
         video_modality = Modality(
-            enabled=True,
             latent=noisy_video,
-            timesteps=video_timesteps,
             positions=video_positions,
             context=video_prompt_embeds,
-            context_mask=prompt_attention_mask,
+            denoise_mask=video_denoise_mask,
+            sigma=sigmas.squeeze(),
         )
 
         # Video loss mask: True for tokens we want to compute loss on (non-conditioning tokens)
@@ -225,7 +225,8 @@ class TextToVideoStrategy(TrainingStrategy):
         audio_latents = audio_data["latents"]
 
         # Patchify audio latents: [B, C, T, F] -> [B, T, C*F]
-        audio_latents = self._audio_patchifier.patchify(audio_latents)
+        Ba, Ca, Ta, Fa = audio_latents.shape
+        audio_latents = audio_latents.permute(0, 2, 1, 3).reshape(Ba, Ta, Ca * Fa)
 
         audio_seq_len = audio_latents.shape[1]
 
@@ -239,8 +240,8 @@ class TextToVideoStrategy(TrainingStrategy):
         # Compute audio targets
         audio_targets = audio_noise - audio_latents
 
-        # Audio timesteps: all tokens use the sampled sigma (no conditioning mask)
-        audio_timesteps = sigmas.view(-1, 1).expand(-1, audio_seq_len)
+        # Audio has no conditioning mask, so all tokens are denoised
+        # sigma is shared with video
 
         # Generate audio positions
         audio_positions = self._get_audio_positions(
@@ -252,12 +253,11 @@ class TextToVideoStrategy(TrainingStrategy):
 
         # Create audio Modality
         audio_modality = Modality(
-            enabled=True,
             latent=noisy_audio,
-            timesteps=audio_timesteps,
             positions=audio_positions,
             context=audio_prompt_embeds,
-            context_mask=prompt_attention_mask,
+            denoise_mask=torch.ones(batch_size, audio_seq_len, 1, device=device, dtype=dtype),
+            sigma=sigmas.squeeze(),
         )
 
         # Audio loss mask: all tokens contribute to loss (no conditioning)

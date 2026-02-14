@@ -338,7 +338,7 @@ class AIPRODvTrainer:
         # This method:
         #   1. Loads the text encoder on GPU
         #   2. If validation prompts are configured, computes and caches their embeddings
-        #   3. Unloads the heavy Gemma model while keeping the lightweight embedding connectors
+        #   3. Unloads the heavy LLM model while keeping the lightweight projection layers
         #   The text encoder is kept (as self._text_encoder) but with model/tokenizer/feature_extractor
         #   set to None. Only the embedding connectors remain for use during training.
 
@@ -377,7 +377,7 @@ class AIPRODvTrainer:
         self._text_encoder.tokenizer = None
         self._text_encoder.feature_extractor_linear = None
 
-        logger.debug("Validation prompt embeddings cached. Gemma model unloaded")
+        logger.debug("Validation prompt embeddings cached. LLM encoder unloaded")
         return cached_embeddings
 
     def _load_models(self) -> None:

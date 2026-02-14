@@ -69,6 +69,11 @@ class LLMBridge(nn.Module):
 
     This is NOT a wrapper around a specific model. It's a pluggable
     system that can work with any HuggingFace-compatible LLM.
+
+    Backward-compatible attributes:
+        ``model`` — alias for the internal LLM encoder
+        ``tokenizer`` — alias for the internal tokenizer
+        ``feature_extractor_linear`` — alias for the projection head
     """
 
     def __init__(self, config: LLMBridgeConfig):
@@ -86,6 +91,35 @@ class LLMBridge(nn.Module):
         # The actual LLM will be loaded lazily
         self._encoder = None
         self._tokenizer = None
+
+    # ── Backward-compatible properties ────────────────────────────────────
+
+    @property
+    def model(self):
+        """Backward-compat: alias for the internal LLM encoder."""
+        return self._encoder
+
+    @model.setter
+    def model(self, value):
+        self._encoder = value
+
+    @property
+    def tokenizer(self):
+        """Backward-compat: alias for the internal tokenizer."""
+        return self._tokenizer
+
+    @tokenizer.setter
+    def tokenizer(self, value):
+        self._tokenizer = value
+
+    @property
+    def feature_extractor_linear(self):
+        """Backward-compat: alias for the projection head."""
+        return self.projection
+
+    @feature_extractor_linear.setter
+    def feature_extractor_linear(self, value):
+        self.projection = value
 
     def _load_encoder(self):
         """Lazily load the LLM encoder and tokenizer."""
@@ -185,26 +219,69 @@ class LLMBridge(nn.Module):
 
     def forward(
         self,
-        input_ids: torch.Tensor,
+        input_ids_or_prompt: torch.Tensor | str,
         attention_mask: Optional[torch.Tensor] = None,
-    ) -> torch.Tensor:
-        """Forward pass for pre-tokenized inputs.
+    ) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Forward pass — accepts pre-tokenized inputs OR a text prompt.
 
-        Args:
-            input_ids: [B, S] token IDs.
-            attention_mask: [B, S] attention mask.
+        When called with a **string**, the prompt is encoded and the result
+        is returned as ``(video_context, audio_context, attention_mask)``
+        (video and audio share the same embeddings).
 
-        Returns:
-            [B, S, output_dim] projected text embeddings.
+        When called with a **tensor**, behaves as a standard forward pass
+        returning ``[B, S, output_dim]`` projected text embeddings.
         """
+        if isinstance(input_ids_or_prompt, str):
+            return self._encode_prompt(input_ids_or_prompt)
+
         self._load_encoder()
 
         with torch.no_grad() if self.config.freeze else torch.enable_grad():
             outputs = self._encoder(
-                input_ids=input_ids,
+                input_ids=input_ids_or_prompt,
                 attention_mask=attention_mask,
                 output_hidden_states=True,
             )
 
         hidden_states = outputs.hidden_states[self.config.feature_layer]
         return self.projection(hidden_states)
+
+    # ── Backward-compatible high-level helpers ────────────────────────────
+
+    def _encode_prompt(
+        self,
+        prompt: str,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Encode a single prompt, returning separate video & audio contexts.
+
+        In the new unified architecture both streams share the same text
+        embeddings.  The separation is maintained for API compatibility.
+
+        Returns:
+            ``(video_context, audio_context, attention_mask)``
+        """
+        device = next(self.projection.parameters()).device
+        embeddings, mask = self.encode_text([prompt], device=device)
+        # Both modalities share the same context
+        return embeddings, embeddings.clone(), mask
+
+    def _run_connectors(
+        self,
+        prompt_embeds: torch.Tensor,
+        prompt_attention_mask: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Apply embedding connectors to pre-computed text embeddings.
+
+        In the old architecture this ran separate video/audio connector
+        heads.  In the unified LLMBridge both streams share the same
+        projection, so this is effectively a pass-through.
+
+        Args:
+            prompt_embeds: [B, S, D] pre-computed hidden states.
+            prompt_attention_mask: [B, S] attention mask.
+
+        Returns:
+            ``(video_embeds, audio_embeds, attention_mask)``
+        """
+        projected = self.projection(prompt_embeds)
+        return projected, projected.clone(), prompt_attention_mask

@@ -14,4 +14,15 @@ with specific LLMs, the LLM Bridge provides:
 
 from .bridge import LLMBridge, LLMBridgeConfig, TextEncoderBackend
 
-__all__ = ["LLMBridge", "LLMBridgeConfig", "TextEncoderBackend"]
+# Pipeline-compatible alias: the old API used AVGemmaTextEncoderModel
+# everywhere — point it to our pluggable LLMBridge.
+AVGemmaTextEncoderModel = LLMBridge
+GemmaTextEncoderModelBase = LLMBridge
+
+__all__ = [
+    "LLMBridge",
+    "LLMBridgeConfig",
+    "TextEncoderBackend",
+    "AVGemmaTextEncoderModel",
+    "GemmaTextEncoderModelBase",
+]

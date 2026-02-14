@@ -73,3 +73,74 @@ def seed_everything(seed: int) -> None:
     torch.manual_seed(seed)
     if torch.cuda.is_available():
         torch.cuda.manual_seed_all(seed)
+
+
+def find_matching_file(base_path: str | Path, pattern: str) -> Path:
+    """Find a file matching a glob pattern under a base directory.
+
+    Args:
+        base_path: Root directory to search in.
+        pattern: Glob pattern (e.g. ``model*.safetensors``).
+
+    Returns:
+        Path to the first matching file.
+
+    Raises:
+        FileNotFoundError: If no match is found.
+    """
+    base = Path(base_path)
+    matches = list(base.rglob(pattern))
+    if not matches:
+        raise FileNotFoundError(f"No file matching '{pattern}' found in {base}")
+    return matches[0]
+
+
+def to_velocity(noisy: torch.Tensor, sigma: torch.Tensor | float, denoised: torch.Tensor) -> torch.Tensor:
+    """Convert denoised prediction to velocity.
+
+    In flow-matching: v = (noisy - denoised) / sigma
+
+    Args:
+        noisy: Current noisy latent.
+        sigma: Current noise level.
+        denoised: Model's clean prediction.
+
+    Returns:
+        Velocity tensor.
+    """
+    sigma = float(sigma) if isinstance(sigma, torch.Tensor) else sigma
+    if sigma == 0:
+        return torch.zeros_like(noisy)
+    return (noisy - denoised) / sigma
+
+
+def to_denoised(noisy: torch.Tensor, velocity: torch.Tensor, sigma: torch.Tensor | float) -> torch.Tensor:
+    """Convert velocity to denoised prediction.
+
+    In flow-matching: x0 = noisy - sigma * v
+
+    Args:
+        noisy: Current noisy latent.
+        velocity: Predicted velocity.
+        sigma: Current noise level.
+
+    Returns:
+        Denoised prediction tensor.
+    """
+    sigma = float(sigma) if isinstance(sigma, torch.Tensor) else sigma
+    return noisy - sigma * velocity
+
+
+def post_process_latent(
+    denoised: torch.Tensor,
+    denoise_mask: torch.Tensor | None,
+    clean_latent: torch.Tensor | None,
+) -> torch.Tensor:
+    """Apply denoise mask to keep conditioning regions clean.
+
+    Where mask == 0, replace with clean_latent.
+    Where mask == 1, keep denoised.
+    """
+    if denoise_mask is None or clean_latent is None:
+        return denoised
+    return denoise_mask * denoised + (1.0 - denoise_mask) * clean_latent

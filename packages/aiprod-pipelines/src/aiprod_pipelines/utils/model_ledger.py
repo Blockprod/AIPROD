@@ -2,9 +2,9 @@ from dataclasses import replace
 
 import torch
 
-from aiprod_core.loader.primitives import LoraPathStrengthAndSDOps
-from aiprod_core.loader.registry import DummyRegistry, Registry
-from aiprod_core.loader.single_gpu_model_builder import SingleGPUModelBuilder as Builder
+from aiprod_core.loader import LoraPathStrengthAndSDOps
+from aiprod_core.loader import DummyRegistry, Registry
+from aiprod_core.loader import SingleGPUModelBuilder as Builder
 from aiprod_core.model.audio_vae import (
     AUDIO_VAE_DECODER_COMFY_KEYS_FILTER,
     VOCODER_COMFY_KEYS_FILTER,
@@ -29,13 +29,7 @@ from aiprod_core.model.video_vae import (
     VideoEncoder,
     VideoEncoderConfigurator,
 )
-from aiprod_core.text_encoders.gemma import (
-    AV_GEMMA_TEXT_ENCODER_KEY_OPS,
-    AVGemmaTextEncoderModel,
-    AVGemmaTextEncoderModelConfigurator,
-    module_ops_from_gemma_root,
-)
-from aiprod_core.text_encoders.gemma.encoders.av_encoder import GEMMA_MODEL_OPS
+from aiprod_core.model.text_encoder import LLMBridge, LLMBridgeConfig
 from aiprod_core.utils import find_matching_file
 
 
@@ -145,17 +139,13 @@ class ModelLedger:
             )
 
             if self.gemma_root_path is not None:
-                module_ops = module_ops_from_gemma_root(self.gemma_root_path)
-                model_folder = find_matching_file(self.gemma_root_path, "model*.safetensors").parent
-                weight_paths = [str(p) for p in model_folder.rglob("*.safetensors")]
-
-                self.text_encoder_builder = Builder(
-                    model_path=(str(self.checkpoint_path), *weight_paths),
-                    model_class_configurator=AVGemmaTextEncoderModelConfigurator,
-                    model_sd_ops=AV_GEMMA_TEXT_ENCODER_KEY_OPS,
-                    registry=self.registry,
-                    module_ops=(GEMMA_MODEL_OPS, *module_ops),
+                # Build text encoder using LLMBridge (proprietary wrapper)
+                self.text_encoder_config = LLMBridgeConfig(
+                    model_name=self.gemma_root_path,
                 )
+                self._has_text_encoder = True
+            else:
+                self._has_text_encoder = False
 
         if self.spatial_upsampler_path is not None:
             self.upsampler_builder = Builder(
@@ -217,14 +207,15 @@ class ModelLedger:
 
         return self.vae_encoder_builder.build(device=self._target_device(), dtype=self.dtype).to(self.device).eval()
 
-    def text_encoder(self) -> AVGemmaTextEncoderModel:
-        if not hasattr(self, "text_encoder_builder"):
+    def text_encoder(self) -> LLMBridge:
+        if not getattr(self, "_has_text_encoder", False):
             raise ValueError(
                 "Text encoder not initialized. Please provide a checkpoint path and gemma root path to the "
                 "ModelLedger constructor."
             )
 
-        return self.text_encoder_builder.build(device=self._target_device(), dtype=self.dtype).to(self.device).eval()
+        bridge = LLMBridge(self.text_encoder_config)
+        return bridge.to(self.device).eval()
 
     def audio_decoder(self) -> AudioDecoder:
         if not hasattr(self, "audio_decoder_builder"):

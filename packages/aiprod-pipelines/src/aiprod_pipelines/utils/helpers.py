@@ -6,7 +6,7 @@ import torch
 from tqdm import tqdm
 
 from aiprod_core.components.guiders import MultiModalGuider
-from aiprod_core.components.noisers import Noiser
+from aiprod_core.components.noisers import Noiser  # noqa: F401 — backward compat path
 from aiprod_core.components.protocols import DiffusionStepProtocol, GuiderProtocol
 from aiprod_core.conditioning import (
     ConditioningItem,
@@ -21,7 +21,7 @@ from aiprod_core.guidance.perturbations import (
 )
 from aiprod_core.model.transformer import Modality, X0Model
 from aiprod_core.model.video_vae import VideoEncoder
-from aiprod_core.text_encoders.gemma import GemmaTextEncoderModelBase
+from aiprod_core.text_encoders.gemma import GemmaTextEncoderModelBase  # noqa: F401 — backward compat path
 from aiprod_core.tools import AudioLatentTools, LatentTools, VideoLatentTools
 from aiprod_core.types import AudioLatentShape, LatentState, VideoLatentShape, VideoPixelShape
 from aiprod_core.utils import to_denoised, to_velocity
@@ -316,16 +316,16 @@ def modality_from_latent_state(
     state: LatentState, context: torch.Tensor, sigma: float | torch.Tensor, enabled: bool = True
 ) -> Modality:
     """Create a Modality from a latent state.
-    Constructs a Modality object with the latent state's data, timesteps derived
-    from the denoise mask and sigma, positions, and the provided context.
+    Constructs a Modality object with the latent state's data,
+    positions, and the provided context.  ``enabled`` is accepted
+    for backward compat but currently ignored.
     """
     return Modality(
-        enabled=enabled,
         latent=state.latent,
-        timesteps=timesteps_from_mask(state.denoise_mask, sigma),
         positions=state.positions,
         context=context,
-        context_mask=None,
+        denoise_mask=state.denoise_mask,
+        sigma=sigma,
     )
 
 

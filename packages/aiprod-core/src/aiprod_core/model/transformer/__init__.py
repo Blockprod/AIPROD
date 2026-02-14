@@ -33,6 +33,28 @@ from .attention import (
 )
 from .position import LearnedPositionalEncoding3D
 from .norm import AdaptiveRMSNorm
+from .modality import Modality
+from .wrapper import X0Model
+
+# Backward-compatible aliases
+AIPRODTransformer3DModel = SHDTModel
+AIPRODModel = SHDTModel
+
+
+def __getattr__(name: str):
+    """Lazy imports to avoid circular dependency with configurators."""
+    _configurator_names = {
+        "SHDTConfigurator",
+        "AIPRODModelConfigurator",
+        "AIPRODV_MODEL_COMFY_RENAMING_MAP",
+        "AIPRODV_MODEL_COMFY_RENAMING_WITH_TRANSFORMER_LINEAR_DOWNCAST_MAP",
+        "UPCAST_DURING_INFERENCE",
+    }
+    if name in _configurator_names:
+        from aiprod_core.model import configurators as _cfg
+        return getattr(_cfg, name)
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
+
 
 __all__ = [
     "SHDTModel",
@@ -44,4 +66,13 @@ __all__ = [
     "CrossModalAttention",
     "LearnedPositionalEncoding3D",
     "AdaptiveRMSNorm",
+    "Modality",
+    "X0Model",
+    "AIPRODTransformer3DModel",
+    "AIPRODModel",
+    "AIPRODModelConfigurator",
+    "SHDTConfigurator",
+    "AIPRODV_MODEL_COMFY_RENAMING_MAP",
+    "AIPRODV_MODEL_COMFY_RENAMING_WITH_TRANSFORMER_LINEAR_DOWNCAST_MAP",
+    "UPCAST_DURING_INFERENCE",
 ]

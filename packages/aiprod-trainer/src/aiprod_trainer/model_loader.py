@@ -28,11 +28,11 @@ Device = str | torch.device
 
 # Type checking imports (not loaded at runtime)
 if TYPE_CHECKING:
-    from aiprod_core.components.schedulers import AIPROD2Scheduler
+    from aiprod_core.components import AIPROD2Scheduler
     from aiprod_core.model.audio_vae import AudioDecoder, AudioEncoder, Vocoder
-    from aiprod_core.model.transformer import AIPRODModel
+    from aiprod_core.model.transformer import SHDTModel
     from aiprod_core.model.video_vae import VideoDecoder, VideoEncoder
-    from aiprod_core.text_encoders.gemma import AVGemmaTextEncoderModel
+    from aiprod_core.model.text_encoder import LLMBridge
 
 
 def _to_torch_device(device: Device) -> torch.device:
@@ -49,17 +49,17 @@ def load_transformer(
     checkpoint_path: str | Path,
     device: Device = "cpu",
     dtype: torch.dtype = torch.bfloat16,
-) -> "AIPRODModel":
-    """Load the AIPROD transformer model.
+) -> "SHDTModel":
+    """Load the AIPROD SHDT transformer model.
     Args:
         checkpoint_path: Path to the safetensors checkpoint file
         device: Device to load model on
         dtype: Data type for model weights
     Returns:
-        Loaded AIPRODModel transformer
+        Loaded SHDTModel transformer
     """
-    from aiprod_core.loader.single_gpu_model_builder import SingleGPUModelBuilder
-    from aiprod_core.model.transformer.model_configurator import (
+    from aiprod_core.loader import SingleGPUModelBuilder
+    from aiprod_core.model.transformer import (
         AIPRODV_MODEL_COMFY_RENAMING_MAP,
         AIPRODModelConfigurator,
     )
@@ -84,7 +84,7 @@ def load_video_vae_encoder(
     Returns:
         Loaded VideoEncoder
     """
-    from aiprod_core.loader.single_gpu_model_builder import SingleGPUModelBuilder
+    from aiprod_core.loader import SingleGPUModelBuilder
     from aiprod_core.model.video_vae import VAE_ENCODER_COMFY_KEYS_FILTER, VideoEncoderConfigurator
 
     return SingleGPUModelBuilder(
@@ -107,7 +107,7 @@ def load_video_vae_decoder(
     Returns:
         Loaded VideoDecoder
     """
-    from aiprod_core.loader.single_gpu_model_builder import SingleGPUModelBuilder
+    from aiprod_core.loader import SingleGPUModelBuilder
     from aiprod_core.model.video_vae import VAE_DECODER_COMFY_KEYS_FILTER, VideoDecoderConfigurator
 
     return SingleGPUModelBuilder(
@@ -192,51 +192,41 @@ def load_text_encoder(
     device: Device = "cpu",
     dtype: torch.dtype = torch.bfloat16,
     load_in_8bit: bool = False,
-) -> "AVGemmaTextEncoderModel":
-    """Load the Gemma text encoder.
+) -> "LLMBridge":
+    """Load the text encoder.
+
+    Uses the AIPROD LLMBridge which supports pluggable LLM backends
+    (Gemma, LLaMA, Mistral, etc.).
+
     Args:
         checkpoint_path: Path to the AIPROD safetensors checkpoint file
-        gemma_model_path: Path to Gemma model directory
+        gemma_model_path: Path to the LLM model directory (e.g. gemma-3/)
         device: Device to load model on
         dtype: Data type for model weights
-        load_in_8bit: Whether to load the Gemma model in 8-bit precision using bitsandbytes.
-            When True, the model is loaded with device_map="auto" and the device argument
-            is ignored for the Gemma backbone (feature extractor still uses dtype).
+        load_in_8bit: Whether to load in 8-bit precision (requires bitsandbytes).
     Returns:
-        Loaded AVGemmaTextEncoderModel
+        Loaded LLMBridge text encoder
     """
     if not Path(gemma_model_path).is_dir():
-        raise ValueError(f"Gemma model path is not a directory: {gemma_model_path}")
+        raise ValueError(f"Text encoder model path is not a directory: {gemma_model_path}")
 
     # Use 8-bit loading path if requested
     if load_in_8bit:
-        from aiprod_trainer.gemma_8bit import load_8bit_gemma
+        from aiprod_trainer.gemma_8bit import load_8bit_text_encoder
 
-        return load_8bit_gemma(checkpoint_path, gemma_model_path, dtype)
+        return load_8bit_text_encoder(checkpoint_path, gemma_model_path, dtype)
 
-    # Standard loading path
-    from aiprod_core.loader.single_gpu_model_builder import SingleGPUModelBuilder
-    from aiprod_core.text_encoders.gemma.encoders.av_encoder import (
-        AV_GEMMA_TEXT_ENCODER_KEY_OPS,
-        GEMMA_MODEL_OPS,
-        AVGemmaTextEncoderModelConfigurator,
-    )
-    from aiprod_core.text_encoders.gemma.encoders.base_encoder import module_ops_from_gemma_root
-    from aiprod_core.utils import find_matching_file
+    # Standard loading path using LLMBridge
+    from aiprod_core.model.text_encoder import LLMBridge, LLMBridgeConfig
 
     torch_device = _to_torch_device(device)
 
-    gemma_model_folder = find_matching_file(str(gemma_model_path), "model*.safetensors").parent
-    gemma_weight_paths = [str(p) for p in gemma_model_folder.rglob("*.safetensors")]
-
-    text_encoder = SingleGPUModelBuilder(
-        model_path=(str(checkpoint_path), *gemma_weight_paths),
-        model_class_configurator=AVGemmaTextEncoderModelConfigurator,
-        model_sd_ops=AV_GEMMA_TEXT_ENCODER_KEY_OPS,
-        module_ops=(GEMMA_MODEL_OPS, *module_ops_from_gemma_root(str(gemma_model_path))),
-    ).build(device=torch_device, dtype=dtype)
-
-    return text_encoder
+    config = LLMBridgeConfig(
+        model_name=str(gemma_model_path),
+    )
+    bridge = LLMBridge(config)
+    bridge = bridge.to(device=torch_device, dtype=dtype)
+    return bridge
 
 
 # =============================================================================
@@ -248,12 +238,12 @@ def load_text_encoder(
 class AIPRODModelComponents:
     """Container for all AIPROD model components."""
 
-    transformer: "AIPRODModel"
+    transformer: "SHDTModel"
     video_vae_encoder: "VideoEncoder | None" = None
     video_vae_decoder: "VideoDecoder | None" = None
     audio_vae_decoder: "AudioDecoder | None" = None
     vocoder: "Vocoder | None" = None
-    text_encoder: "AVGemmaTextEncoderModel | None" = None
+    text_encoder: "LLMBridge | None" = None
     scheduler: "AIPROD2Scheduler | None" = None
 
 
@@ -291,7 +281,7 @@ def load_model(
     Returns:
         AIPRODModelComponents containing all loaded model components
     """
-    from aiprod_core.components.schedulers import AIPROD2Scheduler
+    from aiprod_core.components import AIPROD2Scheduler
 
     checkpoint_path = Path(checkpoint_path)
 

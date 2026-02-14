@@ -11,7 +11,7 @@ import torch
 from pydantic import Field
 from torch import Tensor
 
-from aiprod_core.model.transformer.modality import Modality
+from aiprod_core.model.transformer import Modality
 from aiprod_trainer import logger
 from aiprod_trainer.timestep_samplers import TimestepSampler
 from aiprod_trainer.training_strategies.base_strategy import (
@@ -112,8 +112,10 @@ class VideoToVideoStrategy(TrainingStrategy):
             )
 
         # Patchify latents: [B, C, F, H, W] -> [B, seq_len, C]
-        target_latents = self._video_patchifier.patchify(target_latents)
-        ref_latents = self._video_patchifier.patchify(ref_latents)
+        Bt, Ct, Ft, Ht, Wt = target_latents.shape
+        target_latents = target_latents.permute(0, 2, 3, 4, 1).reshape(Bt, Ft * Ht * Wt, Ct)
+        Br, Cr, Fr, Hr, Wr = ref_latents.shape
+        ref_latents = ref_latents.permute(0, 2, 3, 4, 1).reshape(Br, Fr * Hr * Wr, Cr)
 
         # Handle FPS
         fps = latents.get("fps", None)
@@ -170,9 +172,6 @@ class VideoToVideoStrategy(TrainingStrategy):
         # Concatenate reference (clean) and target (noisy)
         combined_latents = torch.cat([ref_latents, noisy_target], dim=1)
 
-        # Create per-token timesteps
-        timesteps = self._create_per_token_timesteps(conditioning_mask, sigmas.squeeze())
-
         # Generate positions for reference and target separately, then concatenate
         ref_positions = self._get_video_positions(
             num_frames=ref_frames,
@@ -206,14 +205,16 @@ class VideoToVideoStrategy(TrainingStrategy):
         # Concatenate positions along sequence dimension
         positions = torch.cat([ref_positions, target_positions], dim=2)
 
+        # Create denoise_mask: 1.0 for tokens to denoise, 0.0 for conditioning
+        denoise_mask = (~conditioning_mask).float().unsqueeze(-1)  # [B, seq, 1]
+
         # Create video Modality
         video_modality = Modality(
-            enabled=True,
             latent=combined_latents,
-            timesteps=timesteps,
             positions=positions,
             context=prompt_embeds,
-            context_mask=prompt_attention_mask,
+            denoise_mask=denoise_mask,
+            sigma=sigmas.squeeze(),
         )
 
         # Loss mask: only compute loss on non-conditioning target tokens

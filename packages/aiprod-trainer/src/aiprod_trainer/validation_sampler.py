@@ -7,36 +7,33 @@ from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING, Literal
 
 import torch
-from einops import rearrange
 from torch import Tensor
 
-from aiprod_core.components.diffusion_steps import EulerDiffusionStep
-from aiprod_core.components.guiders import CFGGuider, STGGuider
-from aiprod_core.components.noisers import GaussianNoiser
-from aiprod_core.components.patchifiers import (
+from aiprod_core.components import (
+    AIPROD2Scheduler,
     AudioPatchifier,
+    CFGGuider,
+    EulerFlowStep,
+    GaussianNoiser,
+    STGGuider,
     VideoLatentPatchifier,
     get_pixel_coords,
 )
-from aiprod_core.components.schedulers import AIPROD2Scheduler
 from aiprod_core.guidance.perturbations import (
     BatchedPerturbationConfig,
-    Perturbation,
     PerturbationConfig,
     PerturbationType,
 )
-from aiprod_core.model.transformer.modality import Modality
-from aiprod_core.model.transformer.model import X0Model
-from aiprod_core.model.video_vae import SpatialTilingConfig, TemporalTilingConfig, TilingConfig
+from aiprod_core.model.transformer import Modality, X0Model
 from aiprod_core.tools import AudioLatentTools, VideoLatentTools
 from aiprod_core.types import AudioLatentShape, LatentState, SpatioTemporalScaleFactors, VideoLatentShape, VideoPixelShape
 from aiprod_trainer.progress import SamplingContext
 
 if TYPE_CHECKING:
     from aiprod_core.model.audio_vae import AudioDecoder, Vocoder
-    from aiprod_core.model.transformer import AIPRODModel
+    from aiprod_core.model.transformer import SHDTModel
     from aiprod_core.model.video_vae import VideoDecoder, VideoEncoder
-    from aiprod_core.text_encoders.gemma import AVGemmaTextEncoderModel
+    from aiprod_core.model.text_encoder import LLMBridge
 
 VIDEO_SCALE_FACTORS = SpatioTemporalScaleFactors.default()
 
@@ -121,20 +118,20 @@ class ValidationSampler:
 
     def __init__(
         self,
-        transformer: "AIPRODModel",
+        transformer: "SHDTModel",
         vae_decoder: "VideoDecoder",
         vae_encoder: "VideoEncoder | None",
-        text_encoder: "AVGemmaTextEncoderModel | None" = None,
+        text_encoder: "LLMBridge | None" = None,
         audio_decoder: "AudioDecoder | None" = None,
         vocoder: "Vocoder | None" = None,
         sampling_context: SamplingContext | None = None,
     ):
         """Initialize the validation sampler.
         Args:
-            transformer: AIPROD transformer model
+            transformer: AIPROD SHDT transformer model
             vae_decoder: Video VAE decoder
             vae_encoder: Video VAE encoder (for image/video conditioning), can be None if not needed
-            text_encoder: Gemma text encoder with embeddings connector (optional if cached_embeddings in config)
+            text_encoder: LLMBridge text encoder (optional if cached_embeddings in config)
             audio_decoder: Optional audio VAE decoder (for audio generation)
             vocoder: Optional vocoder (for audio generation)
             sampling_context: Optional SamplingContext for progress display during denoising
@@ -330,25 +327,29 @@ class ValidationSampler:
     def _create_video_latent_tools(self, config: GenerationConfig) -> VideoLatentTools:
         """Create video latent tools for the given configuration."""
         pixel_shape = VideoPixelShape(
-            batch=1,
-            frames=config.num_frames,
+            num_frames=config.num_frames,
             height=config.height,
             width=config.width,
             fps=config.frame_rate,
         )
         return VideoLatentTools(
             patchifier=self._video_patchifier,
-            target_shape=VideoLatentShape.from_pixel_shape(shape=pixel_shape),
+            latent_shape=VideoLatentShape.from_pixel_shape(shape=pixel_shape),
             fps=config.frame_rate,
             scale_factors=VIDEO_SCALE_FACTORS,
-            causal_fix=True,
         )
 
     def _create_audio_latent_tools(self, config: GenerationConfig) -> AudioLatentTools:
         """Create audio latent tools for the given configuration."""
+        pixel_shape = VideoPixelShape(
+            num_frames=config.num_frames,
+            height=config.height,
+            width=config.width,
+            fps=config.frame_rate,
+        )
         return AudioLatentTools(
             patchifier=self._audio_patchifier,
-            target_shape=AudioLatentShape.from_duration(batch=1, duration=config.num_frames / config.frame_rate),
+            latent_shape=AudioLatentShape.from_video_pixel_shape(shape=pixel_shape),
         )
 
     def _apply_image_conditioning(
@@ -358,8 +359,22 @@ class ValidationSampler:
         # Encode the image
         encoded_image = self._encode_conditioning_image(image, config.height, config.width, device)
 
-        # Patchify the encoded image (single frame)
-        patchified_image = self._video_patchifier.patchify(encoded_image)  # [1, 1, C] -> [1, num_patches, C]
+        # Patchify the encoded image (single frame) — create a trivial shape for 1-frame latent
+        _, c_enc, t_enc, h_enc, w_enc = encoded_image.shape
+        img_latent_shape = VideoLatentShape(
+            batch_size=1,
+            channels=c_enc,
+            num_frames=t_enc,
+            height=h_enc,
+            width=w_enc,
+        )
+        patchified_state = self._video_patchifier.patchify(
+            encoded_image,
+            latent_shape=img_latent_shape,
+            fps=config.frame_rate,
+            scale_factors=VIDEO_SCALE_FACTORS,
+        )
+        patchified_image = patchified_state.latent  # [1, num_patches, C]
         num_image_tokens = patchified_image.shape[1]
 
         # Update the first frame tokens in the latent
@@ -428,7 +443,7 @@ class ValidationSampler:
             ref_video = ref_video[:, :, h_start : h_start + target_height, w_start : w_start + target_width]
 
         # Convert to [B, C, F, H, W] and trim to valid frame count (k*8 + 1)
-        ref_video = rearrange(ref_video, "f c h w -> 1 c f h w")
+        ref_video = ref_video.permute(1, 0, 2, 3).unsqueeze(0)  # [F,C,H,W] → [1,C,F,H,W]
         valid_frames = (ref_video.shape[2] - 1) // 8 * 8 + 1
         ref_video = ref_video[:, :, :valid_frames]
 
@@ -453,22 +468,22 @@ class ValidationSampler:
         self._vae_encoder.to("cpu")
 
         latents = latents.to(torch.bfloat16)
-        patchified = self._video_patchifier.patchify(latents)
 
-        # Compute positions
+        # Determine latent shape
         latent_shape = VideoLatentShape(
-            batch=1,
+            batch_size=1,
             channels=latents.shape[1],
-            frames=latents.shape[2],
+            num_frames=latents.shape[2],
             height=latents.shape[3],
             width=latents.shape[4],
         )
-        latent_coords = self._video_patchifier.get_patch_grid_bounds(output_shape=latent_shape, device=device)
-        positions = get_pixel_coords(latent_coords, scale_factors=VIDEO_SCALE_FACTORS, causal_fix=True)
-        positions = positions.to(torch.bfloat16)
-        positions[:, 0, ...] = positions[:, 0, ...] / fps
 
-        return patchified, positions
+        # Patchify
+        patchified_state = self._video_patchifier.patchify(
+            latents, latent_shape=latent_shape, fps=fps, scale_factors=VIDEO_SCALE_FACTORS,
+        )
+
+        return patchified_state.latent, patchified_state.positions
 
     def _run_denoising(
         self,
@@ -486,33 +501,31 @@ class ValidationSampler:
         """Run the denoising loop using X0 prediction with CFG and optional STG."""
         scheduler = AIPROD2Scheduler()
         sigmas = scheduler.execute(steps=config.num_inference_steps).to(device).float()
-        stepper = EulerDiffusionStep()
-        cfg_guider = CFGGuider(config.guidance_scale)
-        stg_guider = STGGuider(config.stg_scale)
+        stepper = EulerFlowStep()
+        cfg_guider = CFGGuider(guidance_scale=config.guidance_scale)
 
         # Build STG perturbation config if STG is enabled
-        stg_perturbation_config = self._build_stg_perturbation_config(config) if stg_guider.enabled() else None
+        use_stg = config.stg_scale > 0.0
+        stg_guider = STGGuider(guidance_scale=config.guidance_scale, stg_scale=config.stg_scale) if use_stg else None
+        stg_perturbation_config = self._build_stg_perturbation_config(config) if use_stg else None
 
-        # Create initial modalities (will be updated each step via replace())
+        # Create initial modalities
         video = Modality(
-            enabled=True,
             latent=video_state.latent,
-            timesteps=video_state.denoise_mask,
+            denoise_mask=video_state.denoise_mask,
             positions=video_state.positions,
             context=v_ctx_pos,
-            context_mask=None,
+            sigma=1.0,
         )
 
-        # Audio modality is None when not generating audio
         audio: Modality | None = None
         if audio_state is not None:
             audio = Modality(
-                enabled=True,
                 latent=audio_state.latent,
-                timesteps=audio_state.denoise_mask,
+                denoise_mask=audio_state.denoise_mask,
                 positions=audio_state.positions,
                 context=a_ctx_pos,
-                context_mask=None,
+                sigma=1.0,
             )
 
         # Wrap transformer with X0Model to convert velocity predictions to denoised outputs
@@ -521,44 +534,51 @@ class ValidationSampler:
 
         with torch.autocast(device_type=str(device).split(":")[0], dtype=torch.bfloat16):
             for step_idx, sigma in enumerate(sigmas[:-1]):
-                # Update modalities with current state and timesteps
+                sigma_val = float(sigma)
+
+                # Update modalities with current state and sigma
                 video = replace(
                     video,
                     latent=video_state.latent,
-                    timesteps=sigma * video_state.denoise_mask,
+                    denoise_mask=video_state.denoise_mask,
                     positions=video_state.positions,
+                    sigma=sigma_val,
                 )
 
                 if audio is not None and audio_state is not None:
                     audio = replace(
                         audio,
                         latent=audio_state.latent,
-                        timesteps=sigma * audio_state.denoise_mask,
+                        denoise_mask=audio_state.denoise_mask,
                         positions=audio_state.positions,
+                        sigma=sigma_val,
                     )
 
                 # Run model (positive pass) - X0Model returns denoised outputs
-                pos_video, pos_audio = x0_model(video=video, audio=audio, perturbations=None)
-                denoised_video, denoised_audio = pos_video, pos_audio
+                pos_video, pos_audio = x0_model(video=video, audio=audio, perturbation_config=None)
+                denoised_video = pos_video
+                denoised_audio = pos_audio
 
-                # Apply CFG if guidance_scale != 1.0
-                if cfg_guider.enabled() and v_ctx_neg is not None:
+                # Apply guidance
+                use_cfg = config.guidance_scale != 1.0 and v_ctx_neg is not None
+                if use_cfg:
                     video_neg = replace(video, context=v_ctx_neg)
                     audio_neg = replace(audio, context=a_ctx_neg) if audio is not None else None
-                    neg_video, neg_audio = x0_model(video=video_neg, audio=audio_neg, perturbations=None)
+                    neg_video, neg_audio = x0_model(video=video_neg, audio=audio_neg, perturbation_config=None)
 
-                    denoised_video = denoised_video + cfg_guider.delta(pos_video, neg_video)
-                    if audio is not None and denoised_audio is not None:
-                        denoised_audio = denoised_audio + cfg_guider.delta(pos_audio, neg_audio)
-
-                # Apply STG if stg_scale != 0.0
-                if stg_guider.enabled() and stg_perturbation_config is not None:
-                    perturbed_video, perturbed_audio = x0_model(
-                        video=video, audio=audio, perturbations=stg_perturbation_config
-                    )
-                    denoised_video = denoised_video + stg_guider.delta(pos_video, perturbed_video)
-                    if audio is not None and denoised_audio is not None and perturbed_audio is not None:
-                        denoised_audio = denoised_audio + stg_guider.delta(pos_audio, perturbed_audio)
+                    if use_stg and stg_perturbation_config is not None and stg_guider is not None:
+                        # Combined CFG + STG: run perturbed pass then use STGGuider
+                        perturbed_video, perturbed_audio = x0_model(
+                            video=video, audio=audio, perturbation_config=stg_perturbation_config
+                        )
+                        denoised_video = stg_guider.guide_stg(pos_video, neg_video, perturbed_video)
+                        if audio is not None and denoised_audio is not None and neg_audio is not None and perturbed_audio is not None:
+                            denoised_audio = stg_guider.guide_stg(pos_audio, neg_audio, perturbed_audio)
+                    else:
+                        # CFG only
+                        denoised_video = cfg_guider.guide(pos_video, neg_video)
+                        if audio is not None and denoised_audio is not None and neg_audio is not None:
+                            denoised_audio = cfg_guider.guide(pos_audio, neg_audio)
 
                 # Apply conditioning mask (keep conditioned tokens clean)
                 denoised_video = denoised_video * video_state.denoise_mask + video_clean_state.latent.float() * (
@@ -569,19 +589,15 @@ class ValidationSampler:
                         1 - audio_state.denoise_mask
                     )
 
-                # Euler step
+                # Euler step (schedule-based convention: noisy, denoised, sigmas, step_index)
                 video_state = replace(
                     video_state,
-                    latent=stepper.step(
-                        sample=video.latent, denoised_sample=denoised_video, sigmas=sigmas, step_index=step_idx
-                    ),
+                    latent=stepper.step(video.latent, denoised_video, sigmas, step_idx),
                 )
                 if audio is not None and audio_state is not None:
                     audio_state = replace(
                         audio_state,
-                        latent=stepper.step(
-                            sample=audio.latent, denoised_sample=denoised_audio, sigmas=sigmas, step_index=step_idx
-                        ),
+                        latent=stepper.step(audio.latent, denoised_audio, sigmas, step_idx),
                     )
 
                 # Update progress
@@ -593,64 +609,46 @@ class ValidationSampler:
     @staticmethod
     def _build_stg_perturbation_config(config: GenerationConfig) -> BatchedPerturbationConfig:
         """Build the perturbation config for STG based on the stg_mode."""
-        # Always skip video self-attention for STG
-        perturbations: list[Perturbation] = [
-            Perturbation(type=PerturbationType.SKIP_VIDEO_SELF_ATTN, blocks=config.stg_blocks)
-        ]
+        perturbation_configs: list[PerturbationConfig] = []
 
-        # Optionally also skip audio self-attention (stg_av mode)
-        if config.stg_mode == "stg_av":
-            perturbations.append(Perturbation(type=PerturbationType.SKIP_AUDIO_SELF_ATTN, blocks=config.stg_blocks))
+        # Create per-block perturbation configs for attention zeroing
+        blocks = config.stg_blocks or []
+        for block_idx in blocks:
+            perturbation_configs.append(
+                PerturbationConfig(
+                    block_index=block_idx,
+                    perturbation_type=PerturbationType.ATTENTION_ZERO,
+                    scale=1.0,
+                )
+            )
 
-        perturbation_config = PerturbationConfig(perturbations=perturbations)
-        # Batch size is 1 for validation
-        return BatchedPerturbationConfig(perturbations=[perturbation_config])
+        return BatchedPerturbationConfig(configs=perturbation_configs)
 
     def _decode_video_latent(self, latent: Tensor, config: GenerationConfig, device: torch.device) -> Tensor:
         """Decode patchified video latent to pixel space."""
         # Unpatchify
-        latent_frames = config.num_frames // VIDEO_SCALE_FACTORS.time + 1
-        latent_height = config.height // VIDEO_SCALE_FACTORS.height
-        latent_width = config.width // VIDEO_SCALE_FACTORS.width
+        latent_frames = config.num_frames // VIDEO_SCALE_FACTORS.temporal + 1
+        latent_height = config.height // VIDEO_SCALE_FACTORS.spatial_h
+        latent_width = config.width // VIDEO_SCALE_FACTORS.spatial_w
 
+        latent_shape = VideoLatentShape(
+            height=latent_height,
+            width=latent_width,
+            num_frames=latent_frames,
+            batch_size=1,
+            channels=128,
+        )
+
+        unpatchified_state = LatentState(latent=latent)
         unpatchified = self._video_patchifier.unpatchify(
-            latent,
-            output_shape=VideoLatentShape(
-                height=latent_height,
-                width=latent_width,
-                frames=latent_frames,
-                batch=1,
-                channels=128,
-            ),
+            unpatchified_state,
+            latent_shape=latent_shape,
         )
 
         # Decode - ensure bfloat16 to match decoder weights
         self._vae_decoder.to(device)
         unpatchified = unpatchified.to(dtype=torch.bfloat16)
-        tiled_config = config.tiled_decoding
-
-        if tiled_config is not None and tiled_config.enabled:
-            # Use tiled decoding for reduced VRAM
-            tiling_config = TilingConfig(
-                spatial_config=SpatialTilingConfig(
-                    tile_size_in_pixels=tiled_config.tile_size_pixels,
-                    tile_overlap_in_pixels=tiled_config.tile_overlap_pixels,
-                ),
-                temporal_config=TemporalTilingConfig(
-                    tile_size_in_frames=tiled_config.tile_size_frames,
-                    tile_overlap_in_frames=tiled_config.tile_overlap_frames,
-                ),
-            )
-            chunks = []
-            for video_chunk in self._vae_decoder.tiled_decode(
-                unpatchified,
-                tiling_config=tiling_config,
-            ):
-                chunks.append(video_chunk)
-            decoded_video = torch.cat(chunks, dim=2)
-        else:
-            # Standard full decoding
-            decoded_video = self._vae_decoder(unpatchified)
+        decoded_video = self._vae_decoder(unpatchified)
 
         decoded_video = ((decoded_video + 1.0) / 2.0).clamp(0.0, 1.0)
         self._vae_decoder.to("cpu")
@@ -700,10 +698,11 @@ class ValidationSampler:
         if config.guidance_scale != 1.0:
             v_ctx_neg, a_ctx_neg, _ = self._text_encoder(config.negative_prompt)
 
-        # Move the base Gemma model to CPU but keep embeddings connectors on GPU
-        # as this module is also used during training
-        self._text_encoder.model.to("cpu")
-        self._text_encoder.feature_extractor_linear.to("cpu")
+        # Move the heavy LLM encoder to CPU but keep projection on GPU
+        if self._text_encoder.model is not None:
+            self._text_encoder.model.to("cpu")
+        if self._text_encoder.feature_extractor_linear is not None:
+            self._text_encoder.feature_extractor_linear.to("cpu")
 
         return v_ctx_pos, a_ctx_pos, v_ctx_neg, a_ctx_neg
 
@@ -714,7 +713,7 @@ class ValidationSampler:
         Args:
             video_state: Video latent state to decode
             device: Device to run decoding on
-            tiled_config: Optional tiled decoding configuration for reduced VRAM usage
+            tiled_config: Optional tiled decoding configuration (reserved for future use)
         Returns:
             Decoded video tensor [C, F, H, W] in [0, 1] range
         """
@@ -722,28 +721,8 @@ class ValidationSampler:
         # Ensure latent is bfloat16 to match decoder weights
         latent = video_state.latent.to(dtype=torch.bfloat16)
 
-        if tiled_config is not None and tiled_config.enabled:
-            # Use tiled decoding for reduced VRAM
-            tiling_config = TilingConfig(
-                spatial_config=SpatialTilingConfig(
-                    tile_size_in_pixels=tiled_config.tile_size_pixels,
-                    tile_overlap_in_pixels=tiled_config.tile_overlap_pixels,
-                ),
-                temporal_config=TemporalTilingConfig(
-                    tile_size_in_frames=tiled_config.tile_size_frames,
-                    tile_overlap_in_frames=tiled_config.tile_overlap_frames,
-                ),
-            )
-            chunks = []
-            for video_chunk in self._vae_decoder.tiled_decode(
-                latent,
-                tiling_config=tiling_config,
-            ):
-                chunks.append(video_chunk)
-            decoded_video = torch.cat(chunks, dim=2)
-        else:
-            # Standard full decoding
-            decoded_video = self._vae_decoder(latent)
+        # Standard full decoding
+        decoded_video = self._vae_decoder(latent)
 
         decoded_video = ((decoded_video + 1.0) / 2.0).clamp(0.0, 1.0)
         self._vae_decoder.to("cpu")
@@ -833,7 +812,7 @@ class ValidationSampler:
                 resize_height = int(target_width / aspect_ratio)
                 resize_width = target_width
 
-            image = rearrange(image, "c h w -> 1 c h w")
+            image = image.unsqueeze(0)  # [C,H,W] → [1,C,H,W]
             image = torch.nn.functional.interpolate(
                 image, size=(resize_height, resize_width), mode="bilinear", align_corners=False
             )
@@ -843,10 +822,10 @@ class ValidationSampler:
             w_start = (resize_width - target_width) // 2
             image = image[:, :, h_start : h_start + target_height, w_start : w_start + target_width]
         else:
-            image = rearrange(image, "c h w -> 1 c h w")
+            image = image.unsqueeze(0)  # [C,H,W] → [1,C,H,W]
 
         # Add frame dimension and convert to [-1, 1]
-        image = rearrange(image, "b c h w -> b c 1 h w")
+        image = image.unsqueeze(2)  # [B,C,H,W] → [B,C,1,H,W]
         image = (image * 2.0 - 1.0).to(device=device, dtype=torch.float32)
 
         # Encode

@@ -12,12 +12,12 @@ import torch
 from pydantic import BaseModel, ConfigDict, Field
 from torch import Tensor
 
-from aiprod_core.components.patchifiers import (
+from aiprod_core.components import (
     AudioPatchifier,
     VideoLatentPatchifier,
     get_pixel_coords,
 )
-from aiprod_core.model.transformer.modality import Modality
+from aiprod_core.model.transformer import Modality
 from aiprod_core.types import AudioLatentShape, SpatioTemporalScaleFactors, VideoLatentShape
 from aiprod_trainer.timestep_samplers import TimestepSampler
 
@@ -159,28 +159,26 @@ class TrainingStrategy(ABC):
         Returns:
             Position tensor of shape [B, 3, seq_len, 2]
         """
-        latent_coords = self._video_patchifier.get_patch_grid_bounds(
-            output_shape=VideoLatentShape(
-                frames=num_frames,
-                height=height,
-                width=width,
-                batch=batch_size,
-                channels=128,  # Video latent channels
-            ),
+        # Generate pixel-space positions using the new get_pixel_coords API
+        positions = get_pixel_coords(
+            num_frames=num_frames,
+            height=height,
+            width=width,
+            scale_factors=VIDEO_SCALE_FACTORS,
+            fps=fps,
             device=device,
+            dtype=dtype,
         )
 
-        # Convert latent coords to pixel coords with causal fix
-        pixel_coords = get_pixel_coords(
-            latent_coords=latent_coords,
-            scale_factors=VIDEO_SCALE_FACTORS,
-            causal_fix=True,
-        ).to(dtype)
+        # Expand to batch size
+        if batch_size > 1:
+            positions = positions.expand(batch_size, -1, -1, -1)
 
         # Scale temporal dimension by 1/fps to get time in seconds
-        pixel_coords[:, 0, ...] = pixel_coords[:, 0, ...] / fps
+        positions = positions.clone()
+        positions[:, 0, ...] = positions[:, 0, ...] / fps
 
-        return pixel_coords
+        return positions
 
     def _get_audio_positions(
         self,
@@ -202,19 +200,10 @@ class TrainingStrategy(ABC):
             where T is the number of time steps, C=8 channels, F=16 mel bins.
             This matches the format produced by AudioPatchifier.patchify().
         """
-        mel_bins = 16
-
-        latent_coords = self._audio_patchifier.get_patch_grid_bounds(
-            output_shape=AudioLatentShape(
-                frames=num_time_steps,
-                mel_bins=mel_bins,
-                batch=batch_size,
-                channels=8,  # Audio latent channels
-            ),
-            device=device,
-        )
-
-        return latent_coords.to(dtype)
+        # Audio positions: [B, 1, num_time_steps, 2] with start/end for each timestep
+        idx = torch.arange(num_time_steps, device=device, dtype=dtype)
+        positions = torch.stack([idx, idx + 1], dim=-1)  # [L, 2]
+        return positions.unsqueeze(0).unsqueeze(0).expand(batch_size, 1, -1, -1)
 
     @staticmethod
     def _create_per_token_timesteps(conditioning_mask: Tensor, sampled_sigma: Tensor) -> Tensor:
