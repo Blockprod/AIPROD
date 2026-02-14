@@ -1,0 +1,49 @@
+# =============================================================================
+# AIPROD Kubernetes Namespace + Resource Quotas (Multi-tenant isolation)
+# =============================================================================
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: aiprod-production
+  labels:
+    app.kubernetes.io/name: aiprod
+    app.kubernetes.io/part-of: aiprod-platform
+    environment: production
+---
+# Resource quota for production namespace
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: aiprod-quota
+  namespace: aiprod-production
+spec:
+  hard:
+    requests.cpu: "64"
+    requests.memory: 256Gi
+    requests.nvidia.com/gpu: "20"
+    limits.cpu: "128"
+    limits.memory: 512Gi
+    limits.nvidia.com/gpu: "20"
+    pods: "100"
+    services: "20"
+    persistentvolumeclaims: "50"
+---
+# Limit range for default pod resources
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: aiprod-limits
+  namespace: aiprod-production
+spec:
+  limits:
+    - type: Container
+      default:
+        cpu: "1"
+        memory: 2Gi
+      defaultRequest:
+        cpu: "500m"
+        memory: 1Gi
+      max:
+        cpu: "16"
+        memory: 128Gi
+        nvidia.com/gpu: "8"

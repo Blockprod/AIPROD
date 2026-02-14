@@ -1,0 +1,94 @@
+# =============================================================================
+# AIPROD GPU Monitoring DaemonSet (nvidia-dcgm-exporter)
+# =============================================================================
+# Runs on every GPU node to expose GPU metrics to Prometheus
+# Metrics: temperature, power, utilization, memory, ECC errors, clock speeds
+# =============================================================================
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: nvidia-dcgm-exporter
+  namespace: aiprod-production
+  labels:
+    app.kubernetes.io/name: nvidia-dcgm-exporter
+    app.kubernetes.io/component: gpu-monitoring
+    app.kubernetes.io/part-of: aiprod-platform
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nvidia-dcgm-exporter
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: nvidia-dcgm-exporter
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9400"
+    spec:
+      priorityClassName: aiprod-system
+      hostPID: true
+      containers:
+        - name: dcgm-exporter
+          image: nvcr.io/nvidia/k8s/dcgm-exporter:3.3.8-3.6.0-ubuntu22.04
+          ports:
+            - name: metrics
+              containerPort: 9400
+          env:
+            - name: DCGM_EXPORTER_KUBERNETES
+              value: "true"
+            - name: DCGM_EXPORTER_LISTEN
+              value: ":9400"
+          securityContext:
+            runAsNonRoot: false
+            runAsUser: 0
+            capabilities:
+              add: ["SYS_ADMIN"]
+          volumeMounts:
+            - name: device-plugins
+              mountPath: /var/lib/kubelet/device-plugins
+      volumes:
+        - name: device-plugins
+          hostPath:
+            path: /var/lib/kubelet/device-plugins
+      nodeSelector:
+        cloud.google.com/gke-accelerator: nvidia-tesla-a100
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+---
+# DCGM Exporter Service (for Prometheus ServiceMonitor)
+apiVersion: v1
+kind: Service
+metadata:
+  name: nvidia-dcgm-exporter
+  namespace: aiprod-production
+  labels:
+    app.kubernetes.io/name: nvidia-dcgm-exporter
+spec:
+  type: ClusterIP
+  selector:
+    app.kubernetes.io/name: nvidia-dcgm-exporter
+  ports:
+    - name: metrics
+      port: 9400
+      targetPort: metrics
+---
+# Prometheus ServiceMonitor for GPU metrics
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: nvidia-dcgm
+  namespace: aiprod-production
+  labels:
+    app.kubernetes.io/name: nvidia-dcgm-exporter
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nvidia-dcgm-exporter
+  endpoints:
+    - port: metrics
+      interval: 15s
+      path: /metrics

@@ -1,0 +1,38 @@
+# =============================================================================
+# AIPROD Pod Priority Classes (Enterprise > Pro > Free)
+# =============================================================================
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: aiprod-enterprise
+value: 1000000
+preemptionPolicy: PreemptLowerPriority
+globalDefault: false
+description: "Enterprise tier — highest priority, preempts lower tiers"
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: aiprod-pro
+value: 500000
+preemptionPolicy: PreemptLowerPriority
+globalDefault: false
+description: "Pro tier — medium priority"
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: aiprod-free
+value: 100000
+preemptionPolicy: Never
+globalDefault: false
+description: "Free tier — lowest priority, never preempts"
+---
+apiVersion: scheduling.k8s.io/v1
+kind: PriorityClass
+metadata:
+  name: aiprod-system
+value: 2000000
+preemptionPolicy: PreemptLowerPriority
+globalDefault: false
+description: "System-critical workloads (monitoring, gateway)"

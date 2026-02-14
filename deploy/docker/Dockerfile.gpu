@@ -1,0 +1,126 @@
+# =============================================================================
+# AIPROD GPU Production Dockerfile
+# =============================================================================
+# Multi-stage build: compile → runtime
+# Base: nvidia/cuda:12.4.0-devel-ubuntu22.04
+# Target image: ~15-20 GB with PyTorch + CUDA + all models
+# Health check: /health endpoint with GPU VRAM probe
+# =============================================================================
+
+# ---- Stage 1: Builder -------------------------------------------------------
+FROM nvidia/cuda:12.4.0-devel-ubuntu22.04 AS builder
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1
+
+# System deps for compilation
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.11 python3.11-dev python3.11-venv python3-pip \
+    build-essential cmake git curl \
+    ffmpeg libsndfile1 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create venv
+RUN python3.11 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Upgrade pip
+RUN pip install --upgrade pip setuptools wheel
+
+# Install PyTorch with CUDA 12.4
+RUN pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 \
+    --index-url https://download.pytorch.org/whl/cu124
+
+# Install production dependencies
+COPY requirements.txt /tmp/requirements.txt
+RUN pip install -r /tmp/requirements.txt
+
+# Install extra production deps (API gateway, monitoring, registry)
+RUN pip install \
+    fastapi==0.115.0 \
+    uvicorn[standard]==0.32.0 \
+    pydantic==2.10.0 \
+    opentelemetry-api==1.29.0 \
+    opentelemetry-sdk==1.29.0 \
+    opentelemetry-exporter-otlp==1.29.0 \
+    opentelemetry-instrumentation-fastapi==0.50b0 \
+    prometheus-client==0.21.0 \
+    structlog==24.4.0 \
+    mlflow==2.19.0 \
+    redis==5.2.0 \
+    celery[redis]==5.4.0 \
+    psycopg2-binary==2.9.10 \
+    google-cloud-storage==2.19.0 \
+    boto3==1.35.0
+
+# Copy and install AIPROD packages
+COPY packages/aiprod-core /tmp/aiprod-core
+COPY packages/aiprod-trainer /tmp/aiprod-trainer
+COPY packages/aiprod-pipelines /tmp/aiprod-pipelines
+
+RUN pip install /tmp/aiprod-core && \
+    pip install /tmp/aiprod-trainer && \
+    pip install /tmp/aiprod-pipelines
+
+
+# ---- Stage 2: Runtime -------------------------------------------------------
+FROM nvidia/cuda:12.4.0-runtime-ubuntu22.04 AS runtime
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    NVIDIA_VISIBLE_DEVICES=all \
+    NVIDIA_DRIVER_CAPABILITIES=compute,utility,video \
+    CUDA_MODULE_LOADING=LAZY \
+    TORCH_CUDA_ARCH_LIST="8.0;8.6;8.9;9.0" \
+    AIPROD_ENV=production
+
+# Minimal runtime deps
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3.11 python3.11-venv \
+    ffmpeg libsndfile1 curl \
+    && rm -rf /var/lib/apt/lists/* \
+    && ln -sf /usr/bin/python3.11 /usr/bin/python
+
+# Copy venv from builder
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Create non-root user
+RUN groupadd -r aiprod && useradd -r -g aiprod -d /app -s /sbin/nologin aiprod
+
+# Application directory
+WORKDIR /app
+
+# Copy application code
+COPY packages/aiprod-core/src/aiprod_core /app/aiprod_core
+COPY packages/aiprod-pipelines/src/aiprod_pipelines /app/aiprod_pipelines
+COPY packages/aiprod-trainer/src/aiprod_trainer /app/aiprod_trainer
+COPY config /app/config
+
+# Model cache directory (models pre-loaded or mounted as volume)
+RUN mkdir -p /app/models /app/logs /app/tmp \
+    && chown -R aiprod:aiprod /app
+
+# Volume mount points
+VOLUME ["/app/models", "/app/logs"]
+
+# Switch to non-root user
+USER aiprod
+
+# Expose API port + Prometheus metrics port
+EXPOSE 8080 9090
+
+# Health check with GPU VRAM probe
+HEALTHCHECK --interval=30s --timeout=15s --start-period=120s --retries=3 \
+    CMD curl -f http://localhost:8080/health || exit 1
+
+# Entrypoint: uvicorn with production settings
+CMD ["uvicorn", "aiprod_pipelines.api.gateway:create_fastapi_app", \
+     "--factory", \
+     "--host", "0.0.0.0", \
+     "--port", "8080", \
+     "--workers", "2", \
+     "--timeout-keep-alive", "120", \
+     "--access-log"]

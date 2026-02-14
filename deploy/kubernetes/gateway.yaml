@@ -1,0 +1,171 @@
+# =============================================================================
+# AIPROD API Gateway Deployment (CPU node pool, autoscale 1-100)
+# =============================================================================
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aiprod-gateway
+  namespace: aiprod-production
+  labels:
+    app.kubernetes.io/name: aiprod-gateway
+    app.kubernetes.io/component: api-gateway
+    app.kubernetes.io/part-of: aiprod-platform
+spec:
+  replicas: 2
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: aiprod-gateway
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: aiprod-gateway
+        app.kubernetes.io/component: api-gateway
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9090"
+        prometheus.io/path: "/metrics"
+    spec:
+      priorityClassName: aiprod-system
+      serviceAccountName: aiprod-gateway-sa
+      terminationGracePeriodSeconds: 60
+      containers:
+        - name: gateway
+          image: gcr.io/aiprod/gateway:latest
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+            - name: metrics
+              containerPort: 9090
+              protocol: TCP
+          env:
+            - name: AIPROD_ENV
+              value: production
+            - name: AIPROD_API_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: aiprod-secrets
+                  key: api-secret
+            - name: REDIS_URL
+              valueFrom:
+                secretKeyRef:
+                  name: aiprod-secrets
+                  key: redis-url
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector.aiprod-production:4317"
+          resources:
+            requests:
+              cpu: "500m"
+              memory: 1Gi
+            limits:
+              cpu: "2"
+              memory: 4Gi
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 2
+          startupProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 12
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - weight: 100
+              podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: aiprod-gateway
+---
+# Gateway Service (L7 load balancer)
+apiVersion: v1
+kind: Service
+metadata:
+  name: aiprod-gateway
+  namespace: aiprod-production
+  labels:
+    app.kubernetes.io/name: aiprod-gateway
+  annotations:
+    cloud.google.com/neg: '{"ingress": true}'
+spec:
+  type: LoadBalancer
+  selector:
+    app.kubernetes.io/name: aiprod-gateway
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+      protocol: TCP
+    - name: https
+      port: 443
+      targetPort: http
+      protocol: TCP
+---
+# Gateway HPA (autoscale 2-100 based on CPU + request rate)
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: aiprod-gateway-hpa
+  namespace: aiprod-production
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: aiprod-gateway
+  minReplicas: 2
+  maxReplicas: 100
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Resource
+      resource:
+        name: memory
+        target:
+          type: Utilization
+          averageUtilization: 80
+  behavior:
+    scaleUp:
+      stabilizationWindowSeconds: 60
+      policies:
+        - type: Pods
+          value: 4
+          periodSeconds: 60
+    scaleDown:
+      stabilizationWindowSeconds: 300
+      policies:
+        - type: Pods
+          value: 2
+          periodSeconds: 120
+---
+# Gateway PDB (at least 1 pod always available)
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: aiprod-gateway-pdb
+  namespace: aiprod-production
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: aiprod-gateway
