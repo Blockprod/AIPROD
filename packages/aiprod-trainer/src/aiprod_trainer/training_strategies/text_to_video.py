@@ -149,7 +149,7 @@ class TextToVideoStrategy(TrainingStrategy):
         # Create per-token timesteps
         video_timesteps = self._create_per_token_timesteps(video_conditioning_mask, sigmas.squeeze())
 
-        # Generate video positions using ltx_core's native implementation
+        # Generate video positions using AIPROD_core's native implementation
         video_positions = self._get_video_positions(
             num_frames=num_frames,
             height=height,

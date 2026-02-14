@@ -5,7 +5,7 @@ import torch
 from aiprod_core.guidance.perturbations import BatchedPerturbationConfig, PerturbationType
 from aiprod_core.model.transformer.attention import Attention, AttentionCallable, AttentionFunction
 from aiprod_core.model.transformer.feed_forward import FeedForward
-from aiprod_core.model.transformer.rope import LTXRopeType
+from aiprod_core.model.transformer.rope import AIPRODRopeType
 from aiprod_core.model.transformer.transformer_args import TransformerArgs
 from aiprod_core.utils import rms_norm
 
@@ -24,7 +24,7 @@ class BasicAVTransformerBlock(torch.nn.Module):
         idx: int,
         video: TransformerConfig | None = None,
         audio: TransformerConfig | None = None,
-        rope_type: LTXRopeType = LTXRopeType.INTERLEAVED,
+        rope_type: AIPRODRopeType = AIPRODRopeType.INTERLEAVED,
         norm_eps: float = 1e-6,
         attention_function: AttentionFunction | AttentionCallable = AttentionFunction.DEFAULT,
     ):

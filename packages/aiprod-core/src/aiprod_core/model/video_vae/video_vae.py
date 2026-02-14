@@ -147,7 +147,7 @@ class VideoEncoder(nn.Module):
             - "compress_space" / "compress_space_res": spatial only (H and W)
             - "compress_all" / "compress_all_res": all dimensions (F, H, W)
             - "res_x" / "res_x_y": no compression
-        Standard LTX Video configuration:
+        Standard AIPROD Video configuration:
             - patch_size=4
             - encoder_blocks: 1x compress_space_res, 1x compress_time_res, 2x compress_all_res
             - Final dimensions: F' = 1 + (F-1)/8, H' = H/32, W' = W/32
@@ -395,7 +395,7 @@ class VideoDecoder(nn.Module):
     """
     Variational Autoencoder Decoder. Decodes latent representation into video frames.
     The decoder upsamples latents through a series of upsampling operations (inverse of encoder).
-    Output dimensions: F = 8x(F'-1) + 1, H = 32xH', W = 32xW' for standard LTX Video configuration.
+    Output dimensions: F = 8x(F'-1) + 1, H = 32xH', W = 32xW' for standard AIPROD Video configuration.
     Upsampling blocks expand dimensions by 2x in specified dimensions:
         - "compress_time": temporal only
         - "compress_space": spatial only (H and W)
@@ -412,10 +412,10 @@ class VideoDecoder(nn.Module):
         out_channels: The number of output channels. For RGB images, this is 3.
         decoder_blocks: The list of blocks to construct the decoder. Each block is a tuple of (block_name, params)
                         where params is either an int (num_layers) or a dict with configuration.
-        patch_size: Final spatial expansion factor. For standard LTX Video, use 4 for 4x spatial expansion:
+        patch_size: Final spatial expansion factor. For standard AIPROD Video, use 4 for 4x spatial expansion:
                     H -> Hx4, W -> Wx4. Should be a power of 2.
         norm_layer: The normalization layer to use. Can be either `group_norm` or `pixel_norm`.
-        causal: Whether to use causal convolutions. For standard LTX Video, use False for symmetric padding.
+        causal: Whether to use causal convolutions. For standard AIPROD Video, use False for symmetric padding.
                 When True, uses causal padding (past/current frames only).
         timestep_conditioning: Whether to condition the decoder on timestep for denoising.
     """
@@ -435,7 +435,7 @@ class VideoDecoder(nn.Module):
         super().__init__()
 
         # Spatiotemporal downscaling between decoded video space and VAE latents.
-        # According to the LTXV paper, the standard configuration downsamples
+        # According to the AIPRODV paper, the standard configuration downsamples
         # video inputs by a factor of 8 in the temporal dimension and 32 in
         # each spatial dimension (height and width). This parameter determines how
         # many video frames and pixels correspond to a single latent cell.

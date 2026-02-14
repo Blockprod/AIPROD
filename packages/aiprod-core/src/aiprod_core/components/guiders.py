@@ -74,7 +74,7 @@ class STGGuider(GuiderProtocol):
 
 
 @dataclass(frozen=True)
-class LtxAPGGuider(GuiderProtocol):
+class AIPRODAPGGuider(GuiderProtocol):
     """
     Calculates the APG (adaptive projected guidance) delta between conditioned
     and unconditioned samples.

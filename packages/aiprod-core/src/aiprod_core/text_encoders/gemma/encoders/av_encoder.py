@@ -9,7 +9,7 @@ from aiprod_core.loader import KeyValueOperationResult
 from aiprod_core.loader.module_ops import ModuleOps
 from aiprod_core.loader.sd_ops import SDOps
 from aiprod_core.model.model_protocol import ModelConfigurator
-from aiprod_core.text_encoders.gemma.config import GEMMA3_CONFIG_FOR_LTX
+from aiprod_core.text_encoders.gemma.config import GEMMA3_CONFIG_FOR_AIPROD
 from aiprod_core.text_encoders.gemma.embeddings_connector import (
     Embeddings1DConnector,
     Embeddings1DConnectorConfigurator,
@@ -18,7 +18,7 @@ from aiprod_core.text_encoders.gemma.encoders.base_encoder import (
     GemmaTextEncoderModelBase,
 )
 from aiprod_core.text_encoders.gemma.feature_extractor import GemmaFeaturesExtractorProjLinear
-from aiprod_core.text_encoders.gemma.tokenizer import LTXVGemmaTokenizer
+from aiprod_core.text_encoders.gemma.tokenizer import AIPRODVGemmaTokenizer
 
 
 class AVGemmaEncoderOutput(NamedTuple):
@@ -39,7 +39,7 @@ class AVGemmaTextEncoderModel(GemmaTextEncoderModelBase):
         feature_extractor_linear: GemmaFeaturesExtractorProjLinear,
         embeddings_connector: Embeddings1DConnector,
         audio_embeddings_connector: Embeddings1DConnector,
-        tokenizer: LTXVGemmaTokenizer | None = None,
+        tokenizer: AIPRODVGemmaTokenizer | None = None,
         model: Gemma3ForConditionalGeneration | None = None,
         dtype: torch.dtype = torch.bfloat16,
     ) -> None:
@@ -83,7 +83,7 @@ class AVGemmaTextEncoderModelConfigurator(ModelConfigurator[AVGemmaTextEncoderMo
         feature_extractor_linear = GemmaFeaturesExtractorProjLinear.from_config(config)
         embeddings_connector = Embeddings1DConnectorConfigurator.from_config(config)
         audio_embeddings_connector = Embeddings1DConnectorConfigurator.from_config(config)
-        gemma_config = Gemma3Config.from_dict(GEMMA3_CONFIG_FOR_LTX.to_dict())
+        gemma_config = Gemma3Config.from_dict(GEMMA3_CONFIG_FOR_AIPROD.to_dict())
         with torch.device("meta"):
             model = Gemma3ForConditionalGeneration(gemma_config)
         return AVGemmaTextEncoderModel(

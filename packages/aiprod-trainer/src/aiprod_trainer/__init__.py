@@ -24,7 +24,7 @@ logging.basicConfig(
 )
 
 # Get the logger and configure it
-logger = getLogger("ltxv_trainer")
+logger = getLogger("AIPRODv_trainer")
 logger.setLevel(logging.DEBUG)
 logger.propagate = True
 

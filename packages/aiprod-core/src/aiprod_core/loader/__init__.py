@@ -12,7 +12,7 @@ from aiprod_core.loader.primitives import (
 )
 from aiprod_core.loader.registry import DummyRegistry, Registry, StateDictRegistry
 from aiprod_core.loader.sd_ops import (
-    LTXV_LORA_COMFY_RENAMING_MAP,
+    AIPRODV_LORA_COMFY_RENAMING_MAP,
     ContentMatching,
     ContentReplacement,
     KeyValueOperation,
@@ -24,7 +24,7 @@ from aiprod_core.loader.sft_loader import SafetensorsModelStateDictLoader, Safet
 from aiprod_core.loader.single_gpu_model_builder import SingleGPUModelBuilder
 
 __all__ = [
-    "LTXV_LORA_COMFY_RENAMING_MAP",
+    "AIPRODV_LORA_COMFY_RENAMING_MAP",
     "ContentMatching",
     "ContentReplacement",
     "DummyRegistry",

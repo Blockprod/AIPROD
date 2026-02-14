@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # ruff: noqa: T201
 """
-CLI script for running LTX video/audio generation inference.
+CLI script for running AIPROD video/audio generation inference.
 Usage:
     # Text-to-Video + Audio (default behavior)
     python scripts/inference.py --checkpoint path/to/model.safetensors \
@@ -128,7 +128,7 @@ def load_lora_weights(transformer: torch.nn.Module, lora_path: str | Path) -> to
 
 def main() -> None:  # noqa: PLR0912, PLR0915
     parser = argparse.ArgumentParser(
-        description="LTX Video/Audio Generation",
+        description="AIPROD Video/Audio Generation",
         formatter_class=argparse.ArgumentDefaultsHelpFormatter,
     )
 
@@ -288,7 +288,7 @@ def main() -> None:  # noqa: PLR0912, PLR0915
     generate_audio = not args.skip_audio
 
     print("=" * 80)
-    print("LTX Video/Audio Generation")
+    print("AIPROD Video/Audio Generation")
     print("=" * 80)
 
     # Determine if we need VAE encoder (for image or video conditioning)

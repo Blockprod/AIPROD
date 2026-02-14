@@ -1,9 +1,9 @@
 from transformers import AutoTokenizer
 
 
-class LTXVGemmaTokenizer:
+class AIPRODVGemmaTokenizer:
     """
-    Tokenizer wrapper for Gemma models compatible with LTXV processes.
+    Tokenizer wrapper for Gemma models compatible with AIPRODV processes.
     This class wraps HuggingFace's `AutoTokenizer` for use with Gemma text encoders,
     ensuring correct settings and output formatting for downstream consumption.
     """
@@ -38,7 +38,7 @@ class LTXVGemmaTokenizer:
                     - a list of (token_id, attention_mask) tuples if return_word_ids is False;
                     - a list of (token_id, attention_mask, index) tuples if return_word_ids is True.
         Example:
-            >>> tokenizer = LTXVGemmaTokenizer("path/to/tokenizer", max_length=8)
+            >>> tokenizer = AIPRODVGemmaTokenizer("path/to/tokenizer", max_length=8)
             >>> tokenizer.tokenize_with_weights("hello world")
             {'gemma': [(1234, 1), (5678, 1), (2, 0), ...]}
         """

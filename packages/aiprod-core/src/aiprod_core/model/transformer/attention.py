@@ -3,7 +3,7 @@ from typing import Protocol
 
 import torch
 
-from aiprod_core.model.transformer.rope import LTXRopeType, apply_rotary_emb
+from aiprod_core.model.transformer.rope import AIPRODRopeType, apply_rotary_emb
 
 memory_efficient_attention = None
 flash_attn_interface = None
@@ -148,7 +148,7 @@ class Attention(torch.nn.Module):
         heads: int = 8,
         dim_head: int = 64,
         norm_eps: float = 1e-6,
-        rope_type: LTXRopeType = LTXRopeType.INTERLEAVED,
+        rope_type: AIPRODRopeType = AIPRODRopeType.INTERLEAVED,
         attention_function: AttentionCallable | AttentionFunction = AttentionFunction.DEFAULT,
     ) -> None:
         super().__init__()

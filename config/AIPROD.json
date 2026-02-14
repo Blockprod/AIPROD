@@ -1,0 +1,503 @@
+{
+  "version": "3.3",
+  "exportedAt": "2026-01-05T00:00:00.000Z",
+  "notes": "AIPROD ULTIMATE — Version industrielle et visionnaire. Fusion des agents cognitifs, déterminisme financier (OFP), double QA (Sémantique + Technique) et Orchestrateur pur. Avec cache de cohérence, pricing dynamique et contraintes Fast Track renforcées.",
+  
+  "state": {
+    "blocks": {
+      
+      "orchestrator": {
+        "id": "orch-0001",
+        "type": "orchestrator",
+        "name": "AIPROD Orchestrator (Pure State Machine)",
+        "purpose": "State machine only. Routes execution, retries, and stops cleanly on failure. No business or financial logic.",
+        "states": [
+          "INIT",
+          "ANALYSIS",
+          "CREATIVE_DIRECTION",
+          "VISUAL_TRANSLATION",
+          "FINANCIAL_OPTIMIZATION",
+          "RENDER_EXECUTION",
+          "QA_TECHNICAL",
+          "QA_SEMANTIC",
+          "FINALIZE",
+          "ERROR",
+          "FAST_TRACK"
+        ],
+        "transitions": {
+          "INIT": "ANALYSIS",
+          "ANALYSIS": {"default": "CREATIVE_DIRECTION", "fast": "FAST_TRACK"},
+          "CREATIVE_DIRECTION": "VISUAL_TRANSLATION",
+          "VISUAL_TRANSLATION": "FINANCIAL_OPTIMIZATION",
+          "FINANCIAL_OPTIMIZATION": "RENDER_EXECUTION",
+          "RENDER_EXECUTION": "QA_TECHNICAL",
+          "QA_TECHNICAL": {"pass": "QA_SEMANTIC", "fail": "ERROR"},
+          "QA_SEMANTIC": "FINALIZE",
+          "FAST_TRACK": "FINANCIAL_OPTIMIZATION",
+          "ERROR": "ANALYSIS"
+        },
+        "retryPolicy": {
+          "maxRetries": 3,
+          "backoffSec": 15,
+          "escalationPath": "ERROR"
+        },
+        "performanceMetrics": {
+          "trackStateDuration": true,
+          "logTransitions": true,
+          "alertOnStuckState": true
+        }
+      },
+
+      "inputSanitizer": {
+        "id": "san-0001",
+        "type": "function",
+        "name": "InputSanitizer (Google Optimized)",
+        "purpose": "Normalize user prompts for Gemini compatibility, convert to strict JSON schemas.",
+        "googleOptimized": true,
+        "geminiPromptFormat": "structured_json",
+        "schemaValidation": {
+          "strict": true,
+          "allowPartial": false,
+          "defaultValues": false
+        },
+        "outputsToMemory": ["sanitized_input"]
+      },
+
+      "creativeDirector": {
+        "id": "cd-0001",
+        "type": "agent",
+        "name": "CreativeDirector (Gemini 1.5 Pro)",
+        "purpose": "Fusion of Reasoner, ICRL, ACT, and ScriptMind. Handles narrative intent, cinematic reasoning, temporal consistency markers, and final script generation in a single context.",
+        "llmProvider": "google",
+        "llmModel": "gemini-1.5-pro",
+        "fallbackModels": ["gemini-2.0-flash", "gemini-1.5-flash"],
+        "timeoutSec": 60,
+        "maxTokens": 8000,
+        "systemPrompt": "You are the Creative Director. Analyze the prompt, build a reasoning tree, generate a script and shot list, and inject proactive consistency markers (style, lighting, character) for Veo-3. Output a single, coherent ProductionManifest JSON.",
+        "inputs": ["sanitized_input"],
+        "consistencyCache": {
+          "enabled": true,
+          "ttlHours": 168,
+          "reuseAcrossJobs": true,
+          "similarityThreshold": 0.85
+        },
+        "outputsToMemory": [
+          "production_manifest",
+          "consistency_markers",
+          "script",
+          "shot_list",
+          "complexity_score"
+        ],
+        "performance": {
+          "expectedLatencySec": 45,
+          "cacheHitTarget": 0.3
+        }
+      },
+
+      "visualTranslator": {
+        "id": "vt-0001",
+        "type": "agent",
+        "name": "VisualTranslator (Veo-3 Prompt Engineer)",
+        "purpose": "Turn shot_list into deterministic Veo-3 prompts using consistency_markers. Optimize for Veo-3 API constraints.",
+        "llmProvider": "google",
+        "llmModel": "gemini-2.0-flash-exp",
+        "inputs": ["shot_list", "consistency_markers"],
+        "veoConstraints": {
+          "maxClipDuration": 10,
+          "supportedAspectRatios": ["16:9", "9:16", "1:1", "4:5"],
+          "motionTypes": ["dolly", "pan", "zoom", "static", "orbital"],
+          "audioSupport": true
+        },
+        "promptOptimization": {
+          "includeCameraMovements": true,
+          "specifyLighting": true,
+          "addMoodDescriptors": true,
+          "audioDescriptionRequired": true
+        },
+        "outputsToMemory": ["prompt_bundle", "audio_descriptions", "veo_ready_prompts"]
+      },
+
+      "financialOrchestrator": {
+        "id": "ofp-0001",
+        "type": "function",
+        "name": "FinancialOrchestrator (Deterministic)",
+        "purpose": "Deterministic cost optimization. Compares estimated cost against budget and real-time API pricing rules. No LLM involved for financial decisions.",
+        "rules": {
+          "maxCostPerMinute": 1.20,
+          "forceFastTrackIfCostExceeds": 0.80,
+          "backendPriority": ["veo3", "runwayGen3", "replicate_wan25"],
+          "qualityToCostMapping": {
+            "premium": {"minQuality": 0.8, "maxCostPerMinute": 1.5},
+            "standard": {"minQuality": 0.6, "maxCostPerMinute": 0.9},
+            "economy": {"minQuality": 0.4, "maxCostPerMinute": 0.5}
+          }
+        },
+        "dynamicPricing": {
+          "enabled": true,
+          "updateIntervalHours": 24,
+          "sources": ["google_cloud_billing", "backend_status", "market_rate_api"],
+          "fallbackToStatic": true
+        },
+        "inputs": ["complexity_score", "estimated_duration", "client_budget"],
+        "outputsToMemory": [
+          "optimized_backend_selection",
+          "cost_certification",
+          "estimated_total_cost",
+          "cost_breakdown"
+        ],
+        "auditLog": {
+          "enabled": true,
+          "storeDecisions": true,
+          "logPricingUpdates": true
+        }
+      },
+
+      "renderExecutor": {
+        "id": "re-0001",
+        "type": "agent",
+        "name": "RenderExecutor (Multi-Backend)",
+        "purpose": "Execute API calls based on optimized_backend_selection. Handles chunking, audio sync, and fallback management.",
+        "veo3Configuration": {
+          "projectId": "${GOOGLE_CLOUD_PROJECT}",
+          "location": "us-central1",
+          "defaultParams": {
+            "duration": "10s",
+            "resolution": "1080p",
+            "includeAudio": true,
+            "aspectRatio": "16:9"
+          },
+          "timeoutSec": 120,
+          "maxRetries": 2
+        },
+        "fallbackConfiguration": {
+          "runwayGen3": {
+            "apiKey": "${RUNWAY_API_KEY}",
+            "maxDurationSec": 10,
+            "quality": "medium"
+          },
+          "replicate_wan25": {
+            "apiKey": "${REPLICATE_API_KEY}",
+            "maxDurationSec": 8,
+            "quality": "standard"
+          }
+        },
+        "batchProcessing": {
+          "maxBatchSize": 4,
+          "delayBetweenBatches": 2,
+          "retryOn429": true
+        },
+        "deterministicSeed": true,
+        "seedSource": "gemini_hash",
+        "outputsToMemory": ["generated_assets", "api_metrics", "render_duration", "backend_used"]
+      },
+
+      "technicalQAGate": {
+        "id": "qa-tech-0001",
+        "type": "function",
+        "name": "TechnicalQAGate (Deterministic)",
+        "purpose": "Binary QA checks for technical validity. SLA-compatible, fast execution.",
+        "checks": {
+          "fileIntegrity": true,
+          "durationMatch": {"toleranceSec": 2},
+          "audioPresent": true,
+          "resolutionCheck": "1080p",
+          "clipCountMatch": true,
+          "codecValidation": "h264"
+        },
+        "inputs": ["generated_assets"],
+        "onFail": "ERROR",
+        "outputsToMemory": ["technical_validation_report", "technical_score"]
+      },
+
+      "semanticQA": {
+        "id": "qa-sem-0001",
+        "type": "agent",
+        "name": "SemanticQA (Vision LLM)",
+        "purpose": "Evaluates style coherence, narrative adherence, and emotional sync. Produces the interactive QA report for ICC.",
+        "llmProvider": "google",
+        "visionModel": "gemini-1.5-pro-vision",
+        "llmModel": "gemini-1.5-flash",
+        "inputs": ["generated_assets", "production_manifest", "consistency_markers"],
+        "evaluationCriteria": {
+          "styleCoherence": {"weight": 0.3, "threshold": 0.7},
+          "narrativeAdherence": {"weight": 0.3, "threshold": 0.8},
+          "emotionalSync": {"weight": 0.2, "threshold": 0.6},
+          "visualQuality": {"weight": 0.2, "threshold": 0.7}
+        },
+        "outputsToMemory": [
+          "consistency_report",
+          "quality_score",
+          "recommended_improvements",
+          "semantic_qa_details"
+        ],
+        "interactiveFeatures": {
+          "highlightIssues": true,
+          "suggestAlternatives": true,
+          "generateSummary": true
+        }
+      },
+
+      "supervisor": {
+        "id": "sup-0001",
+        "type": "agent",
+        "name": "AIPROD Supervisor",
+        "purpose": "Final approval gate. Certifies quality and cost for delivery. Generates delivery manifest.",
+        "llmProvider": "google",
+        "llmModel": "gemini-1.5-pro",
+        "inputs": [
+          "consistency_report",
+          "cost_certification",
+          "technical_validation_report",
+          "quality_score"
+        ],
+        "decisionMatrix": {
+          "approveIf": ["quality_score >= 0.7", "estimated_total_cost <= client_budget"],
+          "rejectIf": ["quality_score < 0.4", "technical_score < 0.8"],
+          "escalateIf": ["quality_score between 0.4 and 0.7"]
+        },
+        "outputsToMemory": [
+          "final_approval",
+          "delivery_manifest",
+          "quality_certification",
+          "client_report"
+        ],
+        "clientCommunication": {
+          "generateSummary": true,
+          "includeMetrics": true,
+          "attachAssets": true
+        }
+      },
+
+      "fastTrackAgent": {
+        "id": "ft-0001",
+        "type": "agent",
+        "name": "Fast Track Agent",
+        "purpose": "Simplified pipeline for low-complexity projects. Bypasses detailed creative direction.",
+        "llmProvider": "google",
+        "llmModel": "gemini-2.0-flash-exp",
+        "activationCondition": "complexity_score < 0.3",
+        "constraints": {
+          "maxDurationSec": 30,
+          "maxScenes": 3,
+          "allowedComplexity": "low",
+          "noDialogue": true,
+          "singleLocation": true,
+          "simpleCameraMovements": true
+        },
+        "inputs": ["sanitized_input"],
+        "outputsToMemory": [
+          "prompt_bundle",
+          "basic_shot_list",
+          "fast_track_metadata"
+        ],
+        "performanceTarget": {
+          "maxLatencySec": 20,
+          "costCeiling": 0.3
+        }
+      },
+
+      "googleCloudServices": {
+        "id": "gcs-0001",
+        "type": "executor",
+        "name": "Google Cloud Services Integrator",
+        "purpose": "Manages Google Cloud services integration for storage, logging, and monitoring.",
+        "services": {
+          "aiPlatform": {"veo3": true},
+          "vertexAI": {"gemini": true},
+          "cloudStorage": {
+            "videoAssets": true,
+            "tempFiles": true,
+            "bucket": "${GCS_BUCKET}"
+          },
+          "cloudFunctions": {"orchestration": true},
+          "cloudLogging": {"audit": true, "metrics": true},
+          "cloudMonitoring": {"alerts": true, "dashboards": true}
+        },
+        "outputsToMemory": ["gcp_metrics", "storage_urls", "service_status"]
+      }
+    },
+
+    "edges": [
+      {"from": "orchestrator", "to": "inputSanitizer"},
+      {"from": "inputSanitizer", "to": "orchestrator"},
+      {"from": "orchestrator", "to": "creativeDirector", "condition": "pipeline_mode == 'full'"},
+      {"from": "creativeDirector", "to": "visualTranslator"},
+      {"from": "visualTranslator", "to": "financialOrchestrator"},
+      {"from": "orchestrator", "to": "fastTrackAgent", "condition": "pipeline_mode == 'fast'"},
+      {"from": "fastTrackAgent", "to": "financialOrchestrator"},
+      {"from": "financialOrchestrator", "to": "renderExecutor"},
+      {"from": "renderExecutor", "to": "technicalQAGate"},
+      {"from": "technicalQAGate", "to": "semanticQA"},
+      {"from": "semanticQA", "to": "supervisor"},
+      {"from": "supervisor", "to": "orchestrator"},
+      {"from": "orchestrator", "to": "googleCloudServices", "condition": "state == 'FINALIZE'"}
+    ],
+
+    "memorySchema": {
+      "sanitized_input": {
+        "required": true,
+        "description": "Normalized user input ready for processing"
+      },
+      "production_manifest": {
+        "required": true,
+        "condition": "pipeline_mode == 'full'",
+        "description": "Complete creative plan including narrative, shots, timing"
+      },
+      "consistency_markers": {
+        "required": true,
+        "condition": "pipeline_mode == 'full'",
+        "description": "Proactive markers for style, lighting, character consistency"
+      },
+      "prompt_bundle": {
+        "required": true,
+        "description": "Final Veo-3 ready prompts with audio descriptions"
+      },
+      "optimized_backend_selection": {
+        "required": true,
+        "description": "FinancialOrchestrator's backend choice with cost justification"
+      },
+      "cost_certification": {
+        "required": true,
+        "description": "Certified cost breakdown and validation"
+      },
+      "generated_assets": {
+        "required": true,
+        "description": "Raw video clips from render execution"
+      },
+      "technical_validation_report": {
+        "required": true,
+        "description": "Binary technical QA results"
+      },
+      "consistency_report": {
+        "required": true,
+        "description": "Semantic QA evaluation with scoring and recommendations"
+      },
+      "final_approval": {
+        "required": true,
+        "description": "Supervisor's final decision and certification"
+      },
+      "delivery_manifest": {
+        "required": true,
+        "description": "Complete delivery package including assets, reports, metadata"
+      },
+      
+      "exposedMemory": {
+        "production_manifest": {
+          "editable": true,
+          "description": "ICC: User can view and edit the creative plan before rendering"
+        },
+        "consistency_report": {
+          "editable": false,
+          "description": "ICC: User can view the semantic QA report with visual highlights"
+        },
+        "cost_certification": {
+          "editable": false,
+          "description": "ICC: User can view cost breakdown and approve/reject"
+        },
+        "delivery_manifest": {
+          "editable": false,
+          "description": "ICC: Final delivery package with download links"
+        }
+      }
+    },
+
+    "validationRules": {
+      "complexityThresholds": {
+        "fastTrackMax": 0.3,
+        "standardMin": 0.3,
+        "premiumMin": 0.7
+      },
+      "qualityGates": {
+        "technicalThreshold": 0.8,
+        "semanticThreshold": 0.7,
+        "finalApprovalThreshold": 0.7
+      },
+      "costControls": {
+        "maxOverrunPercentage": 20,
+        "alertThreshold": 0.8,
+        "autoDowngrade": true
+      },
+      "performanceSLA": {
+        "fastTrackMaxSec": 300,
+        "standardMaxSec": 900,
+        "premiumMaxSec": 1800
+      }
+    },
+
+    "googleStackConfiguration": {
+      "apiKeys": {
+        "gemini": "${GEMINI_API_KEY}",
+        "googleCloud": "${GOOGLE_CLOUD_CREDENTIALS_JSON}"
+      },
+      "projectSettings": {
+        "googleCloudProject": "${GOOGLE_CLOUD_PROJECT}",
+        "location": "us-central1",
+        "gcsBucket": "${GCS_BUCKET_NAME}"
+      },
+      "costTracking": {
+        "enable": true,
+        "budgetAlertEmail": "${ALERT_EMAIL}",
+        "dailyLimit": 100.00,
+        "projectLevelQuotas": true
+      },
+      "monitoring": {
+        "cloudLogging": {
+          "enabled": true,
+          "logLevel": "INFO",
+          "structuredLogs": true
+        },
+        "cloudMonitoring": {
+          "enabled": true,
+          "customMetrics": ["pipeline_duration", "quality_score", "cost_per_minute"],
+          "alertingPolicies": ["cost_overrun", "pipeline_failure", "low_quality"]
+        },
+        "errorReporting": {
+          "enabled": true,
+          "autoGrouping": true
+        }
+      }
+    },
+
+    "performanceOptimizations": {
+      "geminiCaching": {
+        "enabled": true,
+        "ttlHours": 24,
+        "similarityThreshold": 0.9
+      },
+      "consistencyCache": {
+        "enabled": true,
+        "ttlHours": 168,
+        "reuseAcrossJobs": true
+      },
+      "veoBatchProcessing": true,
+      "parallelAssetProcessing": true,
+      "predictiveChunking": true,
+      "lazyLoading": {
+        "enabled": true,
+        "delayNonCritical": true
+      }
+    },
+
+    "iccFeatures": {
+      "interactiveApproval": {
+        "enabled": true,
+        "stages": ["creative_plan", "cost_estimate", "final_delivery"]
+      },
+      "realTimePreview": {
+        "enabled": true,
+        "quality": "low_res",
+        "maxDurationSec": 10
+      },
+      "collaboration": {
+        "multiUserReview": true,
+        "commentThreads": true,
+        "versionHistory": true
+      },
+      "reporting": {
+        "qualityMetrics": true,
+        "costAnalysis": true,
+        "performanceDashboard": true
+      }
+    }
+  }
+}

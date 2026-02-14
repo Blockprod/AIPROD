@@ -23,7 +23,7 @@ class ModelConfig(ConfigBaseModel):
 
     text_encoder_path: str | Path | None = Field(
         default=None,
-        description="Path to text encoder (required for LTX-2/Gemma models, optional for LTXV/T5 models)",
+        description="Path to text encoder (required for AIPROD/Gemma models, optional for AIPRODV/T5 models)",
     )
 
     training_mode: Literal["lora", "full"] = Field(
@@ -218,13 +218,13 @@ class ValidationConfig(ConfigBaseModel):
     video_dims: tuple[int, int, int] = Field(
         default=(960, 544, 97),
         description="Dimensions of validation videos (width, height, frames). "
-        "Width and height must be divisible by 32. Frames must satisfy frames % 8 == 1 for LTX-2.",
+        "Width and height must be divisible by 32. Frames must satisfy frames % 8 == 1 for AIPROD.",
     )
 
     @field_validator("video_dims")
     @classmethod
     def validate_video_dims(cls, v: tuple[int, int, int]) -> tuple[int, int, int]:
-        """Validate video dimensions for LTX-2 compatibility."""
+        """Validate video dimensions for AIPROD compatibility."""
         width, height, frames = v
 
         if width % 32 != 0:
@@ -232,7 +232,7 @@ class ValidationConfig(ConfigBaseModel):
         if height % 32 != 0:
             raise ValueError(f"Height ({height}) must be divisible by 32")
         if frames % 8 != 1:
-            raise ValueError(f"Frames ({frames}) must satisfy frames % 8 == 1 for LTX-2 (e.g., 1, 9, 17, 25, ...)")
+            raise ValueError(f"Frames ({frames}) must satisfy frames % 8 == 1 for AIPROD (e.g., 1, 9, 17, 25, ...)")
 
         return v
 
@@ -281,7 +281,7 @@ class ValidationConfig(ConfigBaseModel):
     stg_blocks: list[int] | None = Field(
         default=[29],
         description="Which transformer blocks to perturb for STG. "
-        "None means all blocks are perturbed. Recommended for LTX-2: [29].",
+        "None means all blocks are perturbed. Recommended for AIPROD: [29].",
     )
 
     stg_mode: Literal["stg_av", "stg_v"] = Field(
@@ -424,7 +424,7 @@ class WandbConfig(ConfigBaseModel):
     )
 
     project: str = Field(
-        default="ltxv-trainer",
+        default="AIPRODv-trainer",
         description="W&B project name",
     )
 
@@ -458,8 +458,8 @@ class FlowMatchingConfig(ConfigBaseModel):
     )
 
 
-class LtxTrainerConfig(ConfigBaseModel):
-    """Unified configuration for LTXV training"""
+class AIPRODTrainerConfig(ConfigBaseModel):
+    """Unified configuration for AIPRODV training"""
 
     # Sub-configurations
     model: ModelConfig = Field(default_factory=ModelConfig)
@@ -496,7 +496,7 @@ class LtxTrainerConfig(ConfigBaseModel):
         return str(Path(v).expanduser().resolve())
 
     @model_validator(mode="after")
-    def validate_strategy_compatibility(self) -> "LtxTrainerConfig":
+    def validate_strategy_compatibility(self) -> "AIPRODTrainerConfig":
         """Validate that training strategy and other configurations are compatible."""
 
         # Check that reference videos are provided when using video_to_video strategy

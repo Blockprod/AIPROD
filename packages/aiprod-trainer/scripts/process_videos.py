@@ -9,7 +9,7 @@ This module provides functionality for processing video and image files, includi
 - BucketSampler for grouping videos by resolution
 Can be used as a standalone script:
     python scripts/process_videos.py dataset.csv --resolution-buckets 768x768x25 \
-        --output-dir /path/to/output --model-source /path/to/ltx2.safetensors
+        --output-dir /path/to/output --model-source /path/to/AIPROD2.safetensors
 """
 
 import json
@@ -451,7 +451,7 @@ def compute_latents(  # noqa: PLR0913, PLR0915
         video_column: Column name for video paths in the metadata file
         resolution_buckets: List of (frames, height, width) tuples
         output_dir: Directory to save video latents
-        model_path: Path to LTX-2 checkpoint (.safetensors)
+        model_path: Path to AIPROD checkpoint (.safetensors)
         reshape_mode: How to crop videos ("center", "random")
         main_media_column: Column name for main media paths (if different from video_column)
         batch_size: Batch size for processing
@@ -703,7 +703,7 @@ def tiled_encode_video(  # noqa: PLR0912, PLR0915
     output_width = width // VAE_SPATIAL_FACTOR
     output_frames = 1 + (frames - 1) // VAE_TEMPORAL_FACTOR
 
-    # Latent channels (128 for LTX-2)
+    # Latent channels (128 for AIPROD)
     # Get from a small test encode or assume 128
     latent_channels = 128
 
@@ -826,7 +826,7 @@ def encode_audio(
 ) -> dict[str, torch.Tensor | int | float]:
     """Encode audio waveform into latent representation.
     Args:
-        audio_vae_encoder: Audio VAE encoder model from ltx-core
+        audio_vae_encoder: Audio VAE encoder model from AIPROD-core
         audio_processor: AudioProcessor for waveform-to-spectrogram conversion
         audio_data: Dict with {"waveform": Tensor[channels, samples], "sample_rate": int}
     Returns:
@@ -951,7 +951,7 @@ def main(  # noqa: PLR0913
     ),
     model_path: str = typer.Option(
         ...,
-        help="Path to LTX-2 checkpoint (.safetensors file)",
+        help="Path to AIPROD checkpoint (.safetensors file)",
     ),
     video_column: str = typer.Option(
         default="media_path",
@@ -989,16 +989,16 @@ def main(  # noqa: PLR0913
     Examples:
         # Process videos from a CSV file
         python scripts/process_videos.py dataset.csv --resolution-buckets 768x768x25 \\
-            --output-dir ./latents --model-path /path/to/ltx2.safetensors
+            --output-dir ./latents --model-path /path/to/AIPROD2.safetensors
         # Process videos from a JSON file with custom video column
         python scripts/process_videos.py dataset.json --resolution-buckets 768x768x25 \\
-            --output-dir ./latents --model-path /path/to/ltx2.safetensors --video-column "video_path"
+            --output-dir ./latents --model-path /path/to/AIPROD2.safetensors --video-column "video_path"
         # Enable VAE tiling to save GPU VRAM
         python scripts/process_videos.py dataset.csv --resolution-buckets 1024x1024x25 \\
-            --output-dir ./latents --model-path /path/to/ltx2.safetensors --vae-tiling
+            --output-dir ./latents --model-path /path/to/AIPROD2.safetensors --vae-tiling
         # Process videos with audio
         python scripts/process_videos.py dataset.csv --resolution-buckets 768x768x25 \\
-            --output-dir ./latents --model-path /path/to/ltx2.safetensors \\
+            --output-dir ./latents --model-path /path/to/AIPROD2.safetensors \\
             --with-audio --audio-output-dir ./audio_latents
     """
 

@@ -5,7 +5,7 @@ import torch
 from aiprod_core.model.transformer.adaln import AdaLayerNormSingle
 from aiprod_core.model.transformer.modality import Modality
 from aiprod_core.model.transformer.rope import (
-    LTXRopeType,
+    AIPRODRopeType,
     generate_freq_grid_np,
     generate_freq_grid_pytorch,
     precompute_freqs_cis,
@@ -40,7 +40,7 @@ class TransformerArgsPreprocessor:
         timestep_scale_multiplier: int,
         double_precision_rope: bool,
         positional_embedding_theta: float,
-        rope_type: LTXRopeType,
+        rope_type: AIPRODRopeType,
     ) -> None:
         self.patchify_proj = patchify_proj
         self.adaln = adaln
@@ -163,7 +163,7 @@ class MultiModalTransformerArgsPreprocessor:
         timestep_scale_multiplier: int,
         double_precision_rope: bool,
         positional_embedding_theta: float,
-        rope_type: LTXRopeType,
+        rope_type: AIPRODRopeType,
         av_ca_timestep_scale_multiplier: int,
     ) -> None:
         self.simple_preprocessor = TransformerArgsPreprocessor(

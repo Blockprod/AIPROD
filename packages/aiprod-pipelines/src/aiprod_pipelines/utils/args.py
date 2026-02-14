@@ -1,7 +1,7 @@
 import argparse
 from pathlib import Path
 
-from aiprod_core.loader import LTXV_LORA_COMFY_RENAMING_MAP, LoraPathStrengthAndSDOps
+from aiprod_core.loader import AIPRODV_LORA_COMFY_RENAMING_MAP, LoraPathStrengthAndSDOps
 from aiprod_pipelines.utils.constants import (
     DEFAULT_1_STAGE_HEIGHT,
     DEFAULT_1_STAGE_WIDTH,
@@ -70,7 +70,7 @@ class LoraAction(argparse.Action):
         strength = float(strength_str)
 
         current = getattr(namespace, self.dest) or []
-        current.append(LoraPathStrengthAndSDOps(resolved_path, strength, LTXV_LORA_COMFY_RENAMING_MAP))
+        current.append(LoraPathStrengthAndSDOps(resolved_path, strength, AIPRODV_LORA_COMFY_RENAMING_MAP))
         setattr(namespace, self.dest, current)
 
 
@@ -84,7 +84,7 @@ def basic_arg_parser() -> argparse.ArgumentParser:
         "--checkpoint-path",
         type=resolve_path,
         required=True,
-        help="Path to LTX-2 model checkpoint (.safetensors file).",
+        help="Path to AIPROD model checkpoint (.safetensors file).",
     )
     parser.add_argument(
         "--gemma-root",

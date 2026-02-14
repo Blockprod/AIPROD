@@ -10,7 +10,7 @@ from aiprod_pipelines.utils.constants import VIDEO_LATENT_CHANNELS, VIDEO_SCALE_
 
 class PipelineComponents:
     """
-    Container class for pipeline components used throughout the LTX pipelines.
+    Container class for pipeline components used throughout the AIPROD pipelines.
     Attributes:
         dtype (torch.dtype): Default torch dtype for tensors in the pipeline.
         device (torch.device): Target device to place tensors and modules on.
@@ -37,7 +37,7 @@ class PipelineComponents:
 
 class DenoisingFunc(Protocol):
     """
-    Protocol for a denoising function used in the LTX pipeline.
+    Protocol for a denoising function used in the AIPROD pipeline.
     Args:
         video_state (LatentState): The current latent state for video.
         audio_state (LatentState): The current latent state for audio.
@@ -54,7 +54,7 @@ class DenoisingFunc(Protocol):
 
 class DenoisingLoopFunc(Protocol):
     """
-    Protocol for a denoising loop function used in the LTX pipeline.
+    Protocol for a denoising loop function used in the AIPROD pipeline.
     Args:
         sigmas (torch.Tensor): A 1D tensor of sigma values for each diffusion step.
         video_state (LatentState): The current latent state for video.

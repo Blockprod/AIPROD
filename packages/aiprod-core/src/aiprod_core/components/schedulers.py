@@ -11,9 +11,9 @@ BASE_SHIFT_ANCHOR = 1024
 MAX_SHIFT_ANCHOR = 4096
 
 
-class LTX2Scheduler(SchedulerProtocol):
+class AIPROD2Scheduler(SchedulerProtocol):
     """
-    Default scheduler for LTX-2 diffusion sampling.
+    Default scheduler for AIPROD diffusion sampling.
     Generates a sigma schedule with token-count-dependent shifting and optional
     stretching to a terminal value.
     """

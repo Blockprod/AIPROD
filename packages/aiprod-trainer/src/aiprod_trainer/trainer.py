@@ -28,12 +28,12 @@ from torch.utils.data import DataLoader
 from torchvision.transforms import functional as F  # noqa: N812
 
 from aiprod_trainer import logger
-from aiprod_trainer.config import LtxTrainerConfig
+from aiprod_trainer.config import AIPRODTrainerConfig
 from aiprod_trainer.config_display import print_config
 from aiprod_trainer.datasets import PrecomputedDataset
 from aiprod_trainer.gpu_utils import free_gpu_memory, free_gpu_memory_context, get_gpu_memory_gb
 from aiprod_trainer.hf_hub_utils import push_to_hub
-from aiprod_trainer.model_loader import load_model as load_ltx_model
+from aiprod_trainer.model_loader import load_model as load_AIPROD_model
 from aiprod_trainer.model_loader import load_text_encoder
 from aiprod_trainer.progress import TrainingProgress
 from aiprod_trainer.quantization import quantize_model
@@ -74,8 +74,8 @@ class TrainingStats(BaseModel):
     num_processes: int
 
 
-class LtxvTrainer:
-    def __init__(self, trainer_config: LtxTrainerConfig) -> None:
+class AIPRODvTrainer:
+    def __init__(self, trainer_config: AIPRODTrainerConfig) -> None:
         self._config = trainer_config
         if IS_MAIN_PROCESS:
             print_config(trainer_config)
@@ -381,7 +381,7 @@ class LtxvTrainer:
         return cached_embeddings
 
     def _load_models(self) -> None:
-        """Load the LTX-2 model components."""
+        """Load the AIPROD model components."""
         # Load audio components if:
         # 1. Training strategy requires audio (training the audio branch), OR
         # 2. Validation is configured to generate audio (even if not training audio)
@@ -393,7 +393,7 @@ class LtxvTrainer:
         )
 
         # Load all model components (except text encoder - already handled)
-        components = load_ltx_model(
+        components = load_AIPROD_model(
             checkpoint_path=self._config.model.model_path,
             device="cpu",
             dtype=torch.bfloat16,

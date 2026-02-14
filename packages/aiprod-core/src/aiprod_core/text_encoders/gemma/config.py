@@ -72,4 +72,4 @@ class Gemma3ConfigData:
         return asdict(self)
 
 
-GEMMA3_CONFIG_FOR_LTX = Gemma3ConfigData()
+GEMMA3_CONFIG_FOR_AIPROD = Gemma3ConfigData()

@@ -114,12 +114,12 @@ class SDOps:
 
 
 # Predefined SDOps instances
-LTXV_LORA_COMFY_RENAMING_MAP = (
-    SDOps("LTXV_LORA_COMFY_PREFIX_MAP").with_matching().with_replacement("diffusion_model.", "")
+AIPRODV_LORA_COMFY_RENAMING_MAP = (
+    SDOps("AIPRODV_LORA_COMFY_PREFIX_MAP").with_matching().with_replacement("diffusion_model.", "")
 )
 
-LTXV_LORA_COMFY_TARGET_MAP = (
-    SDOps("LTXV_LORA_COMFY_TARGET_MAP")
+AIPRODV_LORA_COMFY_TARGET_MAP = (
+    SDOps("AIPRODV_LORA_COMFY_TARGET_MAP")
     .with_matching()
     .with_replacement("diffusion_model.", "")
     .with_replacement(".lora_A.weight", ".weight")

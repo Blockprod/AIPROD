@@ -1,9 +1,9 @@
 # ruff: noqa: PLC0415
 
 """
-Model loader for LTX-2 trainer using the new ltx-core package.
-This module provides a unified interface for loading LTX-2 model components
-for training, using SingleGPUModelBuilder from ltx-core.
+Model loader for AIPROD trainer using the new AIPROD-core package.
+This module provides a unified interface for loading AIPROD model components
+for training, using SingleGPUModelBuilder from AIPROD-core.
 Example usage:
     # Load individual components
     vae_encoder = load_video_vae_encoder("/path/to/checkpoint.safetensors", device="cuda")
@@ -28,9 +28,9 @@ Device = str | torch.device
 
 # Type checking imports (not loaded at runtime)
 if TYPE_CHECKING:
-    from aiprod_core.components.schedulers import LTX2Scheduler
+    from aiprod_core.components.schedulers import AIPROD2Scheduler
     from aiprod_core.model.audio_vae import AudioDecoder, AudioEncoder, Vocoder
-    from aiprod_core.model.transformer import LTXModel
+    from aiprod_core.model.transformer import AIPRODModel
     from aiprod_core.model.video_vae import VideoDecoder, VideoEncoder
     from aiprod_core.text_encoders.gemma import AVGemmaTextEncoderModel
 
@@ -49,25 +49,25 @@ def load_transformer(
     checkpoint_path: str | Path,
     device: Device = "cpu",
     dtype: torch.dtype = torch.bfloat16,
-) -> "LTXModel":
-    """Load the LTX transformer model.
+) -> "AIPRODModel":
+    """Load the AIPROD transformer model.
     Args:
         checkpoint_path: Path to the safetensors checkpoint file
         device: Device to load model on
         dtype: Data type for model weights
     Returns:
-        Loaded LTXModel transformer
+        Loaded AIPRODModel transformer
     """
     from aiprod_core.loader.single_gpu_model_builder import SingleGPUModelBuilder
     from aiprod_core.model.transformer.model_configurator import (
-        LTXV_MODEL_COMFY_RENAMING_MAP,
-        LTXModelConfigurator,
+        AIPRODV_MODEL_COMFY_RENAMING_MAP,
+        AIPRODModelConfigurator,
     )
 
     return SingleGPUModelBuilder(
         model_path=str(checkpoint_path),
-        model_class_configurator=LTXModelConfigurator,
-        model_sd_ops=LTXV_MODEL_COMFY_RENAMING_MAP,
+        model_class_configurator=AIPRODModelConfigurator,
+        model_sd_ops=AIPRODV_MODEL_COMFY_RENAMING_MAP,
     ).build(device=_to_torch_device(device), dtype=dtype)
 
 
@@ -195,7 +195,7 @@ def load_text_encoder(
 ) -> "AVGemmaTextEncoderModel":
     """Load the Gemma text encoder.
     Args:
-        checkpoint_path: Path to the LTX-2 safetensors checkpoint file
+        checkpoint_path: Path to the AIPROD safetensors checkpoint file
         gemma_model_path: Path to Gemma model directory
         device: Device to load model on
         dtype: Data type for model weights
@@ -245,16 +245,16 @@ def load_text_encoder(
 
 
 @dataclass
-class LtxModelComponents:
-    """Container for all LTX-2 model components."""
+class AIPRODModelComponents:
+    """Container for all AIPROD model components."""
 
-    transformer: "LTXModel"
+    transformer: "AIPRODModel"
     video_vae_encoder: "VideoEncoder | None" = None
     video_vae_decoder: "VideoDecoder | None" = None
     audio_vae_decoder: "AudioDecoder | None" = None
     vocoder: "Vocoder | None" = None
     text_encoder: "AVGemmaTextEncoderModel | None" = None
-    scheduler: "LTX2Scheduler | None" = None
+    scheduler: "AIPROD2Scheduler | None" = None
 
 
 def load_model(
@@ -267,9 +267,9 @@ def load_model(
     with_audio_vae_decoder: bool = True,
     with_vocoder: bool = True,
     with_text_encoder: bool = True,
-) -> LtxModelComponents:
+) -> AIPRODModelComponents:
     """
-    Load LTX-2 model components from a safetensors checkpoint.
+    Load AIPROD model components from a safetensors checkpoint.
     This is a convenience function that loads multiple components at once.
     For loading individual components, use the dedicated functions:
     - load_transformer()
@@ -289,9 +289,9 @@ def load_model(
         with_vocoder: Whether to load the vocoder
         with_text_encoder: Whether to load the text encoder
     Returns:
-        LtxModelComponents containing all loaded model components
+        AIPRODModelComponents containing all loaded model components
     """
-    from aiprod_core.components.schedulers import LTX2Scheduler
+    from aiprod_core.components.schedulers import AIPROD2Scheduler
 
     checkpoint_path = Path(checkpoint_path)
 
@@ -299,7 +299,7 @@ def load_model(
     if not checkpoint_path.exists():
         raise FileNotFoundError(f"Checkpoint not found: {checkpoint_path}")
 
-    logger.info(f"Loading LTX-2 model from {checkpoint_path}")
+    logger.info(f"Loading AIPROD model from {checkpoint_path}")
 
     torch_device = _to_torch_device(device)
 
@@ -340,9 +340,9 @@ def load_model(
         text_encoder = load_text_encoder(checkpoint_path, text_encoder_path, torch_device, dtype)
 
     # Create scheduler (stateless, no loading needed)
-    scheduler = LTX2Scheduler()
+    scheduler = AIPROD2Scheduler()
 
-    return LtxModelComponents(
+    return AIPRODModelComponents(
         transformer=transformer,
         video_vae_encoder=video_vae_encoder,
         video_vae_decoder=video_vae_decoder,

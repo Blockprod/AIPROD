@@ -24,7 +24,7 @@ from aiprod_trainer.timestep_samplers import TimestepSampler
 # Default frames per second for video missing in the FPS metadata
 DEFAULT_FPS = 24
 
-# VAE scale factors for LTX-2
+# VAE scale factors for AIPROD
 VIDEO_SCALE_FACTORS = SpatioTemporalScaleFactors.default()
 
 
@@ -147,7 +147,7 @@ class TrainingStrategy(ABC):
         device: torch.device,
         dtype: torch.dtype,
     ) -> Tensor:
-        """Generate video position embeddings using ltx_core's native implementation.
+        """Generate video position embeddings using AIPROD_core's native implementation.
         Args:
             num_frames: Number of latent frames
             height: Latent height
@@ -189,7 +189,7 @@ class TrainingStrategy(ABC):
         device: torch.device,
         dtype: torch.dtype,
     ) -> Tensor:
-        """Generate audio position embeddings using ltx_core's native implementation.
+        """Generate audio position embeddings using AIPROD_core's native implementation.
         Args:
             num_time_steps: Number of audio time steps (T, not T*mel_bins)
             batch_size: Batch size

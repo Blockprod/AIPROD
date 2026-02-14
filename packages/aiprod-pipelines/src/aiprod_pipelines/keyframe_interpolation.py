@@ -7,7 +7,7 @@ from aiprod_core.components.diffusion_steps import EulerDiffusionStep
 from aiprod_core.components.guiders import MultiModalGuider, MultiModalGuiderParams
 from aiprod_core.components.noisers import GaussianNoiser
 from aiprod_core.components.protocols import DiffusionStepProtocol
-from aiprod_core.components.schedulers import LTX2Scheduler
+from aiprod_core.components.schedulers import AIPROD2Scheduler
 from aiprod_core.loader import LoraPathStrengthAndSDOps
 from aiprod_core.model.audio_vae import decode_audio as vae_decode_audio
 from aiprod_core.model.upsampler import upsample_video
@@ -115,7 +115,7 @@ class KeyframeInterpolationPipeline:
         # Stage 1: Initial low resolution video generation.
         video_encoder = self.stage_1_model_ledger.video_encoder()
         transformer = self.stage_1_model_ledger.transformer()
-        sigmas = LTX2Scheduler().execute(steps=num_inference_steps).to(dtype=torch.float32, device=self.device)
+        sigmas = AIPROD2Scheduler().execute(steps=num_inference_steps).to(dtype=torch.float32, device=self.device)
 
         def first_stage_denoising_loop(
             sigmas: torch.Tensor, video_state: LatentState, audio_state: LatentState, stepper: DiffusionStepProtocol

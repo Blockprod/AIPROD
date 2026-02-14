@@ -1,14 +1,14 @@
-                         LTX-2 Community License Agreement
+                         AIPROD Community License Agreement
                            License date: January 5, 2026
 
 
-By using or distributing any portion or element of LTX-2, you agree
+By using or distributing any portion or element of AIPROD, you agree
 to be bound by this Agreement.
 
    1. Definitions.
 
       "Agreement" means the terms and conditions for the license, use,
-      reproduction, and distribution of LTX-2 and the Complementary
+      reproduction, and distribution of AIPROD and the Complementary
       Materials, as specified in this document.
 
       "Control" means the direct or indirect ownership of more than
@@ -17,25 +17,25 @@ to be bound by this Agreement.
       such Entity through voting rights, contract, or otherwise.
 
       "Data" means a collection of information and/or content extracted
-      from the dataset used with LTX-2, including to train, pretrain,
-      or otherwise evaluate LTX-2. The Data is not licensed under this
+      from the dataset used with AIPROD, including to train, pretrain,
+      or otherwise evaluate AIPROD. The Data is not licensed under this
       Agreement.
 
-      "Derivatives of LTX-2" means all modifications to LTX-2, works
-      based on LTX-2, or any other model which is created or initialized
+      "Derivatives of AIPROD" means all modifications to AIPROD, works
+      based on AIPROD, or any other model which is created or initialized
       by transfer of patterns of the weights, parameters, activations or
-      output of LTX-2, to the other model, in order to cause the other
-      model to perform similarly to LTX-2, including – but not limited
+      output of AIPROD, to the other model, in order to cause the other
+      model to perform similarly to AIPROD, including – but not limited
       to - distillation methods entailing the use of intermediate data
       representations or methods based on the generation of synthetic
-      data by LTX-2 for training the other model. For clarity, Derivatives
-      of LTX-2 include: (i) any fine-tuned or adapted weights, parameters,
-      or checkpoints derived from LTX-2; (ii) derivative model architectures
-      that incorporate or are based upon LTX-2's architecture; and
+      data by AIPROD for training the other model. For clarity, Derivatives
+      of AIPROD include: (i) any fine-tuned or adapted weights, parameters,
+      or checkpoints derived from AIPROD; (ii) derivative model architectures
+      that incorporate or are based upon AIPROD's architecture; and
       (iii) any modified or extended versions of the Complementary
-      Materials. All intellectual property rights in Derivatives of LTX-2
+      Materials. All intellectual property rights in Derivatives of AIPROD
       shall be subject to the terms of this Agreement, and you may not
-      claim exclusive ownership rights in any Derivatives of LTX-2 that
+      claim exclusive ownership rights in any Derivatives of AIPROD that
       would restrict the rights granted herein.
 
       "Entity" means any individual, corporation, partnership, limited
@@ -54,7 +54,7 @@ to be bound by this Agreement.
       license under this Agreement. For the purposes of this Agreement,
       the Licensor is Lightricks Ltd.
 
-      "LTX-2" means the large language models, text/image/video/audio/3D
+      "AIPROD" means the large language models, text/image/video/audio/3D
       generation models, and multimodal large language models and their
       software and algorithms, including trained model weights, parameters
       (including optimizer states), machine-learning model code,
@@ -62,41 +62,41 @@ to be bound by this Agreement.
       enabling code, accompanying source code, scripts, documentation,
       tutorials, examples, and all other elements of the foregoing
       distributed and made publicly available by Lightricks (including,
-      for example, at https://github.com/Lightricks/LTX-2) for the LTX-2
+      for example, at https://github.com/Lightricks/AIPROD) for the AIPROD
       model released on January 5, 2026. This license is applicable to
-      all LTX-2 versions released since January 5, 2026, and all future
-      releases of LTX-2 under this license.
+      all AIPROD versions released since January 5, 2026, and all future
+      releases of AIPROD under this license.
 
-      "Output" means the results of operating LTX-2 as embodied in
+      "Output" means the results of operating AIPROD as embodied in
       informational content resulting therefrom.
 
       "you" (or "your") means an individual or legal Entity licensing
-      LTX-2 in accordance with this Agreement and/or making use of LTX-2
+      AIPROD in accordance with this Agreement and/or making use of AIPROD
       for whichever purpose and in any field of use, including usage of
-      LTX-2 in an end-use application - e.g. chatbot, translator, image
+      AIPROD in an end-use application - e.g. chatbot, translator, image
       generator.
 
    2. Grant of License. Subject to the terms and conditions of this
       Agreement, you are granted a non-exclusive, worldwide,
       non-transferable and royalty-free limited license under Licensor's
       intellectual property or other rights owned by Licensor embodied
-      in LTX-2 to use, reproduce, prepare, distribute, publicly display,
+      in AIPROD to use, reproduce, prepare, distribute, publicly display,
       publicly perform, sublicense, copy, create derivative works of,
-      and make modifications to LTX-2, for any purpose, subject to the
+      and make modifications to AIPROD, for any purpose, subject to the
       restrictions set forth in Attachment A; provided however, that
       Entities with annual revenues of at least $10,000,000 (the
       "Commercial Entities") are required to obtain a paid commercial
-      use license in order to use LTX-2 and Derivatives of LTX-2,
+      use license in order to use AIPROD and Derivatives of AIPROD,
       subject to the terms and provisions of a different license (the
       "Commercial Use Agreement"), as will be provided by the Licensor.
       Commercial Entities interested in such a commercial license are
-      required to contact Licensor. Any commercial use of LTX-2 or
-      Derivatives of LTX-2 by the Commercial Entities not in accordance
+      required to contact Licensor. Any commercial use of AIPROD or
+      Derivatives of AIPROD by the Commercial Entities not in accordance
       with this Agreement and/or the Commercial Use Agreement is strictly
       prohibited and shall be deemed a material breach of this Agreement.
       Such material breach will be subject, in addition to any license
       fees owed to Licensor for the period such Commercial Entity used
-      LTX-2 (as will be determined by Licensor), to liquidated damages,
+      AIPROD (as will be determined by Licensor), to liquidated damages,
       which will be paid to Licensor immediately upon demand, in an
       amount equal to double the amount that would otherwise have been
       paid by you for the relevant period of time. Such amount reflects
@@ -107,22 +107,22 @@ to be bound by this Agreement.
 
    3. Distribution and Redistribution. You may host for third parties
       remote access purposes (e.g. software-as-a-service), reproduce
-      and distribute copies of LTX-2 or Derivatives of LTX-2 thereof in
+      and distribute copies of AIPROD or Derivatives of AIPROD thereof in
       any medium, with or without modifications, provided that you meet
       the following conditions:
 
       (a) Use-based restrictions as referenced in paragraph 4 and all
           provisions of Attachment A MUST be included as an enforceable
           provision by you in any type of legal agreement (e.g. a
-          license) governing the use and/or distribution of LTX-2 or
-          Derivatives of LTX-2, and you shall give notice to subsequent
-          users you distribute to, that LTX-2 or Derivatives of LTX-2
+          license) governing the use and/or distribution of AIPROD or
+          Derivatives of AIPROD, and you shall give notice to subsequent
+          users you distribute to, that AIPROD or Derivatives of AIPROD
           are subject to paragraph 4 and Attachment A in their entirety,
           including all use restrictions and acceptable use policies;
 
-      (b) You must provide any third party recipients of LTX-2 or
-          Derivatives of LTX-2 a copy of this Agreement, including all
-          attachments and use policies. Any Derivative of LTX-2 (as
+      (b) You must provide any third party recipients of AIPROD or
+          Derivatives of AIPROD a copy of this Agreement, including all
+          attachments and use policies. Any Derivative of AIPROD (as
           defined in Section 1, including but not limited to fine-tuned
           weights, modified training code, models trained on Outputs, or
           any other derivative) must be distributed exclusively under
@@ -134,54 +134,54 @@ to be bound by this Agreement.
 
       (d) You must retain all copyright, patent, trademark, and
           attribution notices excluding those notices that do not
-          pertain to any part of LTX-2, Derivatives of LTX-2.
+          pertain to any part of AIPROD, Derivatives of AIPROD.
 
       You may add your own copyright statement to your modifications and
       may provide additional or different license terms and conditions -
       respecting paragraph 3(a) - for use, reproduction, or distribution
-      of your modifications, or for any such Derivatives of LTX-2 as a
-      whole, provided your use, reproduction, and distribution of LTX-2
+      of your modifications, or for any such Derivatives of AIPROD as a
+      whole, provided your use, reproduction, and distribution of AIPROD
       otherwise complies with the conditions stated in this Agreement,
       and you provide a complete copy of this Agreement with any such
-      use, reproduction and distribution of LTX-2 and any Derivatives
+      use, reproduction and distribution of AIPROD and any Derivatives
       thereof.
 
    4. Use-based restrictions. The restrictions set forth in Attachment A
       are considered Use-based restrictions. Therefore, you cannot use
-      LTX-2 and the Derivatives of LTX-2 in violation of the specified
-      restricted uses. You may use LTX-2 subject to this Agreement,
+      AIPROD and the Derivatives of AIPROD in violation of the specified
+      restricted uses. You may use AIPROD subject to this Agreement,
       including only for lawful purposes and in accordance with the
       Agreement. "Use" may include creating any content with, fine-tuning,
       updating, running, training, evaluating and/or re-parametrizing
-      LTX-2. You shall require all of your users who use LTX-2 or a
-      Derivative of LTX-2 to comply with the terms of this paragraph 4.
+      AIPROD. You shall require all of your users who use AIPROD or a
+      Derivative of AIPROD to comply with the terms of this paragraph 4.
 
    5. The Output You Generate. Except as set forth herein, Licensor
-      claims no rights in the Output you generate using LTX-2. You are
-      accountable for input you insert into LTX-2, the Output you
+      claims no rights in the Output you generate using AIPROD. You are
+      accountable for input you insert into AIPROD, the Output you
       generate and its subsequent uses. No use of the Output can
       contravene any provision as stated in the Agreement.
 
    6. Updates and Runtime Restrictions. To the maximum extent permitted
       by law, Licensor reserves the right to restrict (remotely or
-      otherwise) usage of LTX-2 in violation of this Agreement, update
-      LTX-2 through electronic means, or modify the Output of LTX-2
+      otherwise) usage of AIPROD in violation of this Agreement, update
+      AIPROD through electronic means, or modify the Output of AIPROD
       based on updates. You shall undertake reasonable efforts to use
-      the latest version of LTX-2. Any use of the non-current version
-      of LTX-2 is done solely at your risk.
+      the latest version of AIPROD. Any use of the non-current version
+      of AIPROD is done solely at your risk.
 
    7. Export Controls and Sanctions Compliance. You acknowledge that
-      LTX-2, Derivatives of LTX-2 may be subject to export control laws
+      AIPROD, Derivatives of AIPROD may be subject to export control laws
       and regulations, including but not limited to the U.S. Export
       Administration Regulations and sanctions programs administered by
       the Office of Foreign Assets Control (OFAC). You represent and
-      warrant that you and any users of LTX-2 are not (i) located in,
+      warrant that you and any users of AIPROD are not (i) located in,
       organized under the laws of, or ordinarily resident in any country
       or territory subject to comprehensive sanctions; (ii) identified
       on any U.S. government restricted party list, including the
       Specially Designated Nationals and Blocked Persons List; or
-      (iii) otherwise prohibited from receiving LTX-2 under applicable
-      law. You shall not export, re-export, or transfer LTX-2, directly
+      (iii) otherwise prohibited from receiving AIPROD under applicable
+      law. You shall not export, re-export, or transfer AIPROD, directly
       or indirectly, in violation of any applicable export control or
       sanctions laws or regulations. You agree to comply with all
       applicable trade control laws and shall indemnify and hold
@@ -195,13 +195,13 @@ to be bound by this Agreement.
       are reserved by the Licensor.
 
    9. Disclaimer of Warranty. Unless required by applicable law or
-      agreed to in writing, Licensor provides LTX-2 on an "AS IS" BASIS,
+      agreed to in writing, Licensor provides AIPROD on an "AS IS" BASIS,
       WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
       implied, including, without limitation, any warranties or
       conditions of TITLE, NON-INFRINGEMENT, MERCHANTABILITY, or FITNESS
       FOR A PARTICULAR PURPOSE. You are solely responsible for
-      determining the appropriateness of using or redistributing LTX-2
-      and Derivatives of LTX-2 and assume any risks associated with
+      determining the appropriateness of using or redistributing AIPROD
+      and Derivatives of AIPROD and assume any risks associated with
       your exercise of permissions under this Agreement.
 
    10. Limitation of Liability. In no event and under no legal theory,
@@ -211,13 +211,13 @@ to be bound by this Agreement.
        to you for damages, including any direct, indirect, special,
        incidental, or consequential damages of any character arising as
        a result of this Agreement or out of the use or inability to use
-       LTX-2 (including but not limited to damages for loss of goodwill,
+       AIPROD (including but not limited to damages for loss of goodwill,
        work stoppage, computer failure or malfunction, or any and all
        other commercial damages or losses), even if Licensor has been
        advised of the possibility of such damages.
 
    11. Accepting Warranty or Additional Liability. While redistributing
-       LTX-2 and Derivatives of LTX-2, you may, provided you do not
+       AIPROD and Derivatives of AIPROD, you may, provided you do not
        violate the terms of this Agreement, choose to offer and charge
        a fee for, acceptance of support, warranty, indemnity, or other
        liability obligations. However, in accepting such obligations,
@@ -252,17 +252,17 @@ to be bound by this Agreement.
        to violations of the use restrictions in Attachment A or
        unauthorized commercial use. Upon termination: (a) all rights
        granted to you under this Agreement will immediately cease;
-       (b) you must immediately cease all use of LTX-2 and Derivatives
-       of LTX-2; (c) you must delete or destroy all copies of LTX-2
-       and Derivatives of LTX-2 in your possession or control; and
+       (b) you must immediately cease all use of AIPROD and Derivatives
+       of AIPROD; (c) you must delete or destroy all copies of AIPROD
+       and Derivatives of AIPROD in your possession or control; and
        (d) you must notify any third parties to whom you distributed
-       LTX-2 or Derivatives of LTX-2 of the termination. Sections 8-13,
+       AIPROD or Derivatives of AIPROD of the termination. Sections 8-13,
        and Section 15 shall survive termination of this Agreement.
        Termination does not relieve you of any obligations incurred
        prior to termination, including payment obligations under
        Section 2. In addition, if You commence a lawsuit or other
        proceedings (including a cross-claim or counterclaim in a lawsuit)
-       against Licensor or any person or entity alleging that LTX-2 or
+       against Licensor or any person or entity alleging that AIPROD or
        any Output, or any portion of any of the foregoing, infringe any
        intellectual property or other right owned or licensable by you,
        then all licenses granted to you under this Agreement shall
@@ -290,9 +290,9 @@ to be bound by this Agreement.
 
    ATTACHMENT A: Use Restrictions
 
-      When using the Outputs, LTX-2 and any Derivatives thereof, you
+      When using the Outputs, AIPROD and any Derivatives thereof, you
       will comply with the Acceptable Use Policy. In addition, you
-      agree not to use the Outputs, LTX-2 or its Derivatives in any
+      agree not to use the Outputs, AIPROD or its Derivatives in any
       of the following ways:
 
       1. In any way that violates any applicable national, federal,
@@ -367,14 +367,14 @@ to be bound by this Agreement.
 
       18. For commercial use only: To train, improve, or fine-tune any
           other machine learning model, artificial intelligence system,
-          or competing model, except for Derivatives of LTX-2 as
+          or competing model, except for Derivatives of AIPROD as
           expressly permitted under this Agreement;
 
       19. To circumvent, disable, or interfere with any technical
           limitations, safety features, content filters, or use
-          restrictions implemented in LTX-2 by Licensor;
+          restrictions implemented in AIPROD by Licensor;
 
-      20. To use LTX-2 or Derivatives of LTX-2 in any product, service,
+      20. To use AIPROD or Derivatives of AIPROD in any product, service,
           or application that directly competes with Licensor's
           commercial products or services, or is designed to replace or
           substitute Licensor's offerings in the market, without

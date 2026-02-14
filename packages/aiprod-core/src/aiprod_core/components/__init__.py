@@ -6,5 +6,5 @@ Submodules:
     noisers         - Noise samplers (GaussianNoiser)
     patchifiers     - Latent patchification (VideoLatentPatchifier, AudioPatchifier)
     protocols       - Protocol definitions (Patchifier, etc.)
-    schedulers      - Sigma schedulers (LTX2Scheduler, LinearQuadraticScheduler)
+    schedulers      - Sigma schedulers (AIPROD2Scheduler, LinearQuadraticScheduler)
 """

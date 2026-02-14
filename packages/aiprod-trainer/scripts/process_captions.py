@@ -8,7 +8,7 @@ This module provides functionality for processing text captions, including:
 - CaptionsDataset for caption-only preprocessing workflows
 Can be used as a standalone script:
     python scripts/process_captions.py dataset.json --output-dir /path/to/output \
-        --model-source /path/to/ltx2.safetensors --text-encoder-path /path/to/gemma
+        --model-source /path/to/AIPROD2.safetensors --text-encoder-path /path/to/gemma
 """
 
 import json
@@ -238,7 +238,7 @@ def compute_captions_embeddings(  # noqa: PLR0913
     Args:
         dataset_file: Path to metadata file (CSV/JSON/JSONL) containing captions and media paths
         output_dir: Directory to save embeddings
-        model_path: Path to LTX-2 checkpoint (.safetensors)
+        model_path: Path to AIPROD checkpoint (.safetensors)
         text_encoder_path: Path to Gemma text encoder directory
         caption_column: Column name containing captions in the metadata file
         media_column: Column name containing media paths (used for output naming)
@@ -345,7 +345,7 @@ def main(  # noqa: PLR0913
     ),
     model_path: str = typer.Option(
         ...,
-        help="Path to LTX-2 checkpoint (.safetensors file)",
+        help="Path to AIPROD checkpoint (.safetensors file)",
     ),
     text_encoder_path: str = typer.Option(
         ...,
@@ -385,19 +385,19 @@ def main(  # noqa: PLR0913
     This script processes captions from metadata files and saves text embeddings
     that can be used for training video generation models. The output embeddings
     will maintain the same folder structure and naming as the corresponding media files.
-    Note: This script is designed for LTX-2 models which use the Gemma text encoder.
+    Note: This script is designed for AIPROD models which use the Gemma text encoder.
     Examples:
-        # Process captions with LTX-2 model
+        # Process captions with AIPROD model
         python scripts/process_captions.py dataset.json --output-dir ./embeddings \\
-            --model-path /path/to/ltx2_checkpoint.safetensors \\
+            --model-path /path/to/AIPROD2_checkpoint.safetensors \\
             --text-encoder-path /path/to/gemma
         # Add a trigger word for LoRA training
         python scripts/process_captions.py dataset.json --output-dir ./embeddings \\
-            --model-path /path/to/ltx2.safetensors --text-encoder-path /path/to/gemma \\
+            --model-path /path/to/AIPROD2.safetensors --text-encoder-path /path/to/gemma \\
             --lora-trigger "mytoken"
         # Remove LLM-generated prefixes from captions
         python scripts/process_captions.py dataset.json --output-dir ./embeddings \\
-            --model-path /path/to/ltx2.safetensors --text-encoder-path /path/to/gemma \\
+            --model-path /path/to/AIPROD2.safetensors --text-encoder-path /path/to/gemma \\
             --remove-llm-prefixes
     """
 

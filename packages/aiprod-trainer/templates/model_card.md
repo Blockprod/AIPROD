@@ -1,7 +1,7 @@
 ---
 tags:
-  - ltx-2
-  - ltx-video
+  - AIPROD
+  - AIPROD-video
   - text-to-video
   - audio-video
 pinned: true
@@ -32,7 +32,7 @@ This is a fine-tuned version of [`{base_model}`]({base_model_link}) trained on c
 
 ## Usage
 
-This model is designed to be used with the LTX-2 (Lightricks Audio-Video) pipeline.
+This model is designed to be used with the AIPROD (Lightricks Audio-Video) pipeline.
 
 ### 🔌 Using Trained LoRAs in ComfyUI
 
@@ -44,7 +44,7 @@ In order to use the trained LoRA in ComfyUI, follow these steps:
     - Connect it to the "Load Checkpoint" node to apply the LoRA to the base model
 
 You can find reference Text-to-Video (T2V) and Image-to-Video (I2V) workflows in the
-official [LTX-2 repository](https://github.com/Lightricks/LTX-2).
+official [AIPROD repository](https://github.com/Lightricks/AIPROD).
 
 ### Example Prompts
 
@@ -55,5 +55,5 @@ This model inherits the license of the base model ([`{base_model}`]({base_model_
 
 ## Acknowledgments
 
-- Base model: [Lightricks](https://huggingface.co/Lightricks/LTX-2)
-- Trainer: [LTX-2](https://github.com/Lightricks/LTX-2)
+- Base model: [Lightricks](https://huggingface.co/Lightricks/AIPROD)
+- Trainer: [AIPROD](https://github.com/Lightricks/AIPROD)

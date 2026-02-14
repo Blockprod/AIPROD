@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 """
-Train LTXV models using configuration from YAML files.
-This script provides a command-line interface for training LTXV models using
+Train AIPRODV models using configuration from YAML files.
+This script provides a command-line interface for training AIPRODV models using
 either LoRA fine-tuning or full model fine-tuning. It loads configuration from
 a YAML file and passes it to the trainer.
 Basic usage:
@@ -18,14 +18,14 @@ import typer
 import yaml
 from rich.console import Console
 
-from aiprod_trainer.config import LtxTrainerConfig
-from aiprod_trainer.trainer import LtxvTrainer
+from aiprod_trainer.config import AIPRODTrainerConfig
+from aiprod_trainer.trainer import AIPRODvTrainer
 
 console = Console()
 app = typer.Typer(
     pretty_exceptions_enable=False,
     no_args_is_help=True,
-    help="Train LTXV models using configuration from YAML files.",
+    help="Train AIPRODV models using configuration from YAML files.",
 )
 
 
@@ -48,15 +48,15 @@ def main(
     with open(config_path, "r") as file:
         config_data = yaml.safe_load(file)
 
-    # Convert the loaded data to the LtxTrainerConfig object
+    # Convert the loaded data to the AIPRODTrainerConfig object
     try:
-        trainer_config = LtxTrainerConfig(**config_data)
+        trainer_config = AIPRODTrainerConfig(**config_data)
     except Exception as e:
         typer.echo(f"Error: Invalid configuration data: {e}")
         raise typer.Exit(code=1) from e
 
     # Initialize the training process
-    trainer = LtxvTrainer(trainer_config)
+    trainer = AIPRODvTrainer(trainer_config)
     trainer.train(disable_progress_bars=disable_progress_bars)
 
 

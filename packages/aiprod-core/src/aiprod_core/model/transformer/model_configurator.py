@@ -5,19 +5,19 @@ from aiprod_core.loader.module_ops import ModuleOps
 from aiprod_core.loader.sd_ops import KeyValueOperationResult, SDOps
 from aiprod_core.model.model_protocol import ModelConfigurator
 from aiprod_core.model.transformer.attention import AttentionFunction
-from aiprod_core.model.transformer.model import LTXModel, LTXModelType
-from aiprod_core.model.transformer.rope import LTXRopeType
+from aiprod_core.model.transformer.model import AIPRODModel, AIPRODModelType
+from aiprod_core.model.transformer.rope import AIPRODRopeType
 from aiprod_core.utils import check_config_value
 
 
-class LTXModelConfigurator(ModelConfigurator[LTXModel]):
+class AIPRODModelConfigurator(ModelConfigurator[AIPRODModel]):
     """
-    Configurator for LTX model.
-    Used to create an LTX model from a configuration dictionary.
+    Configurator for AIPROD model.
+    Used to create an AIPROD model from a configuration dictionary.
     """
 
     @classmethod
-    def from_config(cls: type[LTXModel], config: dict) -> LTXModel:
+    def from_config(cls: type[AIPRODModel], config: dict) -> AIPRODModel:
         config = config.get("transformer", {})
 
         check_config_value(config, "dropout", 0.0)
@@ -39,8 +39,8 @@ class LTXModelConfigurator(ModelConfigurator[LTXModel]):
         check_config_value(config, "av_cross_ada_norm", True)
         check_config_value(config, "use_middle_indices_grid", True)
 
-        return LTXModel(
-            model_type=LTXModelType.AudioVideo,
+        return AIPRODModel(
+            model_type=AIPRODModelType.AudioVideo,
             num_attention_heads=config.get("num_attention_heads", 32),
             attention_head_dim=config.get("attention_head_dim", 128),
             in_channels=config.get("in_channels", 128),
@@ -61,19 +61,19 @@ class LTXModelConfigurator(ModelConfigurator[LTXModel]):
             audio_cross_attention_dim=config.get("audio_cross_attention_dim", 2048),
             audio_positional_embedding_max_pos=config.get("audio_positional_embedding_max_pos", [20]),
             av_ca_timestep_scale_multiplier=config.get("av_ca_timestep_scale_multiplier", 1),
-            rope_type=LTXRopeType(config.get("rope_type", "interleaved")),
+            rope_type=AIPRODRopeType(config.get("rope_type", "interleaved")),
             double_precision_rope=config.get("frequencies_precision", False) == "float64",
         )
 
 
-class LTXVideoOnlyModelConfigurator(ModelConfigurator[LTXModel]):
+class AIPRODVideoOnlyModelConfigurator(ModelConfigurator[AIPRODModel]):
     """
-    Configurator for LTX video only model.
-    Used to create an LTX video only model from a configuration dictionary.
+    Configurator for AIPROD video only model.
+    Used to create an AIPROD video only model from a configuration dictionary.
     """
 
     @classmethod
-    def from_config(cls: type[LTXModel], config: dict) -> LTXModel:
+    def from_config(cls: type[AIPRODModel], config: dict) -> AIPRODModel:
         config = config.get("transformer", {})
 
         check_config_value(config, "dropout", 0.0)
@@ -92,8 +92,8 @@ class LTXVideoOnlyModelConfigurator(ModelConfigurator[LTXModel]):
         check_config_value(config, "positional_embedding_type", "rope")
         check_config_value(config, "use_middle_indices_grid", True)
 
-        return LTXModel(
-            model_type=LTXModelType.VideoOnly,
+        return AIPRODModel(
+            model_type=AIPRODModelType.VideoOnly,
             num_attention_heads=config.get("num_attention_heads", 32),
             attention_head_dim=config.get("attention_head_dim", 128),
             in_channels=config.get("in_channels", 128),
@@ -107,7 +107,7 @@ class LTXVideoOnlyModelConfigurator(ModelConfigurator[LTXModel]):
             positional_embedding_max_pos=config.get("positional_embedding_max_pos", [20, 2048, 2048]),
             timestep_scale_multiplier=config.get("timestep_scale_multiplier", 1000),
             use_middle_indices_grid=config.get("use_middle_indices_grid", True),
-            rope_type=LTXRopeType(config.get("rope_type", "interleaved")),
+            rope_type=AIPRODRopeType(config.get("rope_type", "interleaved")),
             double_precision_rope=config.get("frequencies_precision", False) == "float64",
         )
 
@@ -167,14 +167,14 @@ def amend_forward_with_upcast(
     return model
 
 
-LTXV_MODEL_COMFY_RENAMING_MAP = (
-    SDOps("LTXV_MODEL_COMFY_PREFIX_MAP")
+AIPRODV_MODEL_COMFY_RENAMING_MAP = (
+    SDOps("AIPRODV_MODEL_COMFY_PREFIX_MAP")
     .with_matching(prefix="model.diffusion_model.")
     .with_replacement("model.diffusion_model.", "")
 )
 
-LTXV_MODEL_COMFY_RENAMING_WITH_TRANSFORMER_LINEAR_DOWNCAST_MAP = (
-    SDOps("LTXV_MODEL_COMFY_PREFIX_MAP")
+AIPRODV_MODEL_COMFY_RENAMING_WITH_TRANSFORMER_LINEAR_DOWNCAST_MAP = (
+    SDOps("AIPRODV_MODEL_COMFY_PREFIX_MAP")
     .with_matching(prefix="model.diffusion_model.")
     .with_replacement("model.diffusion_model.", "")
     .with_kv_operation(
@@ -217,7 +217,7 @@ LTXV_MODEL_COMFY_RENAMING_WITH_TRANSFORMER_LINEAR_DOWNCAST_MAP = (
 
 UPCAST_DURING_INFERENCE = ModuleOps(
     name="upcast_fp8_during_linear_forward",
-    matcher=lambda model: isinstance(model, LTXModel),
+    matcher=lambda model: isinstance(model, AIPRODModel),
     mutator=lambda model: amend_forward_with_upcast(model, False),
 )
 
@@ -232,6 +232,6 @@ class UpcastWithStochasticRounding(ModuleOps):
         return super().__new__(
             cls,
             name="upcast_fp8_during_linear_forward_with_stochastic_rounding",
-            matcher=lambda model: isinstance(model, LTXModel),
+            matcher=lambda model: isinstance(model, AIPRODModel),
             mutator=lambda model: amend_forward_with_upcast(model, True, seed),
         )

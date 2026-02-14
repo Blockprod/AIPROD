@@ -7,7 +7,7 @@ from transformers import AutoImageProcessor, Gemma3ForConditionalGeneration, Gem
 
 from aiprod_core.loader.module_ops import ModuleOps
 from aiprod_core.text_encoders.gemma.feature_extractor import GemmaFeaturesExtractorProjLinear
-from aiprod_core.text_encoders.gemma.tokenizer import LTXVGemmaTokenizer
+from aiprod_core.text_encoders.gemma.tokenizer import AIPRODVGemmaTokenizer
 from aiprod_core.utils import find_matching_file
 
 
@@ -18,7 +18,7 @@ class GemmaTextEncoderModelBase(torch.nn.Module):
     for implementation classes for multimodal pipelines. It processes input text through tokenization,
     obtains hidden states from the base language model, applies a linear feature extractor.
     Args:
-        tokenizer (LTXVGemmaTokenizer): The tokenizer used for text preprocessing.
+        tokenizer (AIPRODVGemmaTokenizer): The tokenizer used for text preprocessing.
         model (Gemma3ForConditionalGeneration): The base Gemma LLM.
         feature_extractor_linear (GemmaFeaturesExtractorProjLinear): Linear projection for hidden state aggregation.
         dtype (torch.dtype, optional): The data type for model parameters (default: torch.bfloat16).
@@ -27,7 +27,7 @@ class GemmaTextEncoderModelBase(torch.nn.Module):
     def __init__(
         self,
         feature_extractor_linear: GemmaFeaturesExtractorProjLinear,
-        tokenizer: LTXVGemmaTokenizer | None = None,
+        tokenizer: AIPRODVGemmaTokenizer | None = None,
         model: Gemma3ForConditionalGeneration | None = None,
         img_processor: Gemma3Processor | None = None,
         dtype: torch.dtype = torch.bfloat16,
@@ -225,7 +225,7 @@ def module_ops_from_gemma_root(gemma_root: str) -> tuple[ModuleOps, ...]:
     processor_root = str(find_matching_file(gemma_root, "preprocessor_config.json").parent)
 
     def load_tokenizer(module: GemmaTextEncoderModelBase) -> GemmaTextEncoderModelBase:
-        module.tokenizer = LTXVGemmaTokenizer(tokenizer_root, 1024)
+        module.tokenizer = AIPRODVGemmaTokenizer(tokenizer_root, 1024)
         return module
 
     def load_processor(module: GemmaTextEncoderModelBase) -> GemmaTextEncoderModelBase:

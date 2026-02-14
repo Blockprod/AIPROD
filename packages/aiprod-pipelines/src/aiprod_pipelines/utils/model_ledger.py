@@ -14,10 +14,10 @@ from aiprod_core.model.audio_vae import (
     VocoderConfigurator,
 )
 from aiprod_core.model.transformer import (
-    LTXV_MODEL_COMFY_RENAMING_MAP,
-    LTXV_MODEL_COMFY_RENAMING_WITH_TRANSFORMER_LINEAR_DOWNCAST_MAP,
+    AIPRODV_MODEL_COMFY_RENAMING_MAP,
+    AIPRODV_MODEL_COMFY_RENAMING_WITH_TRANSFORMER_LINEAR_DOWNCAST_MAP,
     UPCAST_DURING_INFERENCE,
-    LTXModelConfigurator,
+    AIPRODModelConfigurator,
     X0Model,
 )
 from aiprod_core.model.upsampler import LatentUpsampler, LatentUpsamplerConfigurator
@@ -41,14 +41,14 @@ from aiprod_core.utils import find_matching_file
 
 class ModelLedger:
     """
-    Central coordinator for loading and building models used in an LTX pipeline.
+    Central coordinator for loading and building models used in an AIPROD pipeline.
     The ledger wires together multiple model builders (transformer, video VAE encoder/decoder,
     audio VAE decoder, vocoder, text encoder, and optional latent upsampler) and exposes
     factory methods for constructing model instances.
     ### Model Building
     Each model method (e.g. :meth:`transformer`, :meth:`video_decoder`, :meth:`text_encoder`)
     constructs a new model instance on each call. The builder uses the
-    :class:`~ltx_core.loader.registry.Registry` to load weights from the checkpoint,
+    :class:`~AIPROD_core.loader.registry.Registry` to load weights from the checkpoint,
     instantiates the model with the configured ``dtype``, and moves it to ``self.device``.
     .. note::
         Models are **not cached**. Each call to a model method creates a new instance.
@@ -110,8 +110,8 @@ class ModelLedger:
         if self.checkpoint_path is not None:
             self.transformer_builder = Builder(
                 model_path=self.checkpoint_path,
-                model_class_configurator=LTXModelConfigurator,
-                model_sd_ops=LTXV_MODEL_COMFY_RENAMING_MAP,
+                model_class_configurator=AIPRODModelConfigurator,
+                model_sd_ops=AIPRODV_MODEL_COMFY_RENAMING_MAP,
                 loras=tuple(self.loras),
                 registry=self.registry,
             )
@@ -191,7 +191,7 @@ class ModelLedger:
             fp8_builder = replace(
                 self.transformer_builder,
                 module_ops=(UPCAST_DURING_INFERENCE,),
-                model_sd_ops=LTXV_MODEL_COMFY_RENAMING_WITH_TRANSFORMER_LINEAR_DOWNCAST_MAP,
+                model_sd_ops=AIPRODV_MODEL_COMFY_RENAMING_WITH_TRANSFORMER_LINEAR_DOWNCAST_MAP,
             )
             return X0Model(fp8_builder.build(device=self._target_device())).to(self.device).eval()
         else:

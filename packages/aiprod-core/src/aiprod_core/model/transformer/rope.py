@@ -8,7 +8,7 @@ import torch
 from einops import rearrange
 
 
-class LTXRopeType(Enum):
+class AIPRODRopeType(Enum):
     INTERLEAVED = "interleaved"
     SPLIT = "split"
 
@@ -16,11 +16,11 @@ class LTXRopeType(Enum):
 def apply_rotary_emb(
     input_tensor: torch.Tensor,
     freqs_cis: Tuple[torch.Tensor, torch.Tensor],
-    rope_type: LTXRopeType = LTXRopeType.INTERLEAVED,
+    rope_type: AIPRODRopeType = AIPRODRopeType.INTERLEAVED,
 ) -> torch.Tensor:
-    if rope_type == LTXRopeType.INTERLEAVED:
+    if rope_type == AIPRODRopeType.INTERLEAVED:
         return apply_interleaved_rotary_emb(input_tensor, *freqs_cis)
-    elif rope_type == LTXRopeType.SPLIT:
+    elif rope_type == AIPRODRopeType.SPLIT:
         return apply_split_rotary_emb(input_tensor, *freqs_cis)
     else:
         raise ValueError(f"Invalid rope type: {rope_type}")
@@ -183,7 +183,7 @@ def precompute_freqs_cis(
     max_pos: list[int] | None = None,
     use_middle_indices_grid: bool = False,
     num_attention_heads: int = 32,
-    rope_type: LTXRopeType = LTXRopeType.INTERLEAVED,
+    rope_type: AIPRODRopeType = AIPRODRopeType.INTERLEAVED,
     freq_grid_generator: Callable[[float, int, int, torch.device], torch.Tensor] = generate_freq_grid_pytorch,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     if max_pos is None:
@@ -192,7 +192,7 @@ def precompute_freqs_cis(
     indices = freq_grid_generator(theta, indices_grid.shape[1], dim)
     freqs = generate_freqs(indices, indices_grid, max_pos, use_middle_indices_grid)
 
-    if rope_type == LTXRopeType.SPLIT:
+    if rope_type == AIPRODRopeType.SPLIT:
         expected_freqs = dim // 2
         current_freqs = freqs.shape[-1]
         pad_size = expected_freqs - current_freqs

@@ -4,7 +4,7 @@ from aiprod_core.model.model_protocol import ModelConfigurator
 from aiprod_core.model.transformer.attention import Attention
 from aiprod_core.model.transformer.feed_forward import FeedForward
 from aiprod_core.model.transformer.rope import (
-    LTXRopeType,
+    AIPRODRopeType,
     generate_freq_grid_np,
     generate_freq_grid_pytorch,
     precompute_freqs_cis,
@@ -18,7 +18,7 @@ class _BasicTransformerBlock1D(torch.nn.Module):
         dim: int,
         heads: int,
         dim_head: int,
-        rope_type: LTXRopeType = LTXRopeType.INTERLEAVED,
+        rope_type: AIPRODRopeType = AIPRODRopeType.INTERLEAVED,
     ):
         super().__init__()
 
@@ -82,7 +82,7 @@ class Embeddings1DConnector(torch.nn.Module):
         causal_temporal_positioning (bool): If True, uses causal attention (default=False).
         num_learnable_registers (int | None): Number of learnable registers to replace padded tokens. If None, disables
             register replacement. (default=128)
-        rope_type (LTXRopeType): The RoPE variant to use (default=DEFAULT_ROPE_TYPE).
+        rope_type (AIPRODRopeType): The RoPE variant to use (default=DEFAULT_ROPE_TYPE).
         double_precision_rope (bool): Use double precision rope calculation (default=False).
     """
 
@@ -97,7 +97,7 @@ class Embeddings1DConnector(torch.nn.Module):
         positional_embedding_max_pos: list[int] | None = None,
         causal_temporal_positioning: bool = False,
         num_learnable_registers: int | None = 128,
-        rope_type: LTXRopeType = LTXRopeType.INTERLEAVED,
+        rope_type: AIPRODRopeType = AIPRODRopeType.INTERLEAVED,
         double_precision_rope: bool = False,
     ):
         super().__init__()
@@ -198,7 +198,7 @@ class Embeddings1DConnectorConfigurator(ModelConfigurator[Embeddings1DConnector]
     @classmethod
     def from_config(cls: type[Embeddings1DConnector], config: dict) -> Embeddings1DConnector:
         config = config.get("transformer", {})
-        rope_type = LTXRopeType(config.get("rope_type", "interleaved"))
+        rope_type = AIPRODRopeType(config.get("rope_type", "interleaved"))
         double_precision_rope = config.get("frequencies_precision", False) == "float64"
         pe_max_pos = config.get("connector_positional_embedding_max_pos", [1])
 

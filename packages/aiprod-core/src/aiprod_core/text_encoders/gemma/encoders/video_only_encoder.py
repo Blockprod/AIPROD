@@ -11,7 +11,7 @@ from aiprod_core.text_encoders.gemma.embeddings_connector import (
 )
 from aiprod_core.text_encoders.gemma.encoders.base_encoder import GemmaTextEncoderModelBase
 from aiprod_core.text_encoders.gemma.feature_extractor import GemmaFeaturesExtractorProjLinear
-from aiprod_core.text_encoders.gemma.tokenizer import LTXVGemmaTokenizer
+from aiprod_core.text_encoders.gemma.tokenizer import AIPRODVGemmaTokenizer
 
 
 class VideoGemmaEncoderOutput(NamedTuple):
@@ -30,7 +30,7 @@ class VideoGemmaTextEncoderModel(GemmaTextEncoderModelBase):
         self,
         feature_extractor_linear: GemmaFeaturesExtractorProjLinear,
         embeddings_connector: Embeddings1DConnector,
-        tokenizer: LTXVGemmaTokenizer | None = None,
+        tokenizer: AIPRODVGemmaTokenizer | None = None,
         model: Gemma3ForConditionalGeneration | None = None,
         dtype: torch.dtype = torch.bfloat16,
     ) -> None:

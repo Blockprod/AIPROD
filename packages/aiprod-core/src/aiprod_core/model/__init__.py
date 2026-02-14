@@ -1,4 +1,4 @@
-"""Model definitions for LTX-2."""
+"""Model definitions for AIPROD."""
 
 from aiprod_core.model.model_protocol import ModelConfigurator, ModelType
 

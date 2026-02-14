@@ -6,7 +6,7 @@ from aiprod_core.guidance.perturbations import BatchedPerturbationConfig
 from aiprod_core.model.transformer.adaln import AdaLayerNormSingle
 from aiprod_core.model.transformer.attention import AttentionCallable, AttentionFunction
 from aiprod_core.model.transformer.modality import Modality
-from aiprod_core.model.transformer.rope import LTXRopeType
+from aiprod_core.model.transformer.rope import AIPRODRopeType
 from aiprod_core.model.transformer.text_projection import PixArtAlphaTextProjection
 from aiprod_core.model.transformer.transformer import BasicAVTransformerBlock, TransformerConfig
 from aiprod_core.model.transformer.transformer_args import (
@@ -17,28 +17,28 @@ from aiprod_core.model.transformer.transformer_args import (
 from aiprod_core.utils import to_denoised
 
 
-class LTXModelType(Enum):
-    AudioVideo = "ltx av model"
-    VideoOnly = "ltx video only model"
-    AudioOnly = "ltx audio only model"
+class AIPRODModelType(Enum):
+    AudioVideo = "AIPROD av model"
+    VideoOnly = "AIPROD video only model"
+    AudioOnly = "AIPROD audio only model"
 
     def is_video_enabled(self) -> bool:
-        return self in (LTXModelType.AudioVideo, LTXModelType.VideoOnly)
+        return self in (AIPRODModelType.AudioVideo, AIPRODModelType.VideoOnly)
 
     def is_audio_enabled(self) -> bool:
-        return self in (LTXModelType.AudioVideo, LTXModelType.AudioOnly)
+        return self in (AIPRODModelType.AudioVideo, AIPRODModelType.AudioOnly)
 
 
-class LTXModel(torch.nn.Module):
+class AIPRODModel(torch.nn.Module):
     """
-    LTX model transformer implementation.
-    This class implements the transformer blocks for the LTX model.
+    AIPROD model transformer implementation.
+    This class implements the transformer blocks for the AIPROD model.
     """
 
     def __init__(  # noqa: PLR0913
         self,
         *,
-        model_type: LTXModelType = LTXModelType.AudioVideo,
+        model_type: AIPRODModelType = AIPRODModelType.AudioVideo,
         num_attention_heads: int = 32,
         attention_head_dim: int = 128,
         in_channels: int = 128,
@@ -59,7 +59,7 @@ class LTXModel(torch.nn.Module):
         audio_cross_attention_dim: int = 2048,
         audio_positional_embedding_max_pos: list[int] | None = None,
         av_ca_timestep_scale_multiplier: int = 1,
-        rope_type: LTXRopeType = LTXRopeType.INTERLEAVED,
+        rope_type: AIPRODRopeType = AIPRODRopeType.INTERLEAVED,
         double_precision_rope: bool = False,
     ):
         super().__init__()
@@ -195,7 +195,7 @@ class LTXModel(torch.nn.Module):
         self,
         cross_pe_max_pos: int | None = None,
     ) -> None:
-        """Initialize preprocessors for LTX."""
+        """Initialize preprocessors for AIPROD."""
 
         if self.model_type.is_video_enabled() and self.model_type.is_audio_enabled():
             self.video_args_preprocessor = MultiModalTransformerArgsPreprocessor(
@@ -273,7 +273,7 @@ class LTXModel(torch.nn.Module):
         norm_eps: float,
         attention_type: AttentionFunction | AttentionCallable,
     ) -> None:
-        """Initialize transformer blocks for LTX."""
+        """Initialize transformer blocks for AIPROD."""
         video_config = (
             TransformerConfig(
                 dim=self.inner_dim,
@@ -324,7 +324,7 @@ class LTXModel(torch.nn.Module):
         audio: TransformerArgs | None,
         perturbations: BatchedPerturbationConfig,
     ) -> tuple[TransformerArgs, TransformerArgs]:
-        """Process transformer blocks for LTXAV."""
+        """Process transformer blocks for AIPRODAV."""
 
         # Process transformer blocks
         for block in self.transformer_blocks:
@@ -356,7 +356,7 @@ class LTXModel(torch.nn.Module):
         x: torch.Tensor,
         embedded_timestep: torch.Tensor,
     ) -> torch.Tensor:
-        """Process output for LTXV."""
+        """Process output for AIPRODV."""
         # Apply scale-shift modulation
         scale_shift_values = (
             scale_shift_table[None, None].to(device=x.device, dtype=x.dtype) + embedded_timestep[:, :, None]
@@ -372,7 +372,7 @@ class LTXModel(torch.nn.Module):
         self, video: Modality | None, audio: Modality | None, perturbations: BatchedPerturbationConfig
     ) -> tuple[torch.Tensor, torch.Tensor]:
         """
-        Forward pass for LTX models.
+        Forward pass for AIPROD models.
         Returns:
             Processed output tensors
         """
@@ -418,7 +418,7 @@ class LegacyX0Model(torch.nn.Module):
     Returns fully denoised output based on the velocities produced by the base model.
     """
 
-    def __init__(self, velocity_model: LTXModel):
+    def __init__(self, velocity_model: AIPRODModel):
         super().__init__()
         self.velocity_model = velocity_model
 
@@ -447,7 +447,7 @@ class X0Model(torch.nn.Module):
     Applies scaled denoising to the video and audio according to the timesteps = sigma * denoising_mask.
     """
 
-    def __init__(self, velocity_model: LTXModel):
+    def __init__(self, velocity_model: AIPRODModel):
         super().__init__()
         self.velocity_model = velocity_model
 

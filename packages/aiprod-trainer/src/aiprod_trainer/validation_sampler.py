@@ -1,6 +1,6 @@
-"""Validation sampling for LTX-2 training using ltx-core components.
+"""Validation sampling for AIPROD training using AIPROD-core components.
 This module provides a simplified validation pipeline for generating samples during training,
-using the new ltx-core components (VideoLatentTools, AudioLatentTools, LatentState, etc.).
+using the new AIPROD-core components (VideoLatentTools, AudioLatentTools, LatentState, etc.).
 """
 
 from dataclasses import dataclass, replace
@@ -18,7 +18,7 @@ from aiprod_core.components.patchifiers import (
     VideoLatentPatchifier,
     get_pixel_coords,
 )
-from aiprod_core.components.schedulers import LTX2Scheduler
+from aiprod_core.components.schedulers import AIPROD2Scheduler
 from aiprod_core.guidance.perturbations import (
     BatchedPerturbationConfig,
     Perturbation,
@@ -34,7 +34,7 @@ from aiprod_trainer.progress import SamplingContext
 
 if TYPE_CHECKING:
     from aiprod_core.model.audio_vae import AudioDecoder, Vocoder
-    from aiprod_core.model.transformer import LTXModel
+    from aiprod_core.model.transformer import AIPRODModel
     from aiprod_core.model.video_vae import VideoDecoder, VideoEncoder
     from aiprod_core.text_encoders.gemma import AVGemmaTextEncoderModel
 
@@ -60,7 +60,7 @@ class TiledDecodingConfig:
     Tiled decoding splits the latent tensor into overlapping tiles, decodes each
     tile individually, and blends them together. This significantly reduces peak
     VRAM usage at the cost of slightly slower decoding.
-    Defaults match the recommended values from ltx-core tests.
+    Defaults match the recommended values from AIPROD-core tests.
     """
 
     enabled: bool = True  # Whether to use tiled decoding (enabled by default)
@@ -106,7 +106,7 @@ class GenerationConfig:
 
 
 class ValidationSampler:
-    """Generates validation samples during training using ltx-core components.
+    """Generates validation samples during training using AIPROD-core components.
     This class provides a simplified interface for generating video (and optionally audio)
     samples during training validation. It supports:
     - Text-to-video generation
@@ -121,7 +121,7 @@ class ValidationSampler:
 
     def __init__(
         self,
-        transformer: "LTXModel",
+        transformer: "AIPRODModel",
         vae_decoder: "VideoDecoder",
         vae_encoder: "VideoEncoder | None",
         text_encoder: "AVGemmaTextEncoderModel | None" = None,
@@ -131,7 +131,7 @@ class ValidationSampler:
     ):
         """Initialize the validation sampler.
         Args:
-            transformer: LTX-2 transformer model
+            transformer: AIPROD transformer model
             vae_decoder: Video VAE decoder
             vae_encoder: Video VAE encoder (for image/video conditioning), can be None if not needed
             text_encoder: Gemma text encoder with embeddings connector (optional if cached_embeddings in config)
@@ -484,7 +484,7 @@ class ValidationSampler:
         device: torch.device,
     ) -> tuple[LatentState, LatentState | None]:
         """Run the denoising loop using X0 prediction with CFG and optional STG."""
-        scheduler = LTX2Scheduler()
+        scheduler = AIPROD2Scheduler()
         sigmas = scheduler.execute(steps=config.num_inference_steps).to(device).float()
         stepper = EulerDiffusionStep()
         cfg_guider = CFGGuider(config.guidance_scale)

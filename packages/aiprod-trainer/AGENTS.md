@@ -4,7 +4,7 @@ This file provides guidance to AI coding assistants (Claude, Cursor, etc.) when 
 
 ## Project Overview
 
-**LTX-2 Trainer** is a training toolkit for fine-tuning the Lightricks LTX-2 audio-video generation model. It supports:
+**AIPROD Trainer** is a training toolkit for fine-tuning the Lightricks AIPROD audio-video generation model. It supports:
 
 - **LoRA training** - Efficient fine-tuning with adapters
 - **Full fine-tuning** - Complete model training
@@ -13,21 +13,21 @@ This file provides guidance to AI coding assistants (Claude, Cursor, etc.) when 
 
 **Key Dependencies:**
 
-- **[`ltx-core`](../ltx-core/)** - Core model implementations (transformer, VAE, text encoder)
-- **[`ltx-pipelines`](../ltx-pipelines/)** - Inference pipeline components
+- **[`AIPROD-core`](../AIPROD-core/)** - Core model implementations (transformer, VAE, text encoder)
+- **[`AIPROD-pipelines`](../AIPROD-pipelines/)** - Inference pipeline components
 
-> **Important:** This trainer only supports **LTX-2** (the audio-video model). The older LTXV models are not supported.
+> **Important:** This trainer only supports **AIPROD** (the audio-video model). The older AIPRODV models are not supported.
 
 ## Architecture Overview
 
 ### Package Structure
 
 ```
-packages/ltx-trainer/
-├── src/ltx_trainer/           # Main training module
+packages/AIPROD-trainer/
+├── src/AIPROD_trainer/           # Main training module
 │   ├── config.py              # Pydantic configuration models
 │   ├── trainer.py             # Main training orchestration with Accelerate
-│   ├── model_loader.py        # Model loading using ltx-core
+│   ├── model_loader.py        # Model loading using AIPROD-core
 │   ├── validation_sampler.py  # Inference for validation samples
 │   ├── datasets.py            # PrecomputedDataset for latent-based training
 │   ├── training_strategies/   # Strategy pattern for different training modes
@@ -50,8 +50,8 @@ packages/ltx-trainer/
 │   ├── compute_reference.py   # Generate IC-LoRA reference videos
 │   └── split_scenes.py        # Scene detection and splitting
 ├── configs/                   # Example training configurations
-│   ├── ltx2_av_lora.yaml      # Audio-video LoRA training
-│   ├── ltx2_v2v_ic_lora.yaml  # IC-LoRA video-to-video
+│   ├── AIPROD2_av_lora.yaml      # Audio-video LoRA training
+│   ├── AIPROD2_v2v_ic_lora.yaml  # IC-LoRA video-to-video
 │   └── accelerate/            # Accelerate configs for distributed training
 └── docs/                      # Documentation
 ```
@@ -60,10 +60,10 @@ packages/ltx-trainer/
 
 **Model Loading:**
 
-- `ltx_trainer.model_loader` provides component loaders using `ltx-core`
+- `AIPROD_trainer.model_loader` provides component loaders using `AIPROD-core`
 - Individual loaders: `load_transformer()`, `load_video_vae_encoder()`, `load_video_vae_decoder()`, `load_text_encoder()`, etc.
-- Combined loader: `load_model()` returns `LtxModelComponents` dataclass
-- Uses `SingleGPUModelBuilder` from ltx-core internally
+- Combined loader: `load_model()` returns `AIPRODModelComponents` dataclass
+- Uses `SingleGPUModelBuilder` from AIPROD-core internally
 
 **Training Flow:**
 
@@ -76,7 +76,7 @@ packages/ltx-trainer/
 **Model Interface (Modality-based):**
 
 ```python
-from ltx_core.model.transformer.modality import Modality
+from AIPROD_core.model.transformer.modality import Modality
 
 # Create modality objects for video and audio
 video = Modality(
@@ -104,8 +104,8 @@ video_pred, audio_pred = model(video=video, audio=audio, perturbations=None)
 
 **Configuration System:**
 
-- All config in `src/ltx_trainer/config.py`
-- Main class: `LtxTrainerConfig`
+- All config in `src/AIPROD_trainer/config.py`
+- Main class: `AIPRODTrainerConfig`
 - Training strategy configs: `TextToVideoConfig`, `VideoToVideoConfig`
 - Uses Pydantic field validators and model validators
 - Config files in `configs/` directory
@@ -117,7 +117,7 @@ video_pred, audio_pred = model(video=video, audio=audio, perturbations=None)
 ```bash
 # From the repository root
 uv sync
-cd packages/ltx-trainer
+cd packages/AIPROD-trainer
 ```
 
 ### Code Quality
@@ -134,7 +134,7 @@ uv run pre-commit run --all-files
 ### Running Tests
 
 ```bash
-cd packages/ltx-trainer
+cd packages/AIPROD-trainer
 uv run pytest
 ```
 
@@ -142,10 +142,10 @@ uv run pytest
 
 ```bash
 # Single GPU
-uv run python scripts/train.py configs/ltx2_av_lora.yaml
+uv run python scripts/train.py configs/AIPROD2_av_lora.yaml
 
 # Multi-GPU with Accelerate
-uv run accelerate launch scripts/train.py configs/ltx2_av_lora.yaml
+uv run accelerate launch scripts/train.py configs/AIPROD2_av_lora.yaml
 ```
 
 ## Code Standards
@@ -170,17 +170,17 @@ uv run accelerate launch scripts/train.py configs/ltx2_av_lora.yaml
 
 ### Logging
 
-- Use `from ltx_trainer import logger` for all messages
+- Use `from AIPROD_trainer import logger` for all messages
 - Avoid print statements in production code
 
 ## Important Files & Modules
 
 ### Configuration (CRITICAL)
 
-**`src/ltx_trainer/config.py`** - Master config definitions
+**`src/AIPROD_trainer/config.py`** - Master config definitions
 
 Key classes:
-- `LtxTrainerConfig` - Main configuration container
+- `AIPRODTrainerConfig` - Main configuration container
 - `ModelConfig` - Model paths and training mode
 - `TrainingStrategyConfig` - Union of `TextToVideoConfig` | `VideoToVideoConfig`
 - `LoraConfig` - LoRA hyperparameters
@@ -195,13 +195,13 @@ Key classes:
 
 ### Training Core
 
-**`src/ltx_trainer/trainer.py`** - Main training loop
+**`src/AIPROD_trainer/trainer.py`** - Main training loop
 
 - Implements distributed training with Accelerate
 - Handles mixed precision, gradient accumulation, checkpointing
 - Uses training strategies for mode-specific logic
 
-**`src/ltx_trainer/training_strategies/`** - Strategy pattern
+**`src/AIPROD_trainer/training_strategies/`** - Strategy pattern
 
 - `base_strategy.py`: `TrainingStrategy` ABC, `ModelInputs` dataclass
 - `text_to_video.py`: Standard text-to-video (with optional audio)
@@ -213,27 +213,27 @@ Key methods each strategy implements:
 - `compute_loss()` - Calculate training loss
 - `requires_audio` property - Whether audio components needed
 
-**`src/ltx_trainer/model_loader.py`** - Model loading
+**`src/AIPROD_trainer/model_loader.py`** - Model loading
 
 Component loaders:
-- `load_transformer()` → `LTXModel`
+- `load_transformer()` → `AIPRODModel`
 - `load_video_vae_encoder()` → `VideoVAEEncoder`
 - `load_video_vae_decoder()` → `VideoVAEDecoder`
 - `load_audio_vae_decoder()` → `AudioVAEDecoder`
 - `load_vocoder()` → `Vocoder`
 - `load_text_encoder()` → `AVGemmaTextEncoderModel`
-- `load_model()` → `LtxModelComponents` (convenience wrapper)
+- `load_model()` → `AIPRODModelComponents` (convenience wrapper)
 
-**`src/ltx_trainer/validation_sampler.py`** - Inference for validation
+**`src/AIPROD_trainer/validation_sampler.py`** - Inference for validation
 
-Uses ltx-core components for denoising:
-- `LTX2Scheduler` for sigma scheduling
+Uses AIPROD-core components for denoising:
+- `AIPROD2Scheduler` for sigma scheduling
 - `EulerDiffusionStep` for diffusion steps
 - `CFGGuider` for classifier-free guidance
 
 ### Data
 
-**`src/ltx_trainer/datasets.py`** - Dataset handling
+**`src/AIPROD_trainer/datasets.py`** - Dataset handling
 
 - `PrecomputedDataset` loads pre-computed VAE latents
 - Supports video latents, audio latents, text embeddings, reference latents
@@ -242,14 +242,14 @@ Uses ltx-core components for denoising:
 
 ### Adding a New Configuration Parameter
 
-1. Add field to appropriate config class in `src/ltx_trainer/config.py`
+1. Add field to appropriate config class in `src/AIPROD_trainer/config.py`
 2. Add validator if needed
 3. Update ALL config files in `configs/`
 4. Update `docs/configuration-reference.md`
 
 ### Implementing a New Training Strategy
 
-1. Create new file in `src/ltx_trainer/training_strategies/`
+1. Create new file in `src/AIPROD_trainer/training_strategies/`
 2. Create config class inheriting `TrainingStrategyConfigBase`
 3. Create strategy class inheriting `TrainingStrategy`
 4. Implement: `get_data_sources()`, `prepare_training_inputs()`, `compute_loss()`
@@ -261,7 +261,7 @@ Uses ltx-core components for denoising:
 
 ```python
 from dataclasses import replace
-from ltx_core.model.transformer.modality import Modality
+from AIPROD_core.model.transformer.modality import Modality
 
 # Create modality
 video = Modality(
@@ -302,7 +302,7 @@ audio = replace(audio, enabled=False)
 
 ## Key Constraints
 
-### LTX-2 Frame Requirements
+### AIPROD Frame Requirements
 
 Frames must satisfy `frames % 8 == 1`:
 - ✅ Valid: 1, 9, 17, 25, 33, 41, 49, 57, 65, 73, 81, 89, 97, 121
@@ -323,13 +323,13 @@ Width and height must be divisible by 32.
 - Linux required (uses `triton` which is Linux-only)
 - CUDA GPU with 24GB+ VRAM recommended
 
-## Reference: ltx-core Key Components
+## Reference: AIPROD-core Key Components
 
 ```
-packages/ltx-core/src/ltx_core/
+packages/AIPROD-core/src/AIPROD_core/
 ├── model/
 │   ├── transformer/
-│   │   ├── model.py              # LTXModel
+│   │   ├── model.py              # AIPRODModel
 │   │   ├── modality.py           # Modality dataclass
 │   │   └── transformer.py        # BasicAVTransformerBlock
 │   ├── video_vae/
@@ -341,7 +341,7 @@ packages/ltx-core/src/ltx_core/
 │       └── encoders/av_encoder.py  # AVGemmaTextEncoderModel
 ├── pipeline/
 │   ├── components/
-│   │   ├── schedulers.py         # LTX2Scheduler
+│   │   ├── schedulers.py         # AIPROD2Scheduler
 │   │   ├── diffusion_steps.py    # EulerDiffusionStep
 │   │   ├── guiders.py            # CFGGuider
 │   │   └── patchifiers.py        # VideoLatentPatchifier, AudioPatchifier

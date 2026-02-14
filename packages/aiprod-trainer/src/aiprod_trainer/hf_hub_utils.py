@@ -9,10 +9,10 @@ from huggingface_hub.utils import are_progress_bars_disabled, disable_progress_b
 from rich.progress import Progress, SpinnerColumn, TextColumn
 
 from aiprod_trainer import logger
-from aiprod_trainer.config import LtxTrainerConfig
+from aiprod_trainer.config import AIPRODTrainerConfig
 
 
-def push_to_hub(weights_path: Path, sampled_videos_paths: List[Path], config: LtxTrainerConfig) -> None:
+def push_to_hub(weights_path: Path, sampled_videos_paths: List[Path], config: AIPRODTrainerConfig) -> None:
     """Push the trained LoRA weights to HuggingFace Hub."""
     if not config.hub.hub_model_id:
         logger.warning("⚠️ HuggingFace hub_model_id not specified, skipping push to hub")
@@ -109,7 +109,7 @@ def convert_video_to_gif(video_path: Path, output_path: Path) -> None:
 def _create_model_card(
     output_dir: Union[str, Path],
     videos: List[Path],
-    config: LtxTrainerConfig,
+    config: AIPRODTrainerConfig,
 ) -> Path:
     """Generate and save a model card for the trained model."""
 

@@ -1,5 +1,5 @@
 # =============================================================================
-# LTX-2 Video-to-Video (IC-LoRA) Training Configuration
+# AIPROD-2 Video-to-Video (IC-LoRA) Training Configuration
 # =============================================================================
 #
 # This configuration is for training In-Context LoRA (IC-LoRA) adapters that
@@ -25,12 +25,12 @@
 # -----------------------------------------------------------------------------
 # Specifies the base model to fine-tune and the training mode.
 model:
-  # Path to the LTX-2 model checkpoint (.safetensors file)
+  # Path to the AIPROD-2 model checkpoint (.safetensors file)
   # This should be a local path to your downloaded model
-  model_path: "path/to/ltx-2-model.safetensors"
+  model_path: "path/to/AIPROD-2-model.safetensors"
 
   # Path to the text encoder model directory
-  # For LTX-2, this is typically the Gemma-based text encoder
+  # For AIPROD-2, this is typically the Gemma-based text encoder
   text_encoder_path: "path/to/gemma-text-encoder"
 
   # Training mode: "lora" for efficient adapter training, "full" for full fine-tuning
@@ -59,7 +59,7 @@ lora:
   dropout: 0.0
 
   # Which transformer modules to apply LoRA to
-  # The LTX-2 transformer has separate attention and FFN blocks for video and audio:
+  # The AIPROD-2 transformer has separate attention and FFN blocks for video and audio:
   #
   # VIDEO MODULES:
   #   - attn1.to_k, attn1.to_q, attn1.to_v, attn1.to_out.0  (video self-attention)
@@ -184,11 +184,11 @@ data:
 # -----------------------------------------------------------------------------
 # Controls validation video generation during training.
 # NOTE: Validation sampling use simplified inference pipelines and prioritizes speed over
-# maximum quality. For production-quality inference, use `packages/ltx-pipelines`.
+# maximum quality. For production-quality inference, use `packages/AIPROD-pipelines`.
 validation:
   # Text prompts for validation video generation
   # Provide prompts representative of your training data
-  # LTX-2 prefers longer, detailed prompts that describe both visual content and audio
+  # AIPROD-2 prefers longer, detailed prompts that describe both visual content and audio
   prompts:
     - "A man in a casual blue jacket walks along a winding path through a lush green park on a bright sunny afternoon. Tall oak trees line the pathway, their leaves rustling gently in the breeze. Dappled sunlight creates shifting patterns on the ground as he strolls at a relaxed pace, occasionally looking up at the scenery around him. The audio captures footsteps on gravel, birds singing in the trees, distant children playing, and the soft whisper of wind through the foliage."
     - "A fluffy orange tabby cat sits perfectly still on a wooden windowsill, its green eyes intently tracking small birds hopping on a branch just outside the glass. The cat's ears twitch and rotate, following every movement. Warm afternoon light illuminates its fur, creating a soft golden glow. Behind the cat, a cozy living room with a bookshelf and houseplants is visible. The audio features gentle purring, occasional soft meows, muffled bird chirps through the window, and quiet ambient room sounds."
@@ -279,7 +279,7 @@ checkpoints:
 # Parameters for the flow matching training objective.
 flow_matching:
   # Timestep sampling mode
-  # "shifted_logit_normal" is recommended for LTX-2 models
+  # "shifted_logit_normal" is recommended for AIPROD-2 models
   timestep_sampling_mode: "shifted_logit_normal"
 
   # Additional parameters for timestep sampling
@@ -306,13 +306,13 @@ wandb:
   enabled: false
 
   # W&B project name
-  project: "ltx-2-trainer"
+  project: "AIPROD-2-trainer"
 
   # W&B username or team (null uses default account)
   entity: null
 
   # Tags to help organize runs
-  tags: [ "ltx2", "ic-lora", "video-to-video" ]
+  tags: [ "AIPROD2", "ic-lora", "video-to-video" ]
 
   # Log validation videos to W&B
   log_validation_videos: true
@@ -326,4 +326,4 @@ wandb:
 seed: 42
 
 # Directory to save outputs (checkpoints, validation videos, logs)
-output_dir: "outputs/ltx2_v2v_ic_lora"
+output_dir: "outputs/AIPROD2_v2v_ic_lora"

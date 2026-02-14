@@ -6,7 +6,7 @@ This script loads latent files saved during preprocessing and decodes them
 back into video clips using the same VAE model.
 Basic usage:
     python scripts/decode_latents.py /path/to/latents/dir /path/to/output \
-        --model-source /path/to/ltx2.safetensors
+        --model-source /path/to/AIPROD2.safetensors
 """
 
 from pathlib import Path
@@ -57,7 +57,7 @@ class LatentsDecoder:
     ):
         """Initialize the decoder with model configuration.
         Args:
-            model_path: Path to LTX-2 checkpoint (.safetensors)
+            model_path: Path to AIPROD checkpoint (.safetensors)
             device: Device to use for computation
             vae_tiling: Whether to enable VAE tiling for larger video resolutions
             with_audio: Whether to load audio VAE for audio decoding
@@ -303,7 +303,7 @@ def main(
     ),
     model_path: str = typer.Option(
         ...,
-        help="Path to LTX-2 checkpoint (.safetensors file)",
+        help="Path to AIPROD checkpoint (.safetensors file)",
     ),
     device: str = typer.Option(
         default="cuda",
@@ -332,13 +332,13 @@ def main(
     Examples:
         # Basic usage
         python scripts/decode_latents.py /path/to/latents /path/to/videos \\
-            --model-path /path/to/ltx2.safetensors
+            --model-path /path/to/AIPROD2.safetensors
         # With VAE tiling for large videos
         python scripts/decode_latents.py /path/to/latents /path/to/videos \\
-            --model-path /path/to/ltx2.safetensors --vae-tiling
+            --model-path /path/to/AIPROD2.safetensors --vae-tiling
         # With audio decoding
         python scripts/decode_latents.py /path/to/latents /path/to/videos \\
-            --model-path /path/to/ltx2.safetensors --with-audio
+            --model-path /path/to/AIPROD2.safetensors --with-audio
     """
     latents_path = Path(latents_dir)
     output_path = Path(output_dir)

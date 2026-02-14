@@ -1,15 +1,15 @@
 """Display utilities for training configuration.
-This module provides formatted console output for LtxTrainerConfig.
+This module provides formatted console output for AIPRODTrainerConfig.
 """
 
 from rich import box
 from rich.console import Console
 from rich.table import Table
 
-from aiprod_trainer.config import LtxTrainerConfig
+from aiprod_trainer.config import AIPRODTrainerConfig
 
 
-def print_config(config: LtxTrainerConfig) -> None:
+def print_config(config: AIPRODTrainerConfig) -> None:
     """Print configuration as a nicely formatted table with sections."""
 
     def fmt(v: object, max_len: int = 55) -> str:

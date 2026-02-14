@@ -7,7 +7,7 @@ using bitsandbytes, which significantly reduces GPU memory usage.
 Example usage:
     from aiprod_trainer.gemma_8bit import load_8bit_gemma
     text_encoder = load_8bit_gemma(
-        checkpoint_path="/path/to/ltx2.safetensors",
+        checkpoint_path="/path/to/AIPROD2.safetensors",
         gemma_model_path="/path/to/gemma",
     )
 """
@@ -29,7 +29,7 @@ from aiprod_core.text_encoders.gemma.encoders.av_encoder import (
     AVGemmaTextEncoderModel,
 )
 from aiprod_core.text_encoders.gemma.feature_extractor import GemmaFeaturesExtractorProjLinear
-from aiprod_core.text_encoders.gemma.tokenizer import LTXVGemmaTokenizer
+from aiprod_core.text_encoders.gemma.tokenizer import AIPRODVGemmaTokenizer
 
 if TYPE_CHECKING:
     from aiprod_core.text_encoders.gemma import AVGemmaTextEncoderModel
@@ -41,12 +41,12 @@ def load_8bit_gemma(
     dtype: torch.dtype = torch.bfloat16,
 ) -> "AVGemmaTextEncoderModel":
     """Load the Gemma text encoder in 8-bit precision using bitsandbytes.
-    This function bypasses ltx-core's standard loading path to enable 8-bit quantization
+    This function bypasses AIPROD-core's standard loading path to enable 8-bit quantization
     via the bitsandbytes library. The Gemma model is loaded with load_in_8bit=True and
     torch_dtype=bfloat16, while the feature extractor and connector weights are loaded
-    from the LTX-2 checkpoint.
+    from the AIPROD checkpoint.
     Args:
-        checkpoint_path: Path to the LTX-2 safetensors checkpoint file
+        checkpoint_path: Path to the AIPROD safetensors checkpoint file
         gemma_model_path: Path to Gemma model directory
         dtype: Data type for non-quantized model weights (feature extractor, connectors)
     Returns:
@@ -77,9 +77,9 @@ def load_8bit_gemma(
         )
 
     # Load tokenizer
-    tokenizer = LTXVGemmaTokenizer(tokenizer_path, 1024)
+    tokenizer = AIPRODVGemmaTokenizer(tokenizer_path, 1024)
 
-    # Load config and weights from the LTX-2 checkpoint
+    # Load config and weights from the AIPROD checkpoint
     loader = SafetensorsModelStateDictLoader()
     config = loader.metadata(str(checkpoint_path))
     sd = loader.load(str(checkpoint_path), sd_ops=AV_GEMMA_TEXT_ENCODER_KEY_OPS)

@@ -1,4 +1,4 @@
-"""Progress tracking for LTX training.
+"""Progress tracking for AIPROD training.
 This module provides a unified progress display for training and validation sampling,
 encapsulating all Rich progress bar logic in one place.
 """

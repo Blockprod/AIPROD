@@ -1,6 +1,6 @@
-# LTX-Core
+# AIPROD-Core
 
-The foundational library for the LTX-2 Audio-Video generation model. This package contains the raw model definitions, component implementations, and loading logic used by `ltx-pipelines` and `ltx-trainer`.
+The foundational library for the AIPROD Audio-Video generation model. This package contains the raw model definitions, component implementations, and loading logic used by `AIPROD-pipelines` and `AIPROD-trainer`.
 
 ## 📦 What's Inside?
 
@@ -8,12 +8,12 @@ The foundational library for the LTX-2 Audio-Video generation model. This packag
 - **`conditioning/`**: Tools for preparing latent states and applying conditioning (image, video, keyframes)
 - **`guidance/`**: Perturbation system for fine-grained control over attention mechanisms
 - **`loader/`**: Utilities for loading weights from `.safetensors`, fusing LoRAs, and managing memory
-- **`model/`**: PyTorch implementations of the LTX-2 Transformer, Video VAE, Audio VAE, Vocoder and Upscaler
+- **`model/`**: PyTorch implementations of the AIPROD Transformer, Video VAE, Audio VAE, Vocoder and Upscaler
 - **`text_encoders/gemma`**: Gemma text encoder implementation with tokenizers, feature extractors, and separate encoders for audio-video and video-only generation
 
 ## 🚀 Quick Start
 
-`ltx-core` provides the building blocks (models, components, and utilities) needed to construct inference flows. For ready-made inference pipelines use [`ltx-pipelines`](../ltx-pipelines/) or [`ltx-trainer`](../ltx-trainer/) for training.
+`AIPROD-core` provides the building blocks (models, components, and utilities) needed to construct inference flows. For ready-made inference pipelines use [`AIPROD-pipelines`](../AIPROD-pipelines/) or [`AIPROD-trainer`](../AIPROD-trainer/) for training.
 
 ## 🔧 Installation
 
@@ -22,45 +22,45 @@ The foundational library for the LTX-2 Audio-Video generation model. This packag
 uv sync --frozen
 
 # Or install as a package
-pip install -e packages/ltx-core
+pip install -e packages/AIPROD-core
 ```
 
 ## Building Blocks Overview
 
-`ltx-core` provides modular components that can be combined to build custom inference flows:
+`AIPROD-core` provides modular components that can be combined to build custom inference flows:
 
 ### Core Models
 
-- **Transformer** ([`model/transformer/`](src/ltx_core/model/transformer/)): The asymmetric dual-stream LTX-2 transformer (14B-parameter video stream, 5B-parameter audio stream) with bidirectional cross-modal attention for joint audio-video processing. Expects inputs in [`Modality`](src/ltx_core/model/transformer/modality.py) format
-- **Video VAE** ([`model/video_vae/`](src/ltx_core/model/video_vae/)): Encodes/decodes video pixels to/from latent space with temporal and spatial compression
-- **Audio VAE** ([`model/audio_vae/`](src/ltx_core/model/audio_vae/)): Encodes/decodes audio spectrograms to/from latent space
-- **Vocoder** ([`model/audio_vae/`](src/ltx_core/model/audio_vae/)): Neural vocoder that converts mel spectrograms to audio waveforms
-- **Text Encoder** ([`text_encoders/`](src/ltx_core/text_encoders/)): Gemma 3-based multilingual encoder with multi-layer feature extraction and thinking tokens that produces separate embeddings for video and audio conditioning
-- **Spatial Upscaler** ([`model/upsampler/`](src/ltx_core/model/upsampler/)): Upsamples latent representations for higher-resolution generation
+- **Transformer** ([`model/transformer/`](src/AIPROD_core/model/transformer/)): The asymmetric dual-stream AIPROD transformer (14B-parameter video stream, 5B-parameter audio stream) with bidirectional cross-modal attention for joint audio-video processing. Expects inputs in [`Modality`](src/AIPROD_core/model/transformer/modality.py) format
+- **Video VAE** ([`model/video_vae/`](src/AIPROD_core/model/video_vae/)): Encodes/decodes video pixels to/from latent space with temporal and spatial compression
+- **Audio VAE** ([`model/audio_vae/`](src/AIPROD_core/model/audio_vae/)): Encodes/decodes audio spectrograms to/from latent space
+- **Vocoder** ([`model/audio_vae/`](src/AIPROD_core/model/audio_vae/)): Neural vocoder that converts mel spectrograms to audio waveforms
+- **Text Encoder** ([`text_encoders/`](src/AIPROD_core/text_encoders/)): Gemma 3-based multilingual encoder with multi-layer feature extraction and thinking tokens that produces separate embeddings for video and audio conditioning
+- **Spatial Upscaler** ([`model/upsampler/`](src/AIPROD_core/model/upsampler/)): Upsamples latent representations for higher-resolution generation
 
 ### Diffusion Components
 
-- **Schedulers** ([`components/schedulers.py`](src/ltx_core/components/schedulers.py)): Noise schedules (LTX2Scheduler, LinearQuadratic, Beta) that control the denoising process
-- **Guiders** ([`components/guiders.py`](src/ltx_core/components/guiders.py)): Guidance strategies (CFG, STG, APG) for controlling generation quality and adherence to prompts
-- **Noisers** ([`components/noisers.py`](src/ltx_core/components/noisers.py)): Add noise to latents according to the diffusion schedule
-- **Patchifiers** ([`components/patchifiers.py`](src/ltx_core/components/patchifiers.py)): Convert between spatial latents `[B, C, F, H, W]` and sequence format `[B, seq_len, dim]` for transformer processing
+- **Schedulers** ([`components/schedulers.py`](src/AIPROD_core/components/schedulers.py)): Noise schedules (AIPROD2Scheduler, LinearQuadratic, Beta) that control the denoising process
+- **Guiders** ([`components/guiders.py`](src/AIPROD_core/components/guiders.py)): Guidance strategies (CFG, STG, APG) for controlling generation quality and adherence to prompts
+- **Noisers** ([`components/noisers.py`](src/AIPROD_core/components/noisers.py)): Add noise to latents according to the diffusion schedule
+- **Patchifiers** ([`components/patchifiers.py`](src/AIPROD_core/components/patchifiers.py)): Convert between spatial latents `[B, C, F, H, W]` and sequence format `[B, seq_len, dim]` for transformer processing
 
 ### Conditioning & Control
 
-- **Conditioning** ([`conditioning/`](src/ltx_core/conditioning/)): Tools for preparing and applying various conditioning types (image, video, keyframes)
-- **Guidance** ([`guidance/`](src/ltx_core/guidance/)): Perturbation system for fine-grained control over attention mechanisms (e.g., skipping specific attention layers)
+- **Conditioning** ([`conditioning/`](src/AIPROD_core/conditioning/)): Tools for preparing and applying various conditioning types (image, video, keyframes)
+- **Guidance** ([`guidance/`](src/AIPROD_core/guidance/)): Perturbation system for fine-grained control over attention mechanisms (e.g., skipping specific attention layers)
 
 ### Utilities
 
-- **Loader** ([`loader/`](src/ltx_core/loader/)): Model loading from `.safetensors`, LoRA fusion, weight remapping, and memory management
+- **Loader** ([`loader/`](src/AIPROD_core/loader/)): Model loading from `.safetensors`, LoRA fusion, weight remapping, and memory management
 
-For complete, production-ready pipeline implementations that combine these building blocks, see the [`ltx-pipelines`](../ltx-pipelines/) package.
+For complete, production-ready pipeline implementations that combine these building blocks, see the [`AIPROD-pipelines`](../AIPROD-pipelines/) package.
 
 ---
 
 # Architecture Overview
 
-This section provides a deep dive into the internal architecture of the LTX-2 Audio-Video generation model.
+This section provides a deep dive into the internal architecture of the AIPROD Audio-Video generation model.
 
 ## Table of Contents
 
@@ -76,7 +76,7 @@ This section provides a deep dive into the internal architecture of the LTX-2 Au
 
 ## High-Level Architecture
 
-LTX-2 is an **asymmetric dual-stream diffusion transformer** that jointly models the text-conditioned distribution of video and audio signals, capturing true joint dependencies (unlike sequential T2V→V2A pipelines).
+AIPROD is an **asymmetric dual-stream diffusion transformer** that jointly models the text-conditioned distribution of video and audio signals, capturing true joint dependencies (unlike sequential T2V→V2A pipelines).
 
 ### Key Design Principles
 
@@ -95,7 +95,7 @@ LTX-2 is an **asymmetric dual-stream diffusion transformer** that jointly models
 └─────────────────────────────────────────────────────────────┘
                             ↓
 ┌─────────────────────────────────────────────────────────────┐
-│     LTX-2 ASYMMETRIC DUAL-STREAM TRANSFORMER (48 Blocks)    │
+│     AIPROD ASYMMETRIC DUAL-STREAM TRANSFORMER (48 Blocks)    │
 │                                                             │
 │  ┌──────────────────────┐      ┌──────────────────────┐     │
 │  │  Video Stream (14B)  │      │  Audio Stream (5B)   │     │
@@ -126,17 +126,17 @@ LTX-2 is an **asymmetric dual-stream diffusion transformer** that jointly models
 
 ## The Transformer
 
-The core of LTX-2 is an **asymmetric dual-stream diffusion transformer** with 48 layers that processes both video and audio tokens simultaneously. The architecture allocates 14B parameters to the video stream and 5B parameters to the audio stream, reflecting the different information densities of the two modalities.
+The core of AIPROD is an **asymmetric dual-stream diffusion transformer** with 48 layers that processes both video and audio tokens simultaneously. The architecture allocates 14B parameters to the video stream and 5B parameters to the audio stream, reflecting the different information densities of the two modalities.
 
 ### Model Structure
 
-**Source**: [`src/ltx_core/model/transformer/model.py`](src/ltx_core/model/transformer/model.py)
+**Source**: [`src/AIPROD_core/model/transformer/model.py`](src/AIPROD_core/model/transformer/model.py)
 
-The `LTXModel` class implements the transformer. It supports both video-only and audio-video generation modes. For actual usage, see the [`ltx-pipelines`](../ltx-pipelines/) package which handles model loading and initialization.
+The `AIPRODModel` class implements the transformer. It supports both video-only and audio-video generation modes. For actual usage, see the [`AIPROD-pipelines`](../AIPROD-pipelines/) package which handles model loading and initialization.
 
 ### Transformer Block Architecture
 
-**Source**: [`src/ltx_core/model/transformer/transformer.py`](src/ltx_core/model/transformer/transformer.py)
+**Source**: [`src/AIPROD_core/model/transformer/transformer.py`](src/AIPROD_core/model/transformer/transformer.py)
 
 Each dual-stream block performs four operations sequentially:
 
@@ -170,7 +170,7 @@ Bidirectional cross-attention enables tight temporal alignment: video and audio 
 
 ### Perturbations
 
-The transformer supports [**perturbations**](src/ltx_core/guidance/perturbations.py) that selectively skip attention operations.
+The transformer supports [**perturbations**](src/AIPROD_core/guidance/perturbations.py) that selectively skip attention operations.
 
 Perturbations allow you to disable specific attention mechanisms during inference, which is useful for guidance techniques like STG (Spatio-Temporal Guidance).
 
@@ -181,13 +181,13 @@ Perturbations allow you to disable specific attention mechanisms during inferenc
 - `SKIP_A2V_CROSS_ATTN`: Skip audio-to-video cross-attention
 - `SKIP_V2A_CROSS_ATTN`: Skip video-to-audio cross-attention
 
-Perturbations are used internally by guidance mechanisms like STG (Spatio-Temporal Guidance). For usage examples, see the [`ltx-pipelines`](../ltx-pipelines/) package.
+Perturbations are used internally by guidance mechanisms like STG (Spatio-Temporal Guidance). For usage examples, see the [`AIPROD-pipelines`](../AIPROD-pipelines/) package.
 
 ---
 
 ## Video VAE
 
-The Video VAE ([`src/ltx_core/model/video_vae/`](src/ltx_core/model/video_vae/)) encodes video pixels into latent representations and decodes them back.
+The Video VAE ([`src/AIPROD_core/model/video_vae/`](src/AIPROD_core/model/video_vae/)) encodes video pixels into latent representations and decodes them back.
 
 ### Architecture
 
@@ -198,13 +198,13 @@ The Video VAE ([`src/ltx_core/model/video_vae/`](src/ltx_core/model/video_vae/))
   - Where `F' = 1 + (F-1)*8`
   - Example: `[B, 128, 5, 16, 16]` → `[B, 3, 33, 512, 512]`
 
-The Video VAE is used internally by pipelines for encoding video pixels to latents and decoding latents back to pixels. For usage examples, see the [`ltx-pipelines`](../ltx-pipelines/) package.
+The Video VAE is used internally by pipelines for encoding video pixels to latents and decoding latents back to pixels. For usage examples, see the [`AIPROD-pipelines`](../AIPROD-pipelines/) package.
 
 ---
 
 ## Audio VAE
 
-The Audio VAE ([`src/ltx_core/model/audio_vae/`](src/ltx_core/model/audio_vae/)) processes audio spectrograms.
+The Audio VAE ([`src/AIPROD_core/model/audio_vae/`](src/AIPROD_core/model/audio_vae/)) processes audio spectrograms.
 
 ### Audio VAE Architecture
 
@@ -219,20 +219,20 @@ Compact neural audio representation optimized for diffusion-based training. Nati
 - Temporal: 4× (time steps)
 - Frequency: Variable (input mel_bins → fixed 16 in latent space)
 
-The Audio VAE is used internally by pipelines for encoding mel spectrograms to latents and decoding latents back to mel spectrograms. The vocoder converts mel spectrograms to audio waveforms. For usage examples, see the [`ltx-pipelines`](../ltx-pipelines/) package.
+The Audio VAE is used internally by pipelines for encoding mel spectrograms to latents and decoding latents back to mel spectrograms. The vocoder converts mel spectrograms to audio waveforms. For usage examples, see the [`AIPROD-pipelines`](../AIPROD-pipelines/) package.
 
 ---
 
 ## Text Encoding (Gemma)
 
-LTX-2 uses **Gemma 3** (Gemma 3-12B) as the multilingual text encoder backbone, located in [`src/ltx_core/text_encoders/gemma/`](src/ltx_core/text_encoders/gemma/). Advanced text understanding is critical not only for global language support but for the phonetic and semantic accuracy of generated speech.
+AIPROD uses **Gemma 3** (Gemma 3-12B) as the multilingual text encoder backbone, located in [`src/AIPROD_core/text_encoders/gemma/`](src/AIPROD_core/text_encoders/gemma/). Advanced text understanding is critical not only for global language support but for the phonetic and semantic accuracy of generated speech.
 
 ### Text Encoder Architecture
 
 The text conditioning pipeline consists of three stages:
 
 1. **Gemma 3 Backbone**: Decoder-only LLM processes text tokens → embeddings across all layers `[B, T, D, L]`
-2. **Multi-Layer Feature Extractor**: Aggregates features from all decoder layers (not just final layer), applies mean-centered scaling, flattens to `[B, T, D×L]`, and projects via learnable matrix W (jointly optimized with LTX-2, LLM weights frozen)
+2. **Multi-Layer Feature Extractor**: Aggregates features from all decoder layers (not just final layer), applies mean-centered scaling, flattens to `[B, T, D×L]`, and projects via learnable matrix W (jointly optimized with AIPROD, LLM weights frozen)
 3. **Text Connector**: Bidirectional transformer blocks with learnable registers (replacing padded positions, also referred to as "thinking tokens" in the paper) for contextual mixing. Separate connectors for video and audio streams (`Embeddings1DConnector`)
 
 **Encoders**:
@@ -244,8 +244,8 @@ The text conditioning pipeline consists of three stages:
 
 System prompts are also used to enhance user's prompts.
 
-- **Text-to-Video**: [`gemma_t2v_system_prompt.txt`](src/ltx_core/text_encoders/gemma/encoders/prompts/gemma_t2v_system_prompt.txt)
-- **Image-to-Video**: [`gemma_i2v_system_prompt.txt`](src/ltx_core/text_encoders/gemma/encoders/prompts/gemma_i2v_system_prompt.txt)
+- **Text-to-Video**: [`gemma_t2v_system_prompt.txt`](src/AIPROD_core/text_encoders/gemma/encoders/prompts/gemma_t2v_system_prompt.txt)
+- **Image-to-Video**: [`gemma_i2v_system_prompt.txt`](src/AIPROD_core/text_encoders/gemma/encoders/prompts/gemma_i2v_system_prompt.txt)
 
 **Important**: Video and audio receive **different** context embeddings, even from the same prompt. This allows better modality-specific conditioning and enables the model to synthesize speech that is synchronized with visual lip movement while being natural in cadence, accent, and emotional tone.
 
@@ -254,15 +254,15 @@ System prompts are also used to enhance user's prompts.
 - Video context: `[B, seq_len, 4096]` - Video-specific text embeddings
 - Audio context: `[B, seq_len, 2048]` - Audio-specific text embeddings
 
-The text encoder is used internally by pipelines. For usage examples, see the [`ltx-pipelines`](../ltx-pipelines/) package.
+The text encoder is used internally by pipelines. For usage examples, see the [`AIPROD-pipelines`](../AIPROD-pipelines/) package.
 
 ---
 
 ## Upscaler
 
-The Upscaler ([`src/ltx_core/model/upsampler/`](src/ltx_core/model/upsampler/)) upsamples latent representations for higher-resolution output.
+The Upscaler ([`src/AIPROD_core/model/upsampler/`](src/AIPROD_core/model/upsampler/)) upsamples latent representations for higher-resolution output.
 
-The spatial upsampler is used internally by two-stage pipelines (e.g., [`TI2VidTwoStagesPipeline`](../ltx-pipelines/src/ltx_pipelines/ti2vid_two_stages.py), [`ICLoraPipeline`](../ltx-pipelines/src/ltx_pipelines/ic_lora.py)) to upsample low-resolution latents before final VAE decoding. For usage examples, see the [`ltx-pipelines`](../ltx-pipelines/) package.
+The spatial upsampler is used internally by two-stage pipelines (e.g., [`TI2VidTwoStagesPipeline`](../AIPROD-pipelines/src/AIPROD_pipelines/ti2vid_two_stages.py), [`ICLoraPipeline`](../AIPROD-pipelines/src/AIPROD_pipelines/ic_lora.py)) to upsample low-resolution latents before final VAE decoding. For usage examples, see the [`AIPROD-pipelines`](../AIPROD-pipelines/) package.
 
 ---
 
@@ -270,7 +270,7 @@ The spatial upsampler is used internally by two-stage pipelines (e.g., [`TI2VidT
 
 ### Complete Generation Pipeline
 
-Here's how all the components work together conceptually ([`src/ltx_core/components/`](src/ltx_core/components/)):
+Here's how all the components work together conceptually ([`src/AIPROD_core/components/`](src/AIPROD_core/components/)):
 
 **Pipeline Steps**:
 
@@ -286,14 +286,14 @@ Here's how all the components work together conceptually ([`src/ltx_core/compone
 6. **Unpatchification**: Convert sequence back to spatial format
 7. **VAE Decoding**: Decode latents to pixel space (with optional upsampling for two-stage)
 
-- [`TI2VidTwoStagesPipeline`](../ltx-pipelines/src/ltx_pipelines/ti2vid_two_stages.py) - Two-stage text-to-video (recommended)
-- [`ICLoraPipeline`](../ltx-pipelines/src/ltx_pipelines/ic_lora.py) - Video-to-video with IC-LoRA control
-- [`DistilledPipeline`](../ltx-pipelines/src/ltx_pipelines/distilled.py) - Fast inference with distilled model
-- [`KeyframeInterpolationPipeline`](../ltx-pipelines/src/ltx_pipelines/keyframe_interpolation.py) - Keyframe-based interpolation
+- [`TI2VidTwoStagesPipeline`](../AIPROD-pipelines/src/AIPROD_pipelines/ti2vid_two_stages.py) - Two-stage text-to-video (recommended)
+- [`ICLoraPipeline`](../AIPROD-pipelines/src/AIPROD_pipelines/ic_lora.py) - Video-to-video with IC-LoRA control
+- [`DistilledPipeline`](../AIPROD-pipelines/src/AIPROD_pipelines/distilled.py) - Fast inference with distilled model
+- [`KeyframeInterpolationPipeline`](../AIPROD-pipelines/src/AIPROD_pipelines/keyframe_interpolation.py) - Keyframe-based interpolation
 
-See the [ltx-pipelines README](../ltx-pipelines/README.md) for usage examples.
+See the [AIPROD-pipelines README](../AIPROD-pipelines/README.md) for usage examples.
 
 ## 🔗 Related Projects
 
-- **[ltx-pipelines](../ltx-pipelines/)** - High-level pipeline implementations for text-to-video, image-to-video, and video-to-video
-- **[ltx-trainer](../ltx-trainer/)** - Training and fine-tuning tools
+- **[AIPROD-pipelines](../AIPROD-pipelines/)** - High-level pipeline implementations for text-to-video, image-to-video, and video-to-video
+- **[AIPROD-trainer](../AIPROD-trainer/)** - Training and fine-tuning tools

@@ -86,4 +86,4 @@ ignore = [
 [tool.ruff.lint.pylint]
 max-args = 10
 [tool.ruff.lint.isort]
-known-first-party = ["ltx_trainer", "ltx_core", "ltx_pipelines"]
+known-first-party = ["AIPROD_trainer", "AIPROD_core", "AIPROD_pipelines"]
