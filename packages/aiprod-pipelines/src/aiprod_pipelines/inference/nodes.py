@@ -102,12 +102,22 @@ class TextEncodeNode(GraphNode):
         }
     
     def _encode_single(self, text: str, dtype: torch.dtype) -> torch.Tensor:
-        """Encode single text string to embeddings."""
-        # Mock implementation - replace with actual encoder
-        # In reality: tokenize → pass through Gemma 3 → return embeddings
-        hidden_dim = getattr(self.text_encoder, "hidden_size", 4096)
-        seq_len = min(len(text.split()), self.max_length)
-        return torch.randn(1, seq_len, hidden_dim, dtype=dtype, device=self.device)
+        """Encode single text string to embeddings via text_encoder."""
+        # Tokenise & encode through the model
+        if hasattr(self.text_encoder, "tokenize"):
+            tokens = self.text_encoder.tokenize(
+                text, max_length=self.max_length, device=self.device,
+            )
+        else:
+            # Fallback: build a simple token tensor from whitespace split
+            words = text.split()[:self.max_length]
+            tokens = torch.zeros(1, len(words), dtype=torch.long, device=self.device)
+
+        # Forward through encoder
+        with torch.no_grad():
+            embeddings = self.text_encoder(tokens)  # expected: [1, seq, hidden]
+
+        return embeddings.to(dtype=dtype)
 
 
 class DenoiseNode(GraphNode):
@@ -195,10 +205,18 @@ class DenoiseNode(GraphNode):
         t: torch.Tensor,
         guidance_scale: float,
     ) -> torch.Tensor:
-        """Single denoising step with CFG."""
-        # Mock implementation
-        # In reality: split embeddings for CFG, run model, compute weighted average
-        return torch.randn_like(latents)
+        """Single denoising step with classifier-free guidance."""
+        # Duplicate latents for unconditional + conditional
+        latent_input = torch.cat([latents, latents], dim=0)
+
+        with torch.no_grad():
+            noise_pred = self.model(latent_input, t, encoder_hidden_states=embeddings)
+
+        # Split predictions & apply CFG
+        noise_uncond, noise_cond = noise_pred.chunk(2, dim=0)
+        noise_pred = noise_uncond + guidance_scale * (noise_cond - noise_uncond)
+
+        return noise_pred
 
 
 class UpsampleNode(GraphNode):
@@ -256,11 +274,24 @@ class UpsampleNode(GraphNode):
         return {"latents_upsampled": latents_up}
     
     def _upsample(self, latents: torch.Tensor) -> torch.Tensor:
-        """Perform 2x upsampling."""
-        # Mock implementation
-        # In reality: use interpolate + learned refinement
+        """Perform 2x upsampling with interpolation + learned refinement."""
         b, c, f, h, w = latents.shape
-        return torch.randn(b, c, f, h * self.scale_factor, w * self.scale_factor, device=latents.device)
+        # Bilinear interpolation per frame
+        frames = []
+        for fi in range(f):
+            frame = latents[:, :, fi, :, :]  # [B, C, H, W]
+            up = torch.nn.functional.interpolate(
+                frame, scale_factor=self.scale_factor, mode="bilinear", align_corners=False,
+            )
+            frames.append(up)
+        upsampled = torch.stack(frames, dim=2)  # [B, C, F, H*s, W*s]
+
+        # Learned refinement (if model available)
+        if self.upsampler is not None:
+            with torch.no_grad():
+                upsampled = self.upsampler(upsampled)
+
+        return upsampled
 
 
 class DecodeVideoNode(GraphNode):
@@ -324,11 +355,43 @@ class DecodeVideoNode(GraphNode):
     
     def _decode_tiled(self, latents: torch.Tensor) -> torch.Tensor:
         """Decode latents with tiling for memory efficiency."""
-        # Mock implementation
-        # In reality: split into tiles, decode each, merge with smooth blending
         b, c, f, h, w = latents.shape
-        # Assuming 8x upsampling in spatial dims
-        return torch.randn(b, f, h * 8, w * 8, 3, device=latents.device, dtype=torch.uint8)
+        tile = self.tile_size
+        overlap = tile // 4  # 25 % overlap for blending
+        stride = tile - overlap
+
+        # Decode full if small enough
+        if h <= tile and w <= tile:
+            with torch.no_grad():
+                return self.vae_decoder(latents)
+
+        # Tiled decoding
+        # Output spatial dims (VAE typically 8x)
+        out_h, out_w = h * 8, w * 8
+        out_tile = tile * 8
+        out_stride = stride * 8
+        out_overlap = overlap * 8
+
+        output = torch.zeros(b, f, out_h, out_w, 3, device=latents.device)
+        weight = torch.zeros(b, 1, 1, out_h, out_w, device=latents.device)
+
+        for y0 in range(0, h, stride):
+            for x0 in range(0, w, stride):
+                y1 = min(y0 + tile, h)
+                x1 = min(x0 + tile, w)
+                tile_latents = latents[:, :, :, y0:y1, x0:x1]
+                with torch.no_grad():
+                    decoded = self.vae_decoder(tile_latents)  # [B, F, H', W', 3]
+                oy0, ox0 = y0 * 8, x0 * 8
+                dh, dw = decoded.shape[2], decoded.shape[3]
+                output[:, :, oy0:oy0 + dh, ox0:ox0 + dw, :] += decoded
+                weight[:, :, :, oy0:oy0 + dh, ox0:ox0 + dw] += 1.0
+
+        # Average overlapping regions
+        weight = weight.clamp(min=1.0)
+        output = output / weight.squeeze(1).unsqueeze(-1)
+
+        return output
 
 
 class AudioEncodeNode(GraphNode):
@@ -379,12 +442,20 @@ class AudioEncodeNode(GraphNode):
         
         if not audio_prompt:
             # Return silent embeddings
-            return {"audio_embeddings": torch.zeros(1, 512, device=self.device)}
-        
-        # Mock implementation
-        embeddings = torch.randn(1, 512, device=self.device)
-        
-        return {"audio_embeddings": embeddings}
+            emb_dim = getattr(self.audio_encoder, "embedding_dim", 512)
+            return {"audio_embeddings": torch.zeros(1, emb_dim, device=self.device)}
+
+        # Encode audio prompt through the model
+        with torch.no_grad():
+            if hasattr(self.audio_encoder, "encode_text"):
+                embeddings = self.audio_encoder.encode_text(audio_prompt)
+            else:
+                embeddings = self.audio_encoder(audio_prompt)
+
+        if embeddings.dim() == 1:
+            embeddings = embeddings.unsqueeze(0)
+
+        return {"audio_embeddings": embeddings.to(device=self.device)}
 
 
 class CleanupNode(GraphNode):

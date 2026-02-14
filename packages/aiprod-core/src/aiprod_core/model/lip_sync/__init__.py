@@ -2,10 +2,11 @@
 # AIPROD Proprietary Software — See LICENSE for terms.
 
 """
-Lip-Sync Module — Audio-Visual Synchronization
+Lip-Sync Module — Audio-Visual Synchronisation
 
-Synchronizes generated speech audio with facial movements
-in the generated video.
-
-TODO: Implement in Phase 2
+Predicts FLAME 52-param facial blend-shapes from audio mel-spectrograms.
 """
+
+from .model import LipSyncModel, LipSyncConfig
+
+__all__ = ["LipSyncModel", "LipSyncConfig"]

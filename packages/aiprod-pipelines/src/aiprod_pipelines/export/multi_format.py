@@ -1,22 +1,32 @@
 """Multi-Format Video Export Engine
 
-Exports video to multiple formats:
-- H.264/H.265 (.mp4, .mkv)
-- ProRes (.mov)
-- DNxHR (.mxf)
-- VP9/AV1 (.webm)
-- EXR sequences
-- DPX sequences
+Exports video to multiple formats via FFmpeg subprocess:
+    H.264/H.265 (.mp4, .mkv) · ProRes (.mov) · DNxHR (.mxf)
+    VP9/AV1 (.webm) · EXR/DPX image sequences
+
+Pipeline:
+    tensor frames → raw pipe → FFmpeg → container
+    tensor audio  → raw PCM   → FFmpeg → muxed output
 """
 
-from dataclasses import dataclass
-from typing import Optional, Dict, List
+from dataclasses import dataclass, field
 from enum import Enum
+from pathlib import Path
+from typing import Callable, Dict, List, Optional
+import os
+import shutil
+import struct
+import subprocess
+import tempfile
+
 import torch
 
 
+# ───────────────────────────────────────────────────────────────────────────
+# Enums & Data classes
+# ───────────────────────────────────────────────────────────────────────────
+
 class VideoCodec(Enum):
-    """Supported video codecs"""
     H264 = "h264"
     H265 = "hevc"
     PRORES_422 = "prores_422"
@@ -28,7 +38,6 @@ class VideoCodec(Enum):
 
 
 class AudioCodec(Enum):
-    """Supported audio codecs"""
     AAC = "aac"
     OPUS = "opus"
     FLAC = "flac"
@@ -40,184 +49,347 @@ class AudioCodec(Enum):
 
 @dataclass
 class ExportProfile:
-    """Video export profile/preset"""
+    """Video export profile / preset."""
     name: str
     video_codec: VideoCodec
     audio_codec: AudioCodec
-    
-    # Video settings
-    resolution: tuple = (1920, 1080)  # (width, height)
+    resolution: tuple = (1920, 1080)
     fps: int = 30
-    bitrate_video: int = 20000  # kbps (20 Mbps for high quality)
-    bitrate_audio: int = 256  # kbps
-    preset: str = "slower"  # x264/x265: ultrafast, superfast, veryfast, faster, fast, medium, slow, slower, veryslow
-    
-    # Color space
-    color_space: str = "rec709"  # rec709, rec2020, dci_p3, aces
-    color_range: str = "full"  # full or limited
-    
-    # HDR (if applicable)
+    bitrate_video: int = 20_000   # kbps
+    bitrate_audio: int = 256      # kbps
+    preset: str = "slower"
+    color_space: str = "rec709"
+    color_range: str = "full"
     hdr_enabled: bool = False
-    hdr_format: Optional[str] = None  # hdr10, dolby_vision, hlg
-    
-    # Container
-    container: str = "mp4"  # mp4, mkv, mov, mxf, webm
+    hdr_format: Optional[str] = None
+    container: str = "mp4"
 
 
 @dataclass
 class ExportConfig:
-    """Global export configuration"""
-    # Profiles for different use cases
-    profiles: Dict[str, ExportProfile] = None
-    
-    # Default settings
+    """Global export configuration."""
+    profiles: Optional[Dict[str, ExportProfile]] = None
     default_profile: str = "web_mp4"
-    temp_directory: str = "/tmp/aiprod_export"
+    temp_directory: str = ""
     use_gpu_encoding: bool = True
     num_workers: int = 4
 
 
+# ───────────────────────────────────────────────────────────────────────────
+# FFmpeg codec / option mapping
+# ───────────────────────────────────────────────────────────────────────────
+
+_FFMPEG_VCODEC = {
+    VideoCodec.H264:        "libx264",
+    VideoCodec.H265:        "libx265",
+    VideoCodec.PRORES_422:  "prores_ks",
+    VideoCodec.PRORES_4444: "prores_ks",
+    VideoCodec.DNxHD:       "dnxhd",
+    VideoCodec.DNxHR:       "dnxhd",
+    VideoCodec.VP9:         "libvpx-vp9",
+    VideoCodec.AV1:         "libaom-av1",
+}
+
+_FFMPEG_ACODEC = {
+    AudioCodec.AAC:          "aac",
+    AudioCodec.OPUS:         "libopus",
+    AudioCodec.FLAC:         "flac",
+    AudioCodec.PCM:          "pcm_s16le",
+    AudioCodec.DOLBY_DIGITAL: "ac3",
+    AudioCodec.DOLBY_DIGITAL_PLUS: "eac3",
+    AudioCodec.ATMOS:        "eac3",
+}
+
+
+def _find_ffmpeg() -> str:
+    """Return path to FFmpeg binary (raises if missing)."""
+    path = shutil.which("ffmpeg")
+    if path is None:
+        raise RuntimeError(
+            "FFmpeg not found on PATH.  Install FFmpeg to enable export."
+        )
+    return path
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# Low-level encoders
+# ───────────────────────────────────────────────────────────────────────────
+
+class VideoEncoder:
+    """Encodes a sequence of tensor frames via FFmpeg raw-pipe."""
+
+    @staticmethod
+    def encode_sequence(
+        video: torch.Tensor,       # [3, H, W, T] float32 0-1
+        output_path: str,
+        codec: VideoCodec = VideoCodec.H264,
+        fps: int = 30,
+        bitrate_kbps: int = 20_000,
+        preset: str = "slower",
+        pix_fmt: str = "yuv420p",
+    ) -> bool:
+        ffmpeg = _find_ffmpeg()
+        _, H, W, T = video.shape
+        lib = _FFMPEG_VCODEC[codec]
+
+        cmd = [
+            ffmpeg, "-y",
+            "-f", "rawvideo",
+            "-pix_fmt", "rgb24",
+            "-s", f"{W}x{H}",
+            "-r", str(fps),
+            "-i", "pipe:0",
+            "-c:v", lib,
+            "-pix_fmt", pix_fmt,
+            "-b:v", f"{bitrate_kbps}k",
+        ]
+
+        # Codec-specific flags
+        if codec in (VideoCodec.H264, VideoCodec.H265):
+            cmd += ["-preset", preset]
+        if codec == VideoCodec.PRORES_422:
+            cmd += ["-profile:v", "2"]          # ProRes 422
+        elif codec == VideoCodec.PRORES_4444:
+            cmd += ["-profile:v", "4"]          # ProRes 4444
+
+        cmd.append(output_path)
+
+        proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        # Feed frames as raw RGB24
+        for t_idx in range(T):
+            frame = video[:, :, :, t_idx]            # [3, H, W]
+            frame_uint8 = (frame.clamp(0, 1) * 255).byte()
+            frame_hwc = frame_uint8.permute(1, 2, 0).contiguous()
+            proc.stdin.write(frame_hwc.numpy().tobytes())
+
+        proc.stdin.close()
+        proc.wait()
+        return proc.returncode == 0
+
+
+class AudioEncoder:
+    """Encodes tensor audio via FFmpeg raw-pipe."""
+
+    @staticmethod
+    def encode(
+        audio: torch.Tensor,       # [C, N] float32, range [-1, 1]
+        output_path: str,
+        codec: AudioCodec = AudioCodec.AAC,
+        sample_rate: int = 48_000,
+        bitrate_kbps: int = 256,
+    ) -> bool:
+        ffmpeg = _find_ffmpeg()
+        C, N = audio.shape
+        lib = _FFMPEG_ACODEC[codec]
+
+        cmd = [
+            ffmpeg, "-y",
+            "-f", "f32le",
+            "-ar", str(sample_rate),
+            "-ac", str(C),
+            "-i", "pipe:0",
+            "-c:a", lib,
+        ]
+        if codec not in (AudioCodec.PCM, AudioCodec.FLAC):
+            cmd += ["-b:a", f"{bitrate_kbps}k"]
+        cmd.append(output_path)
+
+        proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+
+        # Interleave channels: [C, N] → [N, C] → bytes
+        interleaved = audio.T.contiguous()  # [N, C]
+        proc.stdin.write(interleaved.numpy().tobytes())
+
+        proc.stdin.close()
+        proc.wait()
+        return proc.returncode == 0
+
+
+class Muxer:
+    """Multiplexes separate video and audio files into a container."""
+
+    @staticmethod
+    def mux(
+        video_file: str, audio_file: str, output_file: str,
+        container: str = "mp4",
+    ) -> bool:
+        ffmpeg = _find_ffmpeg()
+        cmd = [
+            ffmpeg, "-y",
+            "-i", video_file,
+            "-i", audio_file,
+            "-c", "copy",
+        ]
+        if container == "mp4":
+            cmd += ["-movflags", "+faststart"]
+        cmd.append(output_file)
+        return subprocess.call(cmd, stderr=subprocess.DEVNULL) == 0
+
+
+# ───────────────────────────────────────────────────────────────────────────
+# Export Engine
+# ───────────────────────────────────────────────────────────────────────────
+
 class ExportEngine:
-    """Multi-format video export engine"""
-    
-    # Standard profiles
-    STANDARD_PROFILES = {
+    """Multi-format video export engine."""
+
+    STANDARD_PROFILES: Dict[str, ExportProfile] = {
         "web_mp4": ExportProfile(
             name="web_mp4",
             video_codec=VideoCodec.H264,
             audio_codec=AudioCodec.AAC,
-            resolution=(1920, 1080),
-            fps=30,
-            bitrate_video=8000,  # 8 Mbps for web
-            preset="medium",
+            resolution=(1920, 1080), fps=30,
+            bitrate_video=8_000, preset="medium",
             container="mp4",
         ),
         "streaming_hq": ExportProfile(
             name="streaming_hq",
             video_codec=VideoCodec.H265,
             audio_codec=AudioCodec.AAC,
-            resolution=(3840, 2160),  # 4K
-            fps=30,
-            bitrate_video=25000,  # 25 Mbps
-            preset="slower",
+            resolution=(3840, 2160), fps=30,
+            bitrate_video=25_000, preset="slower",
             container="mp4",
         ),
         "prores_editing": ExportProfile(
             name="prores_editing",
             video_codec=VideoCodec.PRORES_422,
             audio_codec=AudioCodec.PCM,
-            resolution=(1920, 1080),
-            fps=30,
-            bitrate_video=500000,  # Very high for editing
-            preset="fast",
+            resolution=(1920, 1080), fps=30,
+            bitrate_video=500_000, preset="fast",
             container="mov",
         ),
         "dnxhr_mxf": ExportProfile(
             name="dnxhr_mxf",
             video_codec=VideoCodec.DNxHR,
             audio_codec=AudioCodec.PCM,
-            resolution=(1920, 1080),
-            fps=30,
+            resolution=(1920, 1080), fps=30,
             container="mxf",
         ),
         "web_av1": ExportProfile(
             name="web_av1",
             video_codec=VideoCodec.AV1,
             audio_codec=AudioCodec.OPUS,
-            resolution=(1920, 1080),
-            fps=30,
-            bitrate_video=6000,  # 6 Mbps for AV1 (better compression)
-            preset="slower",
+            resolution=(1920, 1080), fps=30,
+            bitrate_video=6_000, preset="slower",
             container="webm",
         ),
     }
-    
+
     def __init__(self, config: Optional[ExportConfig] = None):
         self.config = config or ExportConfig()
         if not self.config.profiles:
-            self.config.profiles = self.STANDARD_PROFILES
-    
+            self.config.profiles = dict(self.STANDARD_PROFILES)
+
+    # ── Main export ────────────────────────────────────────────────────
+
     def export(
         self,
-        video: torch.Tensor,  # [channels, height, width, frames]
-        audio: Optional[torch.Tensor],  # [channels, samples]
+        video: torch.Tensor,                 # [3, H, W, T]
+        audio: Optional[torch.Tensor],       # [C, N]
         output_path: str,
         profile: str = "web_mp4",
-        callback_progress=None,
+        callback_progress: Optional[Callable[[float], None]] = None,
     ) -> bool:
-        """
-        Export video and audio to file
-        
-        Args:
-            video: Video tensor [3, height, width, frames]
-            audio: Audio tensor [2, samples] or [1, samples]
-            output_path: Output file path
-            profile: Export profile name
-            callback_progress: Optional progress callback
-            
-        Returns:
-            success: True if export completed successfully
-        """
+        """Export video (+ optional audio) to *output_path* using *profile*."""
         if profile not in self.config.profiles:
             raise ValueError(f"Unknown profile: {profile}")
-        
-        exp_profile = self.config.profiles[profile]
-        
-        # TODO: Step 2.6
-        # Based on profile:
-        # 1. Start encoder process (libx264, libx265, ProRes encoder, etc.)
-        # 2. Encode video in chunks/frames
-        # 3. Encode audio separately
-        # 4. Mux video + audio into container
-        # 5. Handle metadata/color space tags
-        # 6. Progress reporting via callback
-        
-        raise NotImplementedError(f"Export to {profile} not yet implemented")
-    
+        p = self.config.profiles[profile]
+
+        tmp = self.config.temp_directory or tempfile.mkdtemp(prefix="aiprod_export_")
+        os.makedirs(tmp, exist_ok=True)
+
+        video_tmp = os.path.join(tmp, "video_raw.mkv")
+        audio_tmp = os.path.join(tmp, "audio_raw.mka")
+
+        # 1. Encode video
+        if callback_progress:
+            callback_progress(0.1)
+        ok_v = VideoEncoder.encode_sequence(
+            video, video_tmp,
+            codec=p.video_codec,
+            fps=p.fps,
+            bitrate_kbps=p.bitrate_video,
+            preset=p.preset,
+        )
+        if not ok_v:
+            return False
+
+        if callback_progress:
+            callback_progress(0.6)
+
+        # 2. Encode audio (if present)
+        if audio is not None:
+            ok_a = AudioEncoder.encode(
+                audio, audio_tmp,
+                codec=p.audio_codec,
+                bitrate_kbps=p.bitrate_audio,
+            )
+            if not ok_a:
+                return False
+            if callback_progress:
+                callback_progress(0.8)
+            # 3. Mux
+            ok = Muxer.mux(video_tmp, audio_tmp, output_path, p.container)
+        else:
+            # No audio: just move video
+            shutil.move(video_tmp, output_path)
+            ok = True
+
+        if callback_progress:
+            callback_progress(1.0)
+        return ok
+
+    # ── Image-sequence export ──────────────────────────────────────────
+
     def export_to_sequence(
         self,
         video: torch.Tensor,
         output_dir: str,
-        sequence_format: str = "exr",  # exr or dpx
+        sequence_format: str = "exr",
         bit_depth: int = 16,
     ) -> bool:
-        """
-        Export video to image sequence (EXR or DPX)
-        
-        Args:
-            video: [channels, height, width, frames]
-            output_dir: Output directory
-            sequence_format: "exr" or "dpx"
-            bit_depth: 16 or 32 bit
-            
-        Returns:
-            success: True if all frames written
-        """
-        # TODO: Step 2.6
-        # 1. Create output directory
-        # 2. Loop through frames
-        # 3. Write each frame as ExR or DPX file
-        #    - ExR: Frame 0001.exr, Frame 0002.exr, etc.
-        #    - DPX: frame_00001.dpx, frame_00002.dpx, etc.
-        # 4. Maintain full color info (16-bit or 32-bit float)
-        # 5. Create .mov proxy (optional, for preview)
-        
-        raise NotImplementedError("Image sequence export not yet implemented")
-    
+        """Export each frame as an individual image (EXR/DPX via FFmpeg)."""
+        ffmpeg = _find_ffmpeg()
+        os.makedirs(output_dir, exist_ok=True)
+        _, H, W, T = video.shape
+
+        ext = sequence_format.lower()
+        pattern = os.path.join(output_dir, f"frame_%06d.{ext}")
+
+        pix_fmt = "rgb48le" if bit_depth == 16 else "gbrpf32le"
+        cmd = [
+            ffmpeg, "-y",
+            "-f", "rawvideo",
+            "-pix_fmt", "rgb24",
+            "-s", f"{W}x{H}",
+            "-r", "1",
+            "-i", "pipe:0",
+            "-pix_fmt", pix_fmt,
+            pattern,
+        ]
+
+        proc = subprocess.Popen(cmd, stdin=subprocess.PIPE, stderr=subprocess.PIPE)
+        for t_idx in range(T):
+            frame = video[:, :, :, t_idx]
+            frame_u8 = (frame.clamp(0, 1) * 255).byte().permute(1, 2, 0).contiguous()
+            proc.stdin.write(frame_u8.numpy().tobytes())
+        proc.stdin.close()
+        proc.wait()
+        return proc.returncode == 0
+
+    # ── Profile management ─────────────────────────────────────────────
+
     def add_custom_profile(self, profile: ExportProfile) -> None:
-        """Register a custom export profile"""
         self.config.profiles[profile.name] = profile
-    
+
     def list_profiles(self) -> List[str]:
-        """List all available export profiles"""
         return list(self.config.profiles.keys())
-    
+
     def get_profile_info(self, profile_name: str) -> Dict:
-        """Get detailed info about a profile"""
         profile = self.config.profiles.get(profile_name)
         if not profile:
             return {}
-        
         return {
             "name": profile.name,
             "codec": profile.video_codec.value,
@@ -228,66 +400,3 @@ class ExportEngine:
             "color_space": profile.color_space,
             "hdr": profile.hdr_enabled,
         }
-
-
-class VideoEncoder:
-    """Low-level video encoding (via FFmpeg or similar)"""
-    
-    @staticmethod
-    def encode_frame_to_h264(
-        frame: torch.Tensor,  # [3, height, width] range [0-1]
-        encoder_context,
-    ) -> bytes:
-        """Encode single frame to H.264"""
-        # TODO: Call libx264 encoder
-        raise NotImplementedError()
-    
-    @staticmethod
-    def encode_sequence_hq(
-        video: torch.Tensor,
-        output_path: str,
-        codec: str = "libx265",
-        bitrate: int = 20000,
-        preset: str = "slow",
-    ) -> bool:
-        """Encode entire video sequence with high quality"""
-        # TODO: Use FFmpeg subprocess or similar
-        raise NotImplementedError()
-
-
-class AudioEncoder:
-    """Audio encoding to various formats"""
-    
-    @staticmethod
-    def encode_to_aac(audio: torch.Tensor, output_path: str, bitrate: int = 256) -> bool:
-        """Encode audio to AAC"""
-        # TODO: Use FFmpeg to encode
-        raise NotImplementedError()
-    
-    @staticmethod
-    def encode_to_flac(audio: torch.Tensor, output_path: str) -> bool:
-        """Encode audio to lossless FLAC"""
-        # TODO: Use FFmpeg or libflac
-        raise NotImplementedError()
-
-
-class Muxer:
-    """Multiplexes video and audio into containers"""
-    
-    @staticmethod
-    def mux_mp4(video_file: str, audio_file: str, output_file: str) -> bool:
-        """Mux video and audio into MP4"""
-        # TODO: Use FFmpeg or libmp4v2
-        raise NotImplementedError()
-    
-    @staticmethod
-    def mux_mxf(video_file: str, audio_file: str, output_file: str) -> bool:
-        """Mux into MXF (for broadcast)"""
-        # TODO: Use FFmpeg or libmxf
-        raise NotImplementedError()
-    
-    @staticmethod
-    def mux_webm(video_file: str, audio_file: str, output_file: str) -> bool:
-        """Mux into WebM"""
-        # TODO: Use FFmpeg
-        raise NotImplementedError()
