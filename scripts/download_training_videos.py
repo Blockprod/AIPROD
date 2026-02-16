@@ -46,27 +46,69 @@ app = typer.Typer(
 )
 
 # Diverse query terms for varied training data
+# 50 queries × ~100 vidéos chacune = ~5000 vidéos uniques
 DEFAULT_QUERIES = [
+    # Nature
     "nature landscape",
-    "city timelapse",
-    "ocean waves",
-    "forest walk",
-    "sunset sky",
-    "people walking street",
-    "aerial drone footage",
-    "rain window",
-    "cooking food",
-    "cat dog pet",
-    "flowers blooming",
-    "traffic cars",
-    "snow mountains",
-    "underwater fish",
-    "abstract motion",
-    "studio portrait",
-    "sports action",
-    "fireworks night",
-    "waterfall river",
+    "ocean waves beach",
+    "forest trees walk",
+    "sunset sky golden",
+    "mountain snow peak",
+    "waterfall river stream",
+    "flowers blooming garden",
+    "desert sand dunes",
+    "rain storm lightning",
     "clouds sky timelapse",
+    # Urbain
+    "city timelapse night",
+    "traffic cars highway",
+    "city street people walking",
+    "architecture building modern",
+    "neon lights urban",
+    "construction site crane",
+    # Personnes / actions
+    "people crowd festival",
+    "dance performance stage",
+    "sports action football",
+    "yoga fitness workout",
+    "children playing park",
+    "hands crafting working",
+    # Animaux
+    "cat dog pet cute",
+    "birds flying sky",
+    "underwater fish coral reef",
+    "horse running field",
+    "wildlife safari africa",
+    # Nourriture / quotidien
+    "cooking food kitchen",
+    "coffee shop morning",
+    "fruits vegetables market",
+    # Tech / abstrait
+    "abstract motion graphics",
+    "code technology screen",
+    "robot automation factory",
+    "aerial drone footage city",
+    "aerial drone landscape",
+    # Lumière / atmosphère
+    "fireworks night celebration",
+    "candle flame fire",
+    "studio portrait light",
+    "bokeh lights night",
+    "smoke fog atmospheric",
+    # Véhicules / mouvement
+    "car driving road trip",
+    "train railway journey",
+    "boat sailing ocean",
+    "airplane sky flying",
+    # Saisons / météo
+    "spring cherry blossom",
+    "autumn fall leaves",
+    "winter ice frozen",
+    "summer beach tropical",
+    # Textures / matériaux
+    "water drops splash",
+    "fabric textile pattern",
+    "glass reflection light",
 ]
 
 
@@ -268,37 +310,59 @@ def main(
     search_queries = queries or DEFAULT_QUERIES
 
     # Search for videos
-    console.print(f"\n🔍 Searching Pexels for {num_videos} videos...")
+    console.print(f"\n🔍 Searching Pexels for {num_videos} videos across {len(search_queries)} categories...")
     all_videos = []
-    videos_per_query = max(1, num_videos // len(search_queries)) + 1
+    seen_ids: set[int] = set()
+    # Pages maximum par query : avec 15 résultats/page, 7 pages = ~100 vidéos/query
+    max_pages_per_query = max(3, (num_videos // len(search_queries) // 15) + 2)
+    api_calls = 0
+    api_call_times: list[float] = []
 
-    for query in search_queries:
+    for qi, query in enumerate(search_queries):
         if len(all_videos) >= num_videos:
             break
 
-        page = 1
-        while len(all_videos) < num_videos:
+        query_count = 0
+        for page in range(1, max_pages_per_query + 1):
+            if len(all_videos) >= num_videos:
+                break
+
+            # Rate limiting : max 200 requests/heure
+            now = time.time()
+            api_call_times = [t for t in api_call_times if now - t < 3600]
+            if len(api_call_times) >= 195:
+                wait_time = 3600 - (now - api_call_times[0]) + 5
+                console.print(f"  ⏳ Rate limit approché — pause {wait_time:.0f}s...")
+                time.sleep(wait_time)
+
             results = pexels_search(
                 key,
                 query,
-                per_page=min(videos_per_query, 15),
+                per_page=15,
                 page=page,
                 min_width=resolution,
             )
+            api_calls += 1
+            api_call_times.append(time.time())
+
             if not results:
                 break
 
             for r in results:
-                if r["id"] not in {v["id"] for v in all_videos}:
+                if r["id"] not in seen_ids:
+                    seen_ids.add(r["id"])
                     all_videos.append(r)
+                    query_count += 1
 
-            page += 1
-            time.sleep(0.5)  # Rate limiting (200 req/hour)
+            time.sleep(0.5)  # Respecter le rate-limit
 
             if len(results) < 15:
                 break
 
-        console.print(f"  '{query}': found {len(results)} videos (total: {len(all_videos)})")
+        console.print(
+            f"  [{qi+1}/{len(search_queries)}] '{query}': +{query_count} vidéos "
+            f"(total: {len(all_videos)}, {api_calls} API calls)"
+        )
 
     all_videos = all_videos[:num_videos]
     console.print(f"\n📦 {len(all_videos)} unique videos found")
