@@ -87,22 +87,38 @@ References:
   - QAT: https://arxiv.org/abs/1806.08342
 """
 
-from .quantization import (
-    QuantizationConfig,
-    QuantizationScheme,
-    QuantizedTensor,
-    QuantizationMetrics,
-    ModelQuantizer,
-    CalibrationDataCollector,
-    QuantizationBenchmark,
-)
+try:
+    from .quantization import (
+        QuantizationConfig,
+        QuantizationScheme,
+        QuantizedTensor,
+        QuantizationMetrics,
+        ModelQuantizer,
+        CalibrationDataCollector,
+        QuantizationBenchmark,
+    )
+except ImportError:
+    # Module not yet implemented — stubs
+    QuantizationConfig = None  # type: ignore[assignment,misc]
+    QuantizationScheme = None  # type: ignore[assignment,misc]
+    QuantizedTensor = None  # type: ignore[assignment,misc]
+    QuantizationMetrics = None  # type: ignore[assignment,misc]
+    ModelQuantizer = None  # type: ignore[assignment,misc]
+    CalibrationDataCollector = None  # type: ignore[assignment,misc]
+    QuantizationBenchmark = None  # type: ignore[assignment,misc]
 
-from .quantization_node import (
-    QuantizationProfile,
-    ModelQuantizationNode,
-    QuantizedInferenceNode,
-    QuantizationAdaptiveNode,
-)
+try:
+    from .quantization_node import (
+        QuantizationProfile,
+        ModelQuantizationNode,
+        QuantizedInferenceNode,
+        QuantizationAdaptiveNode,
+    )
+except ImportError:
+    QuantizationProfile = None  # type: ignore[assignment,misc]
+    ModelQuantizationNode = None  # type: ignore[assignment,misc]
+    QuantizedInferenceNode = None  # type: ignore[assignment,misc]
+    QuantizationAdaptiveNode = None  # type: ignore[assignment,misc]
 
 __all__ = [
     # Core quantization

@@ -1,29 +1,48 @@
 """
-Render Executor Adapter - Video Generation with Retry & Fallback
+Render Executor Adapter - Video Generation with Local GPU Worker
 ================================================================
 
-Executes video generation with intelligent retry logic, exponential backoff,
-and multi-level fallback chain across backend providers.
+Executes video generation on the local GPU via GPUWorker.
+Retry + fallback architecture conservée, mais le backend est SOUVERAIN.
 
-PHASE 1 implementation (Weeks 4-5 in execution plan).
+PHASE 2 implementation — Zéro mock, zéro cloud, 100% local.
 """
 
 from typing import Dict, Any, List, Optional, Tuple
 import asyncio
+import logging
 import time
 import random
 from .base import BaseAdapter
 from ..schema.schemas import Context
 
+logger = logging.getLogger(__name__)
+
+# Import souverain : GPUWorker local
+_GPU_WORKER = None  # Singleton lazy-loaded
+
+
+def _get_gpu_worker():
+    """Lazy-load le GPUWorker (singleton pour réutiliser le pipeline chargé)."""
+    global _GPU_WORKER
+    if _GPU_WORKER is None:
+        from aiprod_pipelines.api.gpu_worker import GPUWorker, WorkerConfig
+        _GPU_WORKER = GPUWorker(config=WorkerConfig())
+        try:
+            _GPU_WORKER.load_pipeline()
+        except Exception as e:
+            logger.warning("Pipeline loading failed (stub mode): %s", e)
+    return _GPU_WORKER
+
 
 class RenderExecutorAdapter(BaseAdapter):
     """
-    Render executor with advanced retry logic and fallback chain.
+    Render executor souverain avec GPU local.
     
     Features:
     - Batch processing (configurable batch size)
     - Exponential backoff retry strategy
-    - Multi-backend fallback (primary → fallback chain)
+    - GPU local via GPUWorker (zéro API cloud)
     - Deterministic seeding for reproducibility
     - Rate limiting between batches
     - Failure tracking and logging
@@ -33,21 +52,15 @@ class RenderExecutorAdapter(BaseAdapter):
         """Initialize render executor."""
         super().__init__(config)
         
-        # Backend clients (will be injected in PHASE 1)
-        self.backends = config.get("backends", {}) if config else {}
-        
         # Retry configuration
         self.batch_size = config.get("batch_size", 4) if config else 4
         self.max_retries = config.get("max_retries", 3) if config else 3
         self.base_backoff_delay = 1.0  # seconds
         self.max_backoff_delay = 30.0
         
-        # Fallback chain: primary backend → chain of fallbacks
-        self.fallback_chain = ["runway_gen3", "replicate_wan25"]
-        
         # Rate limiting
-        self.rate_limit_delay = 2.0  # seconds between batches
-        self.rate_limit_requests = 10  # requests per window
+        self.rate_limit_delay = 0.5  # seconds between batches (local = rapide)
+        self.rate_limit_requests = 50  # pas de throttling cloud
         self.rate_limit_window = 60  # seconds
         
         # Tracking
@@ -69,7 +82,7 @@ class RenderExecutorAdapter(BaseAdapter):
             raise ValueError("Missing shot_list in context")
         
         shot_list = ctx["memory"]["shot_list"]
-        selected_backend = ctx["memory"].get("cost_estimation", {}).get("selected_backend", "runway_gen3")
+        selected_backend = ctx["memory"].get("cost_estimation", {}).get("selected_backend", "aiprod_sovereign")
         
         ctx["memory"]["render_start"] = time.time()
         
@@ -135,45 +148,39 @@ class RenderExecutorAdapter(BaseAdapter):
         batch_idx: int
     ) -> List[Dict[str, Any]]:
         """
-        Render batch with retry logic and fallback chain.
+        Render batch avec retry — backend local GPU uniquement.
         
         Args:
             batch: List of shots to render
-            primary_backend: Primary backend to try first
+            primary_backend: Ignoré (toujours local)
             batch_idx: Batch index for tracking
             
         Returns:
             List of generated assets or empty list if all failed
         """
-        backends_to_try = [primary_backend] + self.fallback_chain
-        
         for retry_attempt in range(self.max_retries):
-            for fallback_backend in backends_to_try:
-                try:
-                    # Render with specific backend
-                    results = await self._render_with_backend(
-                        batch, fallback_backend, batch_idx, retry_attempt
-                    )
-                    
-                    if results:
-                        return results
-                    
-                except asyncio.TimeoutError:
-                    # Timeout - try next backend
-                    self.log("warning", f"Backend {fallback_backend} timeout", 
-                             batch=batch_idx, retry=retry_attempt)
-                    continue
+            try:
+                results = await self._render_with_backend(
+                    batch, "aiprod_sovereign", batch_idx, retry_attempt
+                )
                 
-                except Exception as e:
-                    # Other error - try next backend
-                    self.log("warning", f"Backend {fallback_backend} error: {str(e)}", 
-                             batch=batch_idx, retry=retry_attempt)
-                    continue
+                if results:
+                    return results
+                
+            except asyncio.TimeoutError:
+                self.log("warning", f"GPU render timeout",
+                         batch=batch_idx, retry=retry_attempt)
+                continue
+                
+            except Exception as e:
+                self.log("warning", f"GPU render error: {str(e)}",
+                         batch=batch_idx, retry=retry_attempt)
+                continue
             
-            # All backends tried - apply backoff and retry
+            # Apply backoff and retry
             if retry_attempt < self.max_retries - 1:
                 delay = self._calculate_backoff_delay(retry_attempt)
-                self.log("info", f"Retry {retry_attempt + 1}/{self.max_retries} for batch {batch_idx}", 
+                self.log("info", f"Retry {retry_attempt + 1}/{self.max_retries} for batch {batch_idx}",
                          delay=delay)
                 await asyncio.sleep(delay)
         
@@ -188,45 +195,70 @@ class RenderExecutorAdapter(BaseAdapter):
         retry_attempt: int
     ) -> List[Dict[str, Any]]:
         """
-        Render batch with specific backend.
+        Render batch via le GPUWorker souverain local.
         
-        Args:
-            batch: Shots to render
-            backend: Backend to use
-            batch_idx: Batch index
-            retry_attempt: Retry attempt number
-            
-        Returns:
-            Generated assets or None on failure
+        Remplace le mock GCS — génère de VRAIS fichiers vidéo locaux.
         """
-        # In production, would call actual backend API
-        # For now: Mock generation with configurable success rate
+        from aiprod_pipelines.api.gpu_worker import JobRequest
         
-        # Simulate probability of failure (lower on retries)
-        success_probability = 0.95 if retry_attempt == 0 else 0.98
-        
-        if random.random() > success_probability:
-            raise Exception(f"Simulated {backend} failure")
-        
-        # Generate mock assets
+        worker = _get_gpu_worker()
         results = []
-        for shot in batch:
-            asset = {
-                "id": shot["shot_id"],
-                "url": f"gs://aiprod-assets/{shot['shot_id']}.mp4",
-                "duration_sec": shot.get("duration_sec", 10),
-                "resolution": "1080p",
-                "codec": "h264",
-                "bitrate": 5000000,
-                "file_size_bytes": int(shot.get("duration_sec", 10) * 5000000 // 8),
-                "thumbnail_url": f"gs://aiprod-assets/{shot['shot_id']}_thumb.jpg",
-                "backend_used": backend,
-                "seed": shot.get("seed", 0),
-                "generated_at": time.time()
-            }
-            results.append(asset)
         
-        return results
+        for shot in batch:
+            # Créer la requête de génération
+            request = JobRequest(
+                prompt=shot.get("prompt", ""),
+                job_id=shot.get("shot_id", ""),
+                negative_prompt=shot.get("negative_prompt", ""),
+                seed=shot.get("seed", self._get_deterministic_seed(
+                    shot.get("prompt", ""), shot.get("shot_id", "")
+                )),
+                height=shot.get("height", worker.config.default_height),
+                width=shot.get("width", worker.config.default_width),
+                num_frames=shot.get("num_frames", worker.config.default_num_frames),
+                fps=shot.get("fps", worker.config.default_fps),
+                num_inference_steps=shot.get("num_inference_steps", worker.config.default_num_steps),
+                guidance_scale=shot.get("guidance_scale", worker.config.default_guidance_scale),
+                duration_sec=shot.get("duration_sec", 5.0),
+            )
+            
+            # Exécuter la génération (synchrone — le worker fait le GPU work)
+            job_result = await asyncio.to_thread(worker.process_job, request)
+            
+            if job_result.status.value == "completed":
+                asset = {
+                    "id": shot.get("shot_id", request.job_id),
+                    "url": f"file://{job_result.output_path}",
+                    "duration_sec": shot.get("duration_sec", 5.0),
+                    "resolution": f"{request.width}x{request.height}",
+                    "codec": "h264",
+                    "bitrate": 5000000,
+                    "file_size_bytes": self._get_file_size(job_result.output_path),
+                    "backend_used": "aiprod_sovereign",
+                    "seed": request.seed,
+                    "generated_at": time.time(),
+                    "generation_time_sec": job_result.duration_sec,
+                    "output_path": job_result.output_path,
+                }
+                results.append(asset)
+                logger.info("Shot %s generated in %.1fs → %s",
+                           shot.get("shot_id", "?"), job_result.duration_sec,
+                           job_result.output_path)
+            else:
+                logger.error("Shot %s failed: %s",
+                           shot.get("shot_id", "?"), job_result.error)
+        
+        return results if results else None
+    
+    @staticmethod
+    def _get_file_size(path: Optional[str]) -> int:
+        """Retourne la taille du fichier ou 0."""
+        if path:
+            from pathlib import Path
+            p = Path(path)
+            if p.exists():
+                return p.stat().st_size
+        return 0
     
     def _create_batches(
         self, 

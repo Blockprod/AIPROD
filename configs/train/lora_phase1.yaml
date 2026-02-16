@@ -1,0 +1,91 @@
+# ============================================================================
+# AIPROD Sovereign — LoRA Fine-tuning Phase 3.1.1
+# ============================================================================
+# Target : Adapter le transformer LTX-2 SHDT aux cas AIPROD
+# GPU    : 1× A100 80GB (ou 2× 40GB via accelerate)
+# Durée  : ~48-72h
+# Output : checkpoints/aiprod_lora_v1/adapter_model.safetensors (~50-200MB)
+# ============================================================================
+
+model:
+  model_path: "models/ltx2_research/ltx-2-19b-dev-fp8.safetensors"
+  text_encoder_path: "models/aiprod-sovereign/aiprod-text-encoder-v1"
+  training_mode: "lora"
+  load_checkpoint: null
+
+lora:
+  rank: 32
+  alpha: 32
+  dropout: 0.0
+  target_modules:
+    - "to_q"
+    - "to_k"
+    - "to_v"
+    - "to_out.0"
+    - "ff.net.0.proj"
+    - "ff.net.2"
+
+training_strategy:
+  name: "text_to_video"
+
+optimization:
+  learning_rate: 1e-5
+  steps: 15000
+  batch_size: 1
+  gradient_accumulation_steps: 8
+  max_grad_norm: 1.0
+  optimizer_type: "adamw"
+  scheduler_type: "cosine"
+  scheduler_params:
+    T_max: 15000
+    eta_min: 1e-7
+  enable_gradient_checkpointing: true
+
+acceleration:
+  mixed_precision_mode: "bf16"
+  quantization: null
+  load_text_encoder_in_8bit: true
+
+data:
+  preprocessed_data_root: "data/preprocessed/lora_phase1"
+  num_dataloader_workers: 4
+
+validation:
+  prompts:
+    - "A cinematic shot of a golden sunset over calm ocean waves, 4K quality"
+    - "A person walking through a misty forest at dawn, volumetric lighting"
+    - "A drone shot flying over a futuristic city at night, neon lights reflecting on wet streets"
+  negative_prompt: "worst quality, inconsistent motion, blurry, jittery, distorted, low resolution"
+  video_dims: [768, 512, 97]
+  frame_rate: 24.0
+  seed: 42
+  inference_steps: 30
+  interval: 500
+  videos_per_prompt: 1
+  guidance_scale: 3.0
+  stg_scale: 1.0
+  stg_blocks: [29]
+  stg_mode: "stg_av"
+  generate_audio: false
+  skip_initial_validation: false
+
+checkpoints:
+  interval: 2500
+  keep_last_n: 3
+  precision: "bfloat16"
+
+hub:
+  push_to_hub: false
+
+flow_matching:
+  timestep_sampling_mode: "shifted_logit_normal"
+  timestep_sampling_params: {}
+
+wandb:
+  enabled: false
+  project: "aiprod-sovereign-lora"
+  tags: ["phase3", "lora", "sovereign"]
+  log_validation_videos: true
+
+seed: 42
+output_dir: "checkpoints/aiprod_lora_v1"

@@ -1,0 +1,61 @@
+# ============================================================================
+# AIPROD Sovereign — Video VAE Fine-tuning Phase 3.2
+# ============================================================================
+# Target : Fine-tuner le Haar Wavelet VAE (HW-VAE)
+# GPU    : 1× A100 80GB
+# Durée  : ~3-5 jours
+# Output : models/aiprod-sovereign/aiprod-hwvae-v1.safetensors (~500MB)
+# ============================================================================
+
+model:
+  type: "video_vae"
+  encoder_channels: [64, 128, 256, 512]
+  latent_dim: 128
+  decoder_channels: [512, 256, 128, 64]
+  use_haar_wavelet: true
+  use_spectral_norm: true
+
+training:
+  epochs: 80
+  batch_size: 2
+  learning_rate: 1e-4
+  weight_decay: 0.01
+  lr_scheduler: "cosine"
+  warmup_steps: 1000
+  gradient_accumulation_steps: 4
+  gradient_checkpointing: true
+  mixed_precision: "bf16"
+  max_grad_norm: 1.0
+
+loss:
+  reconstruction_weight: 1.0
+  perceptual_weight: 0.1
+  spectral_weight: 0.05
+  kl_weight: 0.0001
+  perceptual_model: "vgg16"
+
+data:
+  video_dir: "data/videos"
+  resolution: [512, 512]
+  num_frames: 16
+  frame_rate: 24.0
+  num_workers: 4
+
+validation:
+  interval_epochs: 5
+  num_samples: 4
+  save_reconstructions: true
+
+checkpoints:
+  save_interval_epochs: 10
+  keep_last_n: 3
+
+output:
+  dir: "checkpoints/aiprod_hwvae_v1"
+  final: "models/aiprod-sovereign/aiprod-hwvae-v1.safetensors"
+
+wandb:
+  enabled: false
+  project: "aiprod-sovereign-vae"
+
+seed: 42

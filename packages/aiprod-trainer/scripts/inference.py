@@ -5,23 +5,23 @@ CLI script for running AIPROD video/audio generation inference.
 Usage:
     # Text-to-Video + Audio (default behavior)
     python scripts/inference.py --checkpoint path/to/model.safetensors \
-        --text-encoder-path path/to/gemma \
+        --text-encoder-path path/to/aiprod-text-encoder \
         --prompt "A cat playing with a ball" --output output.mp4
     # Video only (skip audio)
     python scripts/inference.py --checkpoint path/to/model.safetensors \
-        --text-encoder-path path/to/gemma \
+        --text-encoder-path path/to/aiprod-text-encoder \
         --prompt "A cat playing with a ball" --skip-audio --output output.mp4
     # Image-to-Video
     python scripts/inference.py --checkpoint path/to/model.safetensors \
-        --text-encoder-path path/to/gemma \
+        --text-encoder-path path/to/aiprod-text-encoder \
         --prompt "A cat walking" --condition-image first_frame.png --output output.mp4
     # Video-to-Video (IC-LoRA style)
     python scripts/inference.py --checkpoint path/to/model.safetensors \
-        --text-encoder-path path/to/gemma \
+        --text-encoder-path path/to/aiprod-text-encoder \
         --prompt "A cat turning into a dog" --reference-video input.mp4 --output output.mp4
     # With LoRA weights
     python scripts/inference.py --checkpoint path/to/model.safetensors \
-        --text-encoder-path path/to/gemma \
+        --text-encoder-path path/to/aiprod-text-encoder \
         --lora-path path/to/lora.safetensors \
         --prompt "A cat in my custom style" --output output.mp4
 """
@@ -143,7 +143,7 @@ def main() -> None:  # noqa: PLR0912, PLR0915
         "--text-encoder-path",
         type=str,
         required=True,
-        help="Path to Gemma text encoder directory",
+        help="Path to AIPROD text encoder directory",
     )
 
     # LoRA arguments

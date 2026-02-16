@@ -124,7 +124,7 @@ class TensorRTOptimiser(Optimiser):
         try:
             import torch_tensorrt  # type: ignore[import-untyped]
 
-            self._torch_trt = torch_trt
+            self._torch_trt = torch_tensorrt
         except ImportError:
             pass
 
@@ -572,7 +572,7 @@ class INT4Quantiser(Optimiser):
         )
         calibration_data = kwargs.get("calibration_data", [])
         quantised = AutoGPTQForCausalLM.from_pretrained(
-            model, quant_config
+            model, quant_config, local_files_only=True
         )
         if calibration_data:
             quantised.quantize(calibration_data)
@@ -597,7 +597,7 @@ class INT4Quantiser(Optimiser):
             "q_group_size": self._group_size,
             "zero_point": True,
         }
-        quantised = AutoAWQForCausalLM.from_pretrained(model)
+        quantised = AutoAWQForCausalLM.from_pretrained(model, local_files_only=True)
         calibration_data = kwargs.get("calibration_data", [])
         if calibration_data:
             quantised.quantize(calibration_data, quant_config=quant_config)

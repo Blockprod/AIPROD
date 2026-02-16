@@ -72,7 +72,9 @@ class TestWebhookPayload(unittest.TestCase):
 
         payload = WebhookPayload(
             event="job.completed",
-            data={"job_id": "j1", "status": "done"},
+            job_id="j1",
+            tenant_id="t1",
+            data={"status": "done"},
         )
         sig = payload.sign("mysecret")
         self.assertTrue(sig.startswith("sha256="))
@@ -80,7 +82,7 @@ class TestWebhookPayload(unittest.TestCase):
     def test_to_dict(self):
         from aiprod_pipelines.api.webhooks import WebhookPayload
 
-        payload = WebhookPayload(event="job.completed", data={"x": 1})
+        payload = WebhookPayload(event="job.completed", job_id="j1", tenant_id="t1", data={"x": 1})
         d = payload.to_dict()
         self.assertEqual(d["event"], "job.completed")
         self.assertIn("payload_id", d)
@@ -91,23 +93,23 @@ class TestWebhookManager(unittest.TestCase):
         from aiprod_pipelines.api.webhooks import WebhookManager
 
         mgr = WebhookManager()
-        ep = mgr.register("https://x.com/hook", events=["job.completed"], secret="s")
-        self.assertEqual(len(mgr.list_endpoints()), 1)
-        self.assertEqual(mgr.list_endpoints()[0].url, "https://x.com/hook")
+        ep = mgr.register("t1", "https://x.com/hook", events=["job.completed"], secret="s")
+        self.assertEqual(len(mgr.list_endpoints("t1")), 1)
+        self.assertEqual(mgr.list_endpoints("t1")[0].url, "https://x.com/hook")
 
     def test_unregister(self):
         from aiprod_pipelines.api.webhooks import WebhookManager
 
         mgr = WebhookManager()
-        ep = mgr.register("https://x.com/hook", events=["*"])
+        ep = mgr.register("t1", "https://x.com/hook", events=["*"])
         mgr.unregister(ep.endpoint_id)
-        self.assertEqual(len(mgr.list_endpoints()), 0)
+        self.assertEqual(len(mgr.list_endpoints("t1")), 0)
 
     def test_delivery_audit_trail(self):
         from aiprod_pipelines.api.webhooks import WebhookManager
 
         mgr = WebhookManager()
-        mgr.register("https://x.com/hook", events=["job.completed"])
+        mgr.register("t1", "https://x.com/hook", events=["job.completed"])
         # Audit trail starts empty
         trail = mgr.delivery_log
         self.assertIsInstance(trail, list)
@@ -131,19 +133,19 @@ class TestAIPRODClient(unittest.TestCase):
 
         client = AIPRODClient(api_key="k1")
         headers = client._headers()
-        self.assertIn("Authorization", headers)
-        self.assertEqual(headers["Authorization"], "Bearer k1")
+        self.assertIn("X-API-Key", headers)
+        self.assertEqual(headers["X-API-Key"], "k1")
 
     def test_error_hierarchy(self):
         from aiprod_pipelines.api.sdk import (
             AIPRODError,
-            AuthenticationError,
+            AuthError,
             RateLimitError,
             ValidationError,
             NotFoundError,
         )
 
-        self.assertTrue(issubclass(AuthenticationError, AIPRODError))
+        self.assertTrue(issubclass(AuthError, AIPRODError))
         self.assertTrue(issubclass(RateLimitError, AIPRODError))
         self.assertTrue(issubclass(ValidationError, AIPRODError))
         self.assertTrue(issubclass(NotFoundError, AIPRODError))
@@ -156,11 +158,10 @@ class TestJobResponse(unittest.TestCase):
         data = {
             "job_id": "j1",
             "status": "completed",
-            "progress": 1.0,
-            "result_url": "https://cdn.aiprod.ai/j1.mp4",
+            "video_url": "https://cdn.aiprod.ai/j1.mp4",
             "error": None,
         }
-        jr = JobResponse(**data)
+        jr = JobResponse.from_dict(data)
         self.assertEqual(jr.job_id, "j1")
         self.assertEqual(jr.status, "completed")
 

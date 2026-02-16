@@ -8,7 +8,7 @@ This module provides functionality for processing text captions, including:
 - CaptionsDataset for caption-only preprocessing workflows
 Can be used as a standalone script:
     python scripts/process_captions.py dataset.json --output-dir /path/to/output \
-        --model-source /path/to/AIPROD2.safetensors --text-encoder-path /path/to/gemma
+        --model-source /path/to/AIPROD2.safetensors --text-encoder-path /path/to/aiprod-text-encoder
 """
 
 import json
@@ -239,14 +239,14 @@ def compute_captions_embeddings(  # noqa: PLR0913
         dataset_file: Path to metadata file (CSV/JSON/JSONL) containing captions and media paths
         output_dir: Directory to save embeddings
         model_path: Path to AIPROD checkpoint (.safetensors)
-        text_encoder_path: Path to Gemma text encoder directory
+        text_encoder_path: Path to AIPROD text encoder directory
         caption_column: Column name containing captions in the metadata file
         media_column: Column name containing media paths (used for output naming)
         lora_trigger: Optional trigger word to prepend to each caption
         remove_llm_prefixes: Whether to remove common LLM-generated prefixes
         batch_size: Batch size for processing
         device: Device to use for computation
-        load_in_8bit: Whether to load the Gemma text encoder in 8-bit precision
+        load_in_8bit: Whether to load the text encoder in 8-bit precision
     """
 
     console = Console()
@@ -265,7 +265,7 @@ def compute_captions_embeddings(  # noqa: PLR0913
     output_path.mkdir(parents=True, exist_ok=True)
 
     # Load text encoder
-    with console.status("[bold]Loading Gemma text encoder...", spinner="dots"):
+    with console.status("[bold]Loading AIPROD text encoder...", spinner="dots"):
         text_encoder = load_text_encoder(
             model_path,
             text_encoder_path,
@@ -276,10 +276,10 @@ def compute_captions_embeddings(  # noqa: PLR0913
 
     logger.info("Text encoder loaded successfully")
 
-    # TODO(batch-tokenization): The current Gemma tokenizer doesn't support batched tokenization.
+    # TODO(batch-tokenization): The current tokenizer doesn't support batched tokenization.
     if batch_size > 1:
         logger.warning(
-            "Batch size greater than 1 is not currently supported with the Gemma tokenizer. "
+            "Batch size greater than 1 is not currently supported with this tokenizer. "
             "Overriding batch_size to 1. This will be fixed in a future update."
         )
         batch_size = 1
@@ -349,7 +349,7 @@ def main(  # noqa: PLR0913
     ),
     text_encoder_path: str = typer.Option(
         ...,
-        help="Path to Gemma text encoder directory",
+        help="Path to AIPROD text encoder directory",
     ),
     caption_column: str = typer.Option(
         default="caption",
@@ -378,26 +378,26 @@ def main(  # noqa: PLR0913
     ),
     load_text_encoder_in_8bit: bool = typer.Option(
         default=False,
-        help="Load the Gemma text encoder in 8-bit precision to save GPU memory (requires bitsandbytes)",
+        help="Load the text encoder in 8-bit precision to save GPU memory (requires bitsandbytes)",
     ),
 ) -> None:
     """Process text captions and save embeddings for video generation training.
     This script processes captions from metadata files and saves text embeddings
     that can be used for training video generation models. The output embeddings
     will maintain the same folder structure and naming as the corresponding media files.
-    Note: This script is designed for AIPROD models which use the Gemma text encoder.
+    Note: This script is designed for AIPROD models which use the AIPROD proprietary text encoder.
     Examples:
         # Process captions with AIPROD model
         python scripts/process_captions.py dataset.json --output-dir ./embeddings \\
             --model-path /path/to/AIPROD2_checkpoint.safetensors \\
-            --text-encoder-path /path/to/gemma
+            --text-encoder-path /path/to/aiprod-text-encoder
         # Add a trigger word for LoRA training
         python scripts/process_captions.py dataset.json --output-dir ./embeddings \\
-            --model-path /path/to/AIPROD2.safetensors --text-encoder-path /path/to/gemma \\
+            --model-path /path/to/AIPROD2.safetensors --text-encoder-path /path/to/aiprod-text-encoder \\
             --lora-trigger "mytoken"
         # Remove LLM-generated prefixes from captions
         python scripts/process_captions.py dataset.json --output-dir ./embeddings \\
-            --model-path /path/to/AIPROD2.safetensors --text-encoder-path /path/to/gemma \\
+            --model-path /path/to/AIPROD2.safetensors --text-encoder-path /path/to/aiprod-text-encoder \\
             --remove-llm-prefixes
     """
 

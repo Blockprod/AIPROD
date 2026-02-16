@@ -11,7 +11,7 @@ from aiprod_core.model.audio_vae import decode_audio as vae_decode_audio
 from aiprod_core.model.upsampler import upsample_video
 from aiprod_core.model.video_vae import TilingConfig, get_video_chunks_number
 from aiprod_core.model.video_vae import decode_video as vae_decode_video
-from aiprod_core.text_encoders.gemma import encode_text
+from aiprod_core.model.text_encoder import encode_text
 from aiprod_core.types import LatentState, VideoPixelShape
 from aiprod_pipelines.utils import ModelLedger
 from aiprod_pipelines.utils.args import default_2_stage_distilled_arg_parser
@@ -46,7 +46,7 @@ class DistilledPipeline:
     def __init__(
         self,
         checkpoint_path: str,
-        gemma_root: str,
+        text_encoder_root: str,
         spatial_upsampler_path: str,
         loras: list[LoraPathStrengthAndSDOps],
         device: torch.device = device,
@@ -60,7 +60,7 @@ class DistilledPipeline:
             device=device,
             checkpoint_path=checkpoint_path,
             spatial_upsampler_path=spatial_upsampler_path,
-            gemma_root_path=gemma_root,
+            text_encoder_path=text_encoder_root,
             loras=loras,
             fp8transformer=fp8transformer,
         )
@@ -202,7 +202,7 @@ def main() -> None:
     pipeline = DistilledPipeline(
         checkpoint_path=args.checkpoint_path,
         spatial_upsampler_path=args.spatial_upsampler_path,
-        gemma_root=args.gemma_root,
+        text_encoder_root=args.text_encoder_root,
         loras=args.lora,
         fp8transformer=args.enable_fp8,
     )

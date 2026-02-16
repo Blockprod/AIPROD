@@ -2,15 +2,53 @@
 Production Pipeline Orchestrator - State Machine with Checkpoint Integration
 =============================================================================
 
-Orchestrates production pipeline execution through an 11-state machine.
+Orchestrates production pipeline execution through a sovereign state machine.
 Integrates checkpoint/resume capabilities for resilient execution.
+
+Config: Charge AIPROD_V34_SOVEREIGN.json (env AIPROD_CONFIG ou défaut).
 """
 
+import json
+import logging
+import os
 import time
+from pathlib import Path
 from typing import Dict, Any, Optional, Tuple, Callable
 from .schema.schemas import Context, PipelineRequest, PipelineResponse
 from .checkpoint.manager import CheckpointManager
 from .checkpoint.recovery import RecoveryManager, RecoveryAction
+
+logger = logging.getLogger(__name__)
+
+# ---------- Config loader ----------
+
+_DEFAULT_CONFIG_PATH = "config/AIPROD_V34_SOVEREIGN.json"
+
+
+def load_pipeline_config(config_path: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Charge la configuration pipeline.
+    
+    Priority:
+        1. config_path argument
+        2. AIPROD_CONFIG env var
+        3. config/AIPROD_V34_SOVEREIGN.json (défaut souverain)
+    """
+    path = config_path or os.environ.get("AIPROD_CONFIG", _DEFAULT_CONFIG_PATH)
+    config_file = Path(path)
+    
+    if config_file.exists():
+        with open(config_file, "r", encoding="utf-8") as f:
+            cfg = json.load(f)
+        logger.info("Pipeline config loaded: %s (v%s)", path, cfg.get("version", "?"))
+        return cfg
+    
+    logger.warning("Config file not found: %s — using defaults", path)
+    return {
+        "version": "3.4",
+        "sovereignty": {"score": "9/10", "cloudDependencies": 0},
+        "state": {"blocks": {}},
+    }
 
 
 class Orchestrator:
@@ -30,7 +68,8 @@ class Orchestrator:
         self, 
         adapters: Dict[str, Any],
         checkpoint_manager: Optional[CheckpointManager] = None,
-        max_retries: int = 3
+        max_retries: int = 3,
+        config_path: Optional[str] = None,
     ):
         """
         Initialize orchestrator.
@@ -39,11 +78,20 @@ class Orchestrator:
             adapters: Dictionary of adapter instances by name
             checkpoint_manager: CheckpointManager (created if None)
             max_retries: Maximum retry attempts per state
+            config_path: Path to pipeline config JSON (default: V34 sovereign)
         """
         self.adapters = adapters
         self.checkpoint_manager = checkpoint_manager or CheckpointManager()
         self.recovery_manager = RecoveryManager(self.checkpoint_manager, max_retries)
         self.max_retries = max_retries
+        
+        # Charger la config souveraine
+        self.pipeline_config = load_pipeline_config(config_path)
+        logger.info(
+            "Orchestrator initialized (config v%s, sovereignty=%s)",
+            self.pipeline_config.get("version", "?"),
+            self.pipeline_config.get("sovereignty", {}).get("score", "?"),
+        )
         
         # State transition map
         self.state_handlers: Dict[str, Callable] = {}
@@ -179,7 +227,10 @@ class Orchestrator:
             },
             "config": {
                 "max_retries": self.max_retries,
-                "checkpoint_enabled": True
+                "checkpoint_enabled": True,
+                "pipeline": self.pipeline_config,
+                "version": self.pipeline_config.get("version", "3.4"),
+                "backend": "aiprod_sovereign",
             }
         }
         

@@ -14,15 +14,30 @@ with specific LLMs, the LLM Bridge provides:
 
 from .bridge import LLMBridge, LLMBridgeConfig, TextEncoderBackend
 
-# Pipeline-compatible alias: the old API used AVGemmaTextEncoderModel
-# everywhere — point it to our pluggable LLMBridge.
-AVGemmaTextEncoderModel = LLMBridge
-GemmaTextEncoderModelBase = LLMBridge
+# Pipeline-compatible aliases
+AIPRODTextEncoder = LLMBridge
+AIPRODTextEncoderBase = LLMBridge
+AIPRODTextEncoderModel = LLMBridge
+
+
+def encode_text(
+    text_encoder: LLMBridge,
+    prompts: list[str],
+) -> list[tuple]:
+    """Encode a list of prompts into (video_context, audio_context) tuples."""
+    results = []
+    for prompt in prompts:
+        video_ctx, audio_ctx, _mask = text_encoder._encode_prompt(prompt)
+        results.append((video_ctx, audio_ctx))
+    return results
+
 
 __all__ = [
     "LLMBridge",
     "LLMBridgeConfig",
     "TextEncoderBackend",
-    "AVGemmaTextEncoderModel",
-    "GemmaTextEncoderModelBase",
+    "AIPRODTextEncoder",
+    "AIPRODTextEncoderBase",
+    "AIPRODTextEncoderModel",
+    "encode_text",
 ]

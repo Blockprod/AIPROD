@@ -112,7 +112,7 @@ def check_models():
     """Check for model files"""
     model_dirs = [
         Path("models/aiprod2"),
-        Path("models/gemma-3"),
+        Path("models/aiprod-sovereign"),
     ]
     
     for model_dir in model_dirs:

@@ -29,10 +29,10 @@
 - Pipeline de génération vidéo distillée en deux étapes
 - Stage 1 : génération basse résolution via diffusion Euler avec sigma pré-calculés
 - Stage 2 : upsampling 2× et raffinement
-- Encode le texte via Gemma, les images via video VAE, boucle de débruitage, décodage VAE
+- Encode le texte via AIPROD text encoder, les images via video VAE, boucle de débruitage, décodage VAE
 - **Statut : Implémentation réelle fonctionnelle**
-- **Imports externes :** `aiprod_core` (diffusion steps, noisers, video/audio VAE, Gemma text encoder, upsampler, transformer)
-- **Modèles hardcodés :** Gemma text encoder (via `gemma_root`), `AIPRODV_LORA_COMFY_RENAMING_MAP` (ComfyUI)
+- **Imports externes :** `aiprod_core` (diffusion steps, noisers, video/audio VAE, AIPROD text encoder, upsampler, transformer)
+- **Modèles hardcodés :** AIPROD text encoder (via `text_encoder_root`), `AIPRODV_LORA_COMFY_RENAMING_MAP` (ComfyUI)
 - **Wraps des modèles existants : OUI** — orchestre les composants `aiprod_core` qui encapsulent LTX-Video 2.0
 
 ### 1.3 `ic_lora.py` (366 lignes)
@@ -92,7 +92,7 @@
 - **Statut : Code production — I/O média de bonne qualité**
 
 ### 2.5 `model_ledger.py` (~230 lignes)
-- **Hub central de chargement des modèles.** Câble les `SingleGPUModelBuilder` pour : transformer, video encoder/decoder, audio decoder, vocoder, text encoder (Gemma), spatial upsampler
+- **Hub central de chargement des modèles.** Câble les `SingleGPUModelBuilder` pour : transformer, video encoder/decoder, audio decoder, vocoder, text encoder (AIPROD LLMBridge), spatial upsampler
 - Chaque `build()` crée une instance fraîche depuis les poids checkpoint
 - Support quantization FP8 pour le transformer
 - `with_loras()` crée des variantes partageant le registre de poids
@@ -101,9 +101,9 @@
   - `AIPRODModelConfigurator` — config architecture transformer
   - `VideoDecoderConfigurator`, `VideoEncoderConfigurator` — config VAE
   - `AudioDecoderConfigurator`, `VocoderConfigurator` — config modèles audio
-  - `AVGemmaTextEncoderModelConfigurator` — config text encoder **Google Gemma**
+  - `AIPRODTextEncoderModelConfigurator` — config text encoder **AIPROD LLMBridge**
   - `LatentUpsamplerConfigurator` — config upsampler
-  - `GEMMA_MODEL_OPS` — opérations modèle Gemma
+  - `AIPROD_TEXT_ENCODER_OPS` — opérations modèle AIPROD text encoder
 - **Verdict : PREUVE PRINCIPALE** — toutes les architectures modèle viennent de `aiprod_core` (fork LTX-Video 2.0)
 
 ### 2.6 `types.py` (76 lignes)
@@ -233,7 +233,7 @@
 
 | Modèle/Bibliothèque | Où référencé | Utilisation |
 |---------------------|-------------|-------------|
-| **Google Gemma 3** (text encoder) | `model_ledger.py`, 5 pipelines | Encodage texte via `aiprod_core.text_encoders.gemma` |
+| **AIPROD Text Encoder** (LLMBridge) | `model_ledger.py`, 5 pipelines | Encodage texte via `aiprod_core.model.text_encoder` |
 | **Transformer diffusion** (pattern AIPRODV/LTX-V) | `model_ledger.py` via `AIPRODModelConfigurator` | Modèle débruitage vidéo — chargé depuis checkpoint utilisateur |
 | **Video VAE** (encoder + decoder) | `model_ledger.py` | Encodage/décodage espace latent |
 | **Audio VAE + Vocoder** | `model_ledger.py` | Génération/décodage audio |
@@ -277,9 +277,9 @@
 
 1. **Toutes les architectures modèle** sont définies dans le package frère `aiprod-core`, pas ici. Le package pipelines orchestre uniquement le chargement et l'exécution.
 
-2. L'architecture modèle sous-jacente (transformer + video VAE + Gemma text encoder) suit le pattern **LTX-Video 2.0** (Lightricks) — attesté par les maps de compatibilité ComfyUI, le nommage `AIPRODV`, et la structure architecturale.
+2. L'architecture modèle sous-jacente (transformer + video VAE + AIPROD text encoder) suit le pattern **LTX-Video 2.0** (Lightricks) — attesté par les maps de compatibilité ComfyUI, le nommage `AIPRODV`, et la structure architecturale.
 
-3. Le text encoder est **Google Gemma 3** — un modèle open-source.
+3. Le text encoder est **AIPROD LLMBridge** — un encodeur propriétaire.
 
 4. La couche API référence **Gemini 1.5 Pro** (API propriétaire Google), **Runway Gen-3**, et **Replicate** comme services externes.
 

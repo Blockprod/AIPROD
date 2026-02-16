@@ -37,8 +37,8 @@ model:
   model_path: "path/to/AIPROD-2-model.safetensors"
 
   # Path to the text encoder model directory
-  # For AIPROD-2, this is typically the Gemma-based text encoder
-  text_encoder_path: "path/to/gemma-text-encoder"
+  # For AIPROD-2, this is the proprietary AIPROD text encoder
+  text_encoder_path: "path/to/aiprod-text-encoder"
 
   # Training mode: "lora" for efficient adapter training, "full" for full fine-tuning
   # LoRA is recommended for most use cases (faster, less memory, prevents overfitting)

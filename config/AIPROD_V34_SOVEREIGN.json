@@ -1,0 +1,369 @@
+{
+  "version": "3.4",
+  "exportedAt": "2026-02-14T00:00:00.000Z",
+  "notes": "AIPROD-V34 SOUVERAIN — Version 100% locale. LLMs locaux (AIPROD Text Encoder, Mistral-7B), génération vidéo GPU locale (LTX-2 SHDT), QA sémantique par CLIP/SigLIP. Zéro appel cloud. Zéro API externe. Souveraineté totale.",
+
+  "sovereignty": {
+    "score": "9/10",
+    "cloudDependencies": 0,
+    "externalAPIs": 0,
+    "offlineCapable": true,
+    "dataResidency": "local",
+    "note": "Toutes les opérations sont exécutées localement sur le GPU. Aucune donnée ne quitte la machine."
+  },
+
+  "state": {
+    "blocks": {
+
+      "orchestrator": {
+        "id": "orch-0001",
+        "type": "orchestrator",
+        "name": "AIPROD Orchestrator v34 (Sovereign State Machine)",
+        "purpose": "State machine only. Routes execution, retries, and stops cleanly on failure. Zero cloud dependency.",
+        "states": [
+          "INIT",
+          "ANALYSIS",
+          "CREATIVE_DIRECTION",
+          "VISUAL_TRANSLATION",
+          "RENDER_EXECUTION",
+          "QA_TECHNICAL",
+          "QA_SEMANTIC",
+          "FINALIZE",
+          "ERROR",
+          "FAST_TRACK"
+        ],
+        "transitions": {
+          "INIT": "ANALYSIS",
+          "ANALYSIS": {"default": "CREATIVE_DIRECTION", "fast": "FAST_TRACK"},
+          "CREATIVE_DIRECTION": "VISUAL_TRANSLATION",
+          "VISUAL_TRANSLATION": "RENDER_EXECUTION",
+          "RENDER_EXECUTION": "QA_TECHNICAL",
+          "QA_TECHNICAL": {"pass": "QA_SEMANTIC", "fail": "ERROR"},
+          "QA_SEMANTIC": "FINALIZE",
+          "FAST_TRACK": "RENDER_EXECUTION",
+          "ERROR": "ANALYSIS"
+        },
+        "retryPolicy": {
+          "maxRetries": 3,
+          "backoffSec": 5,
+          "escalationPath": "ERROR"
+        },
+        "performanceMetrics": {
+          "trackStateDuration": true,
+          "logTransitions": true,
+          "alertOnStuckState": true
+        }
+      },
+
+      "inputSanitizer": {
+        "id": "san-0001",
+        "type": "function",
+        "name": "InputSanitizer (Local)",
+        "purpose": "Normalize user prompts. Pure function, no LLM, no cloud.",
+        "provider": "local",
+        "schemaValidation": {
+          "strict": true,
+          "allowPartial": false,
+          "defaultValues": false
+        },
+        "outputsToMemory": ["sanitized_input"]
+      },
+
+      "creativeDirector": {
+        "id": "cd-0001",
+        "type": "agent",
+        "name": "CreativeDirector (Mistral-7B Local)",
+        "purpose": "Narrative reasoning, cinematic script generation, shot list creation. 100% local LLM.",
+        "llmProvider": "local",
+        "llmModel": "models/scenarist/mistral-7b",
+        "fallbackModels": ["models/aiprod-sovereign/aiprod-text-encoder-v1"],
+        "localOnly": true,
+        "timeoutSec": 120,
+        "maxTokens": 4096,
+        "systemPrompt": "You are the Creative Director. Analyze the prompt, generate a script and shot list with consistency markers (style, lighting, character). Output a ProductionManifest JSON.",
+        "inputs": ["sanitized_input"],
+        "consistencyCache": {
+          "enabled": true,
+          "ttlHours": 168,
+          "reuseAcrossJobs": true,
+          "similarityThreshold": 0.85,
+          "storage": "local_sqlite"
+        },
+        "outputsToMemory": [
+          "production_manifest",
+          "consistency_markers",
+          "script",
+          "shot_list",
+          "complexity_score"
+        ],
+        "performance": {
+          "expectedLatencySec": 30,
+          "cacheHitTarget": 0.3
+        }
+      },
+
+      "visualTranslator": {
+        "id": "vt-0001",
+        "type": "agent",
+        "name": "VisualTranslator (AIPROD Text Encoder Local)",
+        "purpose": "Turn shot_list into deterministic LTX-2 prompts using consistency_markers. Optimized for local SHDT pipeline.",
+        "llmProvider": "local",
+        "llmModel": "models/aiprod-sovereign/aiprod-text-encoder-v1",
+        "localOnly": true,
+        "inputs": ["shot_list", "consistency_markers"],
+        "ltx2Constraints": {
+          "maxClipDuration": 10,
+          "supportedAspectRatios": ["16:9", "9:16", "1:1"],
+          "supportedResolutions": ["512x768", "768x512", "512x512"],
+          "defaultNumFrames": 97,
+          "defaultFPS": 24,
+          "audioSupport": false
+        },
+        "promptOptimization": {
+          "includeCameraMovements": true,
+          "specifyLighting": true,
+          "addMoodDescriptors": true,
+          "maxPromptLength": 256
+        },
+        "outputsToMemory": ["prompt_bundle", "ltx2_ready_prompts"]
+      },
+
+      "renderExecutor": {
+        "id": "re-0001",
+        "type": "executor",
+        "name": "RenderExecutor (GPU Local — LTX-2 SHDT)",
+        "purpose": "Execute video generation on local GPU via GPUWorker. Zero cloud API calls.",
+        "provider": "local",
+        "backend": "aiprod_sovereign",
+        "gpuWorkerConfig": {
+          "checkpointPath": "models/ltx2_research",
+          "textEncoderPath": "models/aiprod-sovereign/aiprod-text-encoder-v1",
+          "outputDir": "output",
+          "device": "cuda",
+          "fp8Transformer": true,
+          "defaultParams": {
+            "height": 512,
+            "width": 768,
+            "numFrames": 97,
+            "fps": 24,
+            "numInferenceSteps": 30,
+            "guidanceScale": 3.0
+          }
+        },
+        "batchProcessing": {
+          "maxBatchSize": 4,
+          "delayBetweenBatches": 0.5,
+          "retryOnError": true,
+          "maxRetries": 3
+        },
+        "deterministicSeed": true,
+        "seedSource": "hash",
+        "outputsToMemory": ["generated_assets", "render_duration", "backend_used"]
+      },
+
+      "technicalQAGate": {
+        "id": "qa-tech-0001",
+        "type": "function",
+        "name": "TechnicalQAGate (Deterministic Local)",
+        "purpose": "Binary QA checks for technical validity. Pure function, no LLM.",
+        "provider": "local",
+        "checks": {
+          "fileIntegrity": true,
+          "durationMatch": {"toleranceSec": 2},
+          "resolutionCheck": true,
+          "clipCountMatch": true,
+          "codecValidation": "h264",
+          "fileSizeCheck": {"minBytes": 1024, "maxBytes": 1073741824}
+        },
+        "inputs": ["generated_assets"],
+        "onFail": "ERROR",
+        "outputsToMemory": ["technical_validation_report", "technical_score"]
+      },
+
+      "semanticQA": {
+        "id": "qa-sem-0001",
+        "type": "function",
+        "name": "SemanticQA (CLIP/SigLIP Local)",
+        "purpose": "Evaluates prompt-video coherence using local CLIP/SigLIP embeddings. No cloud vision API.",
+        "provider": "local",
+        "model": "openai/clip-vit-large-patch14",
+        "modelPath": "models/clip",
+        "localOnly": true,
+        "inputs": ["generated_assets", "production_manifest", "consistency_markers"],
+        "evaluationCriteria": {
+          "promptVideoSimilarity": {"weight": 0.4, "threshold": 0.25},
+          "styleCoherence": {"weight": 0.3, "threshold": 0.20},
+          "temporalConsistency": {"weight": 0.3, "threshold": 0.20}
+        },
+        "outputsToMemory": [
+          "consistency_report",
+          "quality_score",
+          "semantic_qa_details"
+        ]
+      },
+
+      "supervisor": {
+        "id": "sup-0001",
+        "type": "function",
+        "name": "AIPROD Supervisor (Deterministic)",
+        "purpose": "Final approval gate. Deterministic rules — no LLM needed for certification.",
+        "provider": "local",
+        "inputs": [
+          "consistency_report",
+          "technical_validation_report",
+          "quality_score"
+        ],
+        "decisionMatrix": {
+          "approveIf": ["quality_score >= 0.6", "technical_score >= 0.8"],
+          "rejectIf": ["quality_score < 0.3", "technical_score < 0.5"],
+          "escalateIf": ["quality_score between 0.3 and 0.6"]
+        },
+        "outputsToMemory": [
+          "final_approval",
+          "delivery_manifest",
+          "quality_certification"
+        ]
+      },
+
+      "fastTrackAgent": {
+        "id": "ft-0001",
+        "type": "function",
+        "name": "Fast Track Agent (Local)",
+        "purpose": "Simplified pipeline for low-complexity prompts. Direct prompt → render.",
+        "provider": "local",
+        "activationCondition": "complexity_score < 0.3",
+        "constraints": {
+          "maxDurationSec": 30,
+          "maxScenes": 3,
+          "allowedComplexity": "low",
+          "singleLocation": true,
+          "simpleCameraMovements": true
+        },
+        "inputs": ["sanitized_input"],
+        "outputsToMemory": [
+          "prompt_bundle",
+          "basic_shot_list",
+          "fast_track_metadata"
+        ],
+        "performanceTarget": {
+          "maxLatencySec": 60,
+          "costCeiling": 0
+        }
+      },
+
+      "localStorage": {
+        "id": "ls-0001",
+        "type": "executor",
+        "name": "Local Storage Manager",
+        "purpose": "Manages local file storage for assets, jobs, and cache. Replaces GCS.",
+        "provider": "local",
+        "paths": {
+          "videoAssets": "output/",
+          "tempFiles": "output/tmp/",
+          "cache": "models/cache/",
+          "jobsDb": "data/jobs.db",
+          "logs": "logs/"
+        },
+        "cleanup": {
+          "autoCleanTemp": true,
+          "maxTempAgeDays": 1,
+          "maxAssetAgeDays": 30
+        }
+      }
+    },
+
+    "edges": [
+      {"from": "orchestrator", "to": "inputSanitizer"},
+      {"from": "inputSanitizer", "to": "orchestrator"},
+      {"from": "orchestrator", "to": "creativeDirector", "condition": "pipeline_mode == 'full'"},
+      {"from": "creativeDirector", "to": "visualTranslator"},
+      {"from": "visualTranslator", "to": "renderExecutor"},
+      {"from": "orchestrator", "to": "fastTrackAgent", "condition": "pipeline_mode == 'fast'"},
+      {"from": "fastTrackAgent", "to": "renderExecutor"},
+      {"from": "renderExecutor", "to": "technicalQAGate"},
+      {"from": "technicalQAGate", "to": "semanticQA"},
+      {"from": "semanticQA", "to": "supervisor"},
+      {"from": "supervisor", "to": "orchestrator"}
+    ],
+
+    "memorySchema": {
+      "sanitized_input": {
+        "required": true,
+        "description": "Normalized user input ready for processing"
+      },
+      "production_manifest": {
+        "required": true,
+        "condition": "pipeline_mode == 'full'",
+        "description": "Complete creative plan including narrative, shots, timing"
+      },
+      "consistency_markers": {
+        "required": true,
+        "condition": "pipeline_mode == 'full'",
+        "description": "Proactive markers for style, lighting, character consistency"
+      },
+      "prompt_bundle": {
+        "required": true,
+        "description": "Final LTX-2 ready prompts"
+      },
+      "generated_assets": {
+        "required": true,
+        "description": "Generated video files (local paths)"
+      },
+      "technical_validation_report": {
+        "required": true,
+        "description": "Binary technical QA results"
+      },
+      "consistency_report": {
+        "required": true,
+        "description": "Semantic QA evaluation (CLIP-based)"
+      },
+      "final_approval": {
+        "required": true,
+        "description": "Supervisor deterministic decision"
+      },
+      "delivery_manifest": {
+        "required": true,
+        "description": "Complete delivery package with local asset paths"
+      }
+    },
+
+    "validationRules": {
+      "complexityThresholds": {
+        "fastTrackMax": 0.3,
+        "standardMin": 0.3,
+        "premiumMin": 0.7
+      },
+      "qualityGates": {
+        "technicalThreshold": 0.8,
+        "semanticThreshold": 0.6,
+        "finalApprovalThreshold": 0.6
+      },
+      "performanceSLA": {
+        "fastTrackMaxSec": 120,
+        "standardMaxSec": 600,
+        "premiumMaxSec": 1200
+      }
+    },
+
+    "performanceOptimizations": {
+      "modelCaching": {
+        "enabled": true,
+        "keepInVRAM": true,
+        "unloadAfterIdleSec": 300
+      },
+      "consistencyCache": {
+        "enabled": true,
+        "ttlHours": 168,
+        "reuseAcrossJobs": true,
+        "backend": "sqlite"
+      },
+      "batchProcessing": true,
+      "fp8Inference": true,
+      "tiledDecoding": true,
+      "lazyModelLoading": {
+        "enabled": true,
+        "delayNonCritical": true
+      }
+    }
+  }
+}

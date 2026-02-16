@@ -44,7 +44,7 @@
 Six production-grade nodes covering all inference operations:
 
 #### TextEncodeNode
-- Gemma 3 text encoder integration
+- AIPROD text encoder integration
 - Positive + negative prompt support
 - Batched processing
 - Outputs: `embeddings`, `embeddings_pooled`

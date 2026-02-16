@@ -5,8 +5,15 @@ from pathlib import Path
 from typing import Callable
 
 import torch
-import wandb
 import yaml
+
+# wandb: optional dependency (souveraineté — zéro dépendance SaaS)
+try:
+    import wandb
+    _WANDB_AVAILABLE = True
+except ImportError:
+    wandb = None  # type: ignore[assignment]
+    _WANDB_AVAILABLE = False
 from accelerate import Accelerator, DistributedType
 from accelerate.utils import set_seed
 from peft import LoraConfig, get_peft_model, get_peft_model_state_dict, set_peft_model_state_dict
@@ -32,7 +39,14 @@ from aiprod_trainer.config import AIPRODTrainerConfig
 from aiprod_trainer.config_display import print_config
 from aiprod_trainer.datasets import PrecomputedDataset
 from aiprod_trainer.gpu_utils import free_gpu_memory, free_gpu_memory_context, get_gpu_memory_gb
-from aiprod_trainer.hf_hub_utils import push_to_hub
+# HuggingFace Hub: optional dependency (souveraineté)
+try:
+    from aiprod_trainer.hf_hub_utils import push_to_hub
+    _HF_HUB_AVAILABLE = True
+except ImportError:
+    push_to_hub = None  # type: ignore[assignment]
+    _HF_HUB_AVAILABLE = False
+
 from aiprod_trainer.model_loader import load_model as load_AIPROD_model
 from aiprod_trainer.model_loader import load_text_encoder
 from aiprod_trainer.progress import TrainingProgress
@@ -42,6 +56,7 @@ from aiprod_trainer.training_strategies import get_training_strategy
 from aiprod_trainer.utils import open_image_as_srgb, save_image
 from aiprod_trainer.validation_sampler import CachedPromptEmbeddings, GenerationConfig, ValidationSampler
 from aiprod_trainer.video_utils import read_video, save_video
+from aiprod_trainer.curriculum_training import CurriculumAdapterConfig, CurriculumConfig
 
 # Disable irrelevant warnings from transformers
 os.environ["TOKENIZERS_PARALLELISM"] = "true"
@@ -75,7 +90,11 @@ class TrainingStats(BaseModel):
 
 
 class AIPRODvTrainer:
-    def __init__(self, trainer_config: AIPRODTrainerConfig) -> None:
+    def __init__(
+        self,
+        trainer_config: AIPRODTrainerConfig,
+        curriculum_config: CurriculumConfig | None = None,
+    ) -> None:
         self._config = trainer_config
         if IS_MAIN_PROCESS:
             print_config(trainer_config)
@@ -90,6 +109,20 @@ class AIPRODvTrainer:
         self._global_step = -1
         self._checkpoint_paths = []
         self._init_wandb()
+
+        # Curriculum training support
+        self._curriculum_adapter: CurriculumAdapterConfig | None = None
+        if curriculum_config and curriculum_config.enabled:
+            self._curriculum_adapter = CurriculumAdapterConfig(
+                base_config=self._config,
+                curriculum_config=curriculum_config,
+            )
+            self._curriculum_adapter.apply_phase_to_trainer_config()
+            if IS_MAIN_PROCESS:
+                logger.info(
+                    "Curriculum training enabled: %d phases",
+                    len(curriculum_config.phases),
+                )
 
     def train(  # noqa: PLR0912, PLR0915
         self,
@@ -199,6 +232,15 @@ class AIPRODvTrainer:
                             if sampled_videos_paths and self._config.wandb.log_validation_videos:
                                 self._log_validation_samples(sampled_videos_paths, cfg.validation.prompts)
 
+                    # Curriculum: check phase transition
+                    if self._curriculum_adapter and is_optimization_step:
+                        self._curriculum_adapter.scheduler.record_loss(loss.item())
+                        if self._curriculum_adapter.should_transition():
+                            if IS_MAIN_PROCESS:
+                                phase_info = self._curriculum_adapter.scheduler.get_phase_info()
+                                logger.info("Curriculum phase transition: %s", phase_info)
+                                self._log_metrics({"curriculum/phase": phase_info["phase_index"]})
+
                     # Save checkpoint if needed
                     if (
                         cfg.checkpoints.interval
@@ -286,7 +328,10 @@ class AIPRODvTrainer:
 
             # Upload artifacts to hub if enabled
             if cfg.hub.push_to_hub:
-                push_to_hub(saved_path, sampled_videos_paths, self._config)
+                if _HF_HUB_AVAILABLE and push_to_hub is not None:
+                    push_to_hub(saved_path, sampled_videos_paths, self._config)
+                else:
+                    logger.warning("⚠️ push_to_hub skipped: huggingface-hub not installed")
 
             # Log final stats to W&B
             if self._wandb_run is not None:
@@ -347,7 +392,7 @@ class AIPRODvTrainer:
 
         self._text_encoder = load_text_encoder(
             checkpoint_path=self._config.model.model_path,
-            gemma_model_path=self._config.model.text_encoder_path,
+            text_encoder_path=self._config.model.text_encoder_path,
             device="cuda",
             dtype=torch.bfloat16,
             load_in_8bit=self._config.acceleration.load_text_encoder_in_8bit,
@@ -944,7 +989,12 @@ class AIPRODvTrainer:
         logger.info(f"💾 Training configuration saved to: {config_path.relative_to(self._config.output_dir)}")
 
     def _init_wandb(self) -> None:
-        """Initialize Weights & Biases run."""
+        """Initialize Weights & Biases run (optional — souveraineté)."""
+        if not _WANDB_AVAILABLE:
+            logger.info("ℹ️ wandb not installed — training metrics logged to console only")
+            self._wandb_run = None
+            return
+
         if not self._config.wandb.enabled or not IS_MAIN_PROCESS:
             self._wandb_run = None
             return

@@ -226,22 +226,16 @@ class BillingCalculator:
 
 
 # ---------------------------------------------------------------------------
-# Stripe integration
+# Stripe integration — local stub (cloud impl in aiprod-cloud)
 # ---------------------------------------------------------------------------
 
 
-class StripeIntegration:
-    """
-    Stripe payment integration.
+class _LocalStripeIntegration:
+    """Local-only Stripe stub (no cloud SDK imports).
 
-    Handles:
-    - Customer creation
-    - Subscription management
-    - Usage-based metering (Stripe usage records)
-    - Invoice generation
-
-    Requires: pip install stripe
-    Falls back to no-op mode if stripe is not installed.
+    Provides the same API surface as the real StripeIntegration but always
+    operates in local/no-op mode.  The real implementation lives in
+    ``aiprod_cloud.stripe_integration`` and is loaded below when available.
     """
 
     PRICE_IDS: Dict[BillingTier, str] = {
@@ -252,62 +246,22 @@ class StripeIntegration:
 
     def __init__(self, api_key: Optional[str] = None):
         self._api_key = api_key
-        self._stripe = None
         self._available = False
-        try:
-            import stripe as stripe_lib
-
-            if api_key:
-                stripe_lib.api_key = api_key
-            self._stripe = stripe_lib
-            self._available = True
-        except ImportError:
-            pass
 
     @property
     def available(self) -> bool:
         return self._available
 
     def create_customer(self, tenant_id: str, email: str, name: str) -> Dict[str, Any]:
-        """Create a Stripe customer."""
-        if not self._available:
-            return {"id": f"cus_local_{tenant_id}", "email": email}
-        customer = self._stripe.Customer.create(
-            email=email,
-            name=name,
-            metadata={"tenant_id": tenant_id},
-        )
-        return {"id": customer.id, "email": customer.email}
+        return {"id": f"cus_local_{tenant_id}", "email": email}
 
-    def create_subscription(
-        self, customer_id: str, tier: BillingTier
-    ) -> Dict[str, Any]:
-        """Create a subscription for a customer."""
-        if not self._available:
-            return {"id": f"sub_local_{customer_id}", "status": "active"}
-        price_id = self.PRICE_IDS.get(tier, self.PRICE_IDS[BillingTier.PRO])
-        sub = self._stripe.Subscription.create(
-            customer=customer_id,
-            items=[{"price": price_id}],
-        )
-        return {"id": sub.id, "status": sub.status}
+    def create_subscription(self, customer_id: str, tier: BillingTier) -> Dict[str, Any]:
+        return {"id": f"sub_local_{customer_id}", "status": "active"}
 
     def report_usage(
-        self,
-        subscription_item_id: str,
-        quantity: int,
-        timestamp: Optional[int] = None,
+        self, subscription_item_id: str, quantity: int, timestamp: Optional[int] = None
     ) -> Dict[str, Any]:
-        """Report metered usage to Stripe."""
-        if not self._available:
-            return {"id": f"mbur_local_{uuid.uuid4().hex[:8]}", "quantity": quantity}
-        record = self._stripe.SubscriptionItem.create_usage_record(
-            subscription_item_id,
-            quantity=quantity,
-            timestamp=timestamp or int(time.time()),
-            action="increment",
-        )
-        return {"id": record.id, "quantity": record.quantity}
+        return {"id": f"mbur_local_{uuid.uuid4().hex[:8]}", "quantity": quantity}
 
     def create_checkout_session(
         self,
@@ -316,19 +270,14 @@ class StripeIntegration:
         success_url: str = "https://app.aiprod.ai/success",
         cancel_url: str = "https://app.aiprod.ai/cancel",
     ) -> Dict[str, Any]:
-        """Create a Stripe Checkout session."""
-        if not self._available:
-            return {"url": f"{success_url}?session=local_{uuid.uuid4().hex[:8]}"}
-        price_id = self.PRICE_IDS.get(tier, self.PRICE_IDS[BillingTier.PRO])
-        session = self._stripe.checkout.Session.create(
-            customer=customer_id,
-            payment_method_types=["card"],
-            line_items=[{"price": price_id, "quantity": 1}],
-            mode="subscription",
-            success_url=success_url,
-            cancel_url=cancel_url,
-        )
-        return {"url": session.url, "id": session.id}
+        return {"url": f"{success_url}?session=local_{uuid.uuid4().hex[:8]}"}
+
+
+# Import real Stripe integration from aiprod-cloud when available
+try:
+    from aiprod_cloud.stripe_integration import StripeIntegration  # noqa: PLC0415
+except ImportError:
+    StripeIntegration = _LocalStripeIntegration  # type: ignore[misc,assignment]
 
 
 # ---------------------------------------------------------------------------

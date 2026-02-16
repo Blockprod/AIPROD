@@ -35,7 +35,7 @@ class FinancialOrchestratorAdapter(BaseAdapter):
         # Default cost parameters (can be overridden in config)
         self.base_rate_min = 0.5
         self.base_rate_max = 1.2
-        self.default_backend = "runway_gen3"
+        self.default_backend = "aiprod_shdt"
     
     async def execute(self, ctx: Context) -> Context:
         """
@@ -66,10 +66,10 @@ class FinancialOrchestratorAdapter(BaseAdapter):
         # Backend selection based on budget
         if estimated_cost / budget > 0.8:
             # Over 80% of budget - use cheaper backend
-            selected_backend = "replicate_wan25"
+            selected_backend = "aiprod_shdt_fast"
         else:
             # Within budget - use premium backend
-            selected_backend = "veo3"
+            selected_backend = "aiprod_shdt_premium"
         
         cost_estimation = {
             "base_cost": duration_min * self.base_rate_min,

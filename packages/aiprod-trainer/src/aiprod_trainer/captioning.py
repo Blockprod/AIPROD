@@ -58,6 +58,8 @@ def create_captioner(captioner_type: CaptionerType, **kwargs) -> "MediaCaptionin
         case CaptionerType.QWEN_OMNI:
             return QwenOmniCaptioner(**kwargs)
         case CaptionerType.GEMINI_FLASH:
+            # Lazy import — GeminiFlashCaptioner is in an optional external module
+            from aiprod_trainer.captioning_external import GeminiFlashCaptioner  # noqa: PLC0415
             return GeminiFlashCaptioner(**kwargs)
         case _:
             raise ValueError(f"Unsupported captioner type: {captioner_type}")
@@ -116,7 +118,7 @@ class QwenOmniCaptioner(MediaCaptioningModel):
     Model: Qwen/Qwen2.5-Omni-7B (7B parameters)
     """
 
-    MODEL_ID = "Qwen/Qwen2.5-Omni-7B"
+    MODEL_ID = "models/captioning/qwen-omni-7b"
 
     # Default system prompt required by Qwen2.5-Omni for proper audio processing
     DEFAULT_SYSTEM_PROMPT = (
@@ -264,119 +266,17 @@ class QwenOmniCaptioner(MediaCaptioningModel):
             low_cpu_mem_usage=True,
             quantization_config=quantization_config,
             device_map="auto",
+            local_files_only=True,
         )
 
-        self.processor = Qwen2_5OmniProcessor.from_pretrained(self.MODEL_ID)
+        self.processor = Qwen2_5OmniProcessor.from_pretrained(
+            self.MODEL_ID,
+            local_files_only=True,
+        )
 
 
-class GeminiFlashCaptioner(MediaCaptioningModel):
-    """Audio-visual captioning using Google's Gemini Flash API.
-    Gemini Flash is a cloud-based multimodal model that natively supports
-    audio and video understanding. Requires a Google API key.
-    Note: This captioner requires the `google-generativeai` package and a valid API key.
-    Set the GEMINI_API_KEY or GOOGLE_API_KEY environment variable, or pass the key directly.
-    """
-
-    MODEL_ID = "gemini-flash-lite-latest"
-
-    def __init__(
-        self,
-        api_key: str | None = None,
-        instruction: str | None = None,
-    ):
-        """Initialize the Gemini Flash captioner.
-        Args:
-            api_key: Google API key. If not provided, will look for
-                     GEMINI_API_KEY or GOOGLE_API_KEY environment variable.
-            instruction: Custom instruction prompt. If None, uses the default instruction
-        """
-        self.instruction = instruction
-        self._init_client(api_key)
-
-    @property
-    def supports_audio(self) -> bool:
-        return True
-
-    def caption(
-        self,
-        path: str | Path,
-        fps: int = 3,  # noqa: ARG002 - kept for API compatibility
-        include_audio: bool = True,
-        clean_caption: bool = True,
-    ) -> str:
-        """Generate a caption for the given video or image.
-        Args:
-            path: Path to the video/image file to caption
-            fps: Frames per second (not used for Gemini, kept for API compatibility)
-            include_audio: Whether to include audio content in the caption
-            clean_caption: Whether to clean up the raw caption
-        Returns:
-            A string containing the generated caption
-        """
-        import time  # noqa: PLC0415
-
-        path = Path(path)
-        is_video = self._is_video_file(path)
-        use_audio = include_audio and is_video
-
-        # Use custom instruction if provided, otherwise pick appropriate default
-        if self.instruction is not None:
-            instruction = self.instruction
-        else:
-            instruction = DEFAULT_CAPTION_INSTRUCTION if use_audio else VIDEO_ONLY_CAPTION_INSTRUCTION
-
-        # Upload the file to Gemini
-        uploaded_file = self._genai.upload_file(path)
-
-        # Wait for processing to complete (videos need time to process)
-        while uploaded_file.state.name == "PROCESSING":
-            time.sleep(1)
-            uploaded_file = self._genai.get_file(uploaded_file.name)
-
-        if uploaded_file.state.name == "FAILED":
-            raise RuntimeError(f"File processing failed: {uploaded_file.state.name}")
-
-        # Generate caption
-        response = self._model.generate_content([uploaded_file, instruction])
-
-        caption_raw = response.text
-
-        # Clean up the uploaded file
-        self._genai.delete_file(uploaded_file.name)
-
-        # Clean up caption if requested
-        return self._clean_raw_caption(caption_raw) if clean_caption else caption_raw
-
-    def _init_client(self, api_key: str | None) -> None:
-        """Initialize the Gemini API client."""
-        import os  # noqa: PLC0415
-
-        try:
-            import google.generativeai as genai  # noqa: PLC0415
-        except ImportError as e:
-            raise ImportError(
-                "The `google-generativeai` package is required for Gemini Flash captioning. "
-                "Install it with: `uv pip install google-generativeai`"
-            ) from e
-
-        # Get API key from argument or environment
-        # GEMINI_API_KEY is the recommended variable, GOOGLE_API_KEY also works
-        resolved_api_key = api_key or os.environ.get("GEMINI_API_KEY") or os.environ.get("GOOGLE_API_KEY")
-
-        if not resolved_api_key:
-            raise ValueError(
-                "Gemini API key is required. Provide it via the `api_key` argument "
-                "or set the GEMINI_API_KEY or GOOGLE_API_KEY environment variable."
-            )
-
-        # Configure the genai library with the API key
-        genai.configure(api_key=resolved_api_key)
-
-        # Store reference to genai module for file operations
-        self._genai = genai
-
-        # Initialize the model
-        self._model = genai.GenerativeModel(self.MODEL_ID)
+# GeminiFlashCaptioner has been moved to captioning_external.py (optional module).
+# Import it explicitly: from aiprod_trainer.captioning_external import GeminiFlashCaptioner
 
 
 def example() -> None:

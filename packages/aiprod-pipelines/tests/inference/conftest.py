@@ -18,7 +18,7 @@ from aiprod_pipelines.inference import (
 
 @pytest.fixture
 def mock_text_encoder():
-    """Mock Gemma 3 text encoder."""
+    """Mock AIPROD text encoder."""
     class MockTextEncoder:
         def __init__(self):
             self.hidden_size = 4096

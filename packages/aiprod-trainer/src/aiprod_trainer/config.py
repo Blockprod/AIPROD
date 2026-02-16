@@ -23,7 +23,7 @@ class ModelConfig(ConfigBaseModel):
 
     text_encoder_path: str | Path | None = Field(
         default=None,
-        description="Path to text encoder (required for AIPROD/Gemma models, optional for AIPRODV/T5 models)",
+        description="Path to text encoder (required for AIPROD models)",
     )
 
     training_mode: Literal["lora", "full"] = Field(

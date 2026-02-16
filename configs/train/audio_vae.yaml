@@ -1,0 +1,63 @@
+# ============================================================================
+# AIPROD Sovereign — Audio VAE + Vocoder Training Phase 3.3
+# ============================================================================
+# Target : Entraîner le codec audio NAC propriétaire
+# GPU    : 1× A100 40GB
+# Durée  : ~2-3 jours
+# Output : models/aiprod-sovereign/aiprod-audio-vae-v1.safetensors (~200MB)
+# ============================================================================
+
+model:
+  type: "audio_vae"
+  encoder_channels: [32, 64, 128, 256]
+  latent_dim: 64
+  num_codebooks: 8
+  codebook_size: 1024
+  sample_rate: 24000
+  n_fft: 1024
+  hop_length: 256
+  n_mels: 80
+  use_snake_activation: true
+
+training:
+  epochs: 100
+  batch_size: 8
+  learning_rate: 3e-4
+  weight_decay: 0.01
+  lr_scheduler: "cosine"
+  warmup_steps: 2000
+  gradient_accumulation_steps: 2
+  mixed_precision: "bf16"
+  max_grad_norm: 1.0
+
+loss:
+  reconstruction_weight: 1.0
+  rvq_commitment_weight: 0.25
+  spectral_weight: 0.1
+  multi_scale_mel_weight: 0.05
+  adversarial_weight: 0.1
+
+data:
+  audio_dir: "data/audio"
+  clip_duration_sec: 5.0
+  sample_rate: 24000
+  num_workers: 4
+
+validation:
+  interval_epochs: 10
+  num_samples: 8
+  save_reconstructions: true
+
+checkpoints:
+  save_interval_epochs: 20
+  keep_last_n: 2
+
+output:
+  dir: "checkpoints/aiprod_audio_vae_v1"
+  final: "models/aiprod-sovereign/aiprod-audio-vae-v1.safetensors"
+
+wandb:
+  enabled: false
+  project: "aiprod-sovereign-audio"
+
+seed: 42

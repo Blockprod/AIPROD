@@ -47,8 +47,8 @@ def main():
     parser.add_argument(
         "--text-encoder-dir",
         type=str,
-        default="models/gemma-3",
-        help="Path to Gemma text encoder directory"
+        default="models/aiprod-sovereign/aiprod-text-encoder-v1",
+        help="Path to AIPROD text encoder directory"
     )
     
     parser.add_argument(

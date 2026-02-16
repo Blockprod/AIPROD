@@ -7,7 +7,7 @@ latent representations of video clips and text embeddings of their captions. The
 data can be used to accelerate training of video generation models and to save GPU memory.
 Basic usage:
     python scripts/process_dataset.py /path/to/dataset.json --resolution-buckets 768x768x49 \
-        --model-path /path/to/AIPROD2.safetensors --text-encoder-path /path/to/gemma
+        --model-path /path/to/AIPROD2.safetensors --text-encoder-path /path/to/aiprod-text-encoder
 The dataset must be a CSV, JSON, or JSONL file with columns for captions and video paths.
 """
 
@@ -197,7 +197,7 @@ def main(  # noqa: PLR0913
     ),
     text_encoder_path: str = typer.Option(
         ...,
-        help="Path to Gemma text encoder directory",
+        help="Path to AIPROD text encoder directory",
     ),
     caption_column: str = typer.Option(
         default="caption",
@@ -245,7 +245,7 @@ def main(  # noqa: PLR0913
     ),
     load_text_encoder_in_8bit: bool = typer.Option(
         default=False,
-        help="Load the Gemma text encoder in 8-bit precision to save GPU memory (requires bitsandbytes)",
+        help="Load the text encoder in 8-bit precision to save GPU memory (requires bitsandbytes)",
     ),
     reference_downscale_factor: int = typer.Option(
         default=1,
@@ -255,26 +255,26 @@ def main(  # noqa: PLR0913
 ) -> None:
     """Preprocess a video dataset by computing and saving latents and text embeddings.
     The dataset must be a CSV, JSON, or JSONL file with columns for captions and video paths.
-    This script is designed for AIPROD models which use the Gemma text encoder.
+    This script is designed for AIPROD models which use the AIPROD proprietary text encoder.
     Examples:
         # Process a dataset with AIPROD model
         python scripts/process_dataset.py dataset.json --resolution-buckets 768x768x25 \\
-            --model-path /path/to/AIPROD2.safetensors --text-encoder-path /path/to/gemma
+            --model-path /path/to/AIPROD2.safetensors --text-encoder-path /path/to/aiprod-text-encoder
         # Process dataset with custom column names
         python scripts/process_dataset.py dataset.json --resolution-buckets 768x768x25 \\
-            --model-path /path/to/AIPROD2.safetensors --text-encoder-path /path/to/gemma \\
+            --model-path /path/to/AIPROD2.safetensors --text-encoder-path /path/to/aiprod-text-encoder \\
             --caption-column "text" --video-column "video_path"
         # Process dataset with reference videos for IC-LoRA training
         python scripts/process_dataset.py dataset.json --resolution-buckets 768x768x25 \\
-            --model-path /path/to/AIPROD2.safetensors --text-encoder-path /path/to/gemma \\
+            --model-path /path/to/AIPROD2.safetensors --text-encoder-path /path/to/aiprod-text-encoder \\
             --reference-column "reference_path"
         # Process dataset with scaled reference videos (half resolution) for efficient IC-LoRA
         python scripts/process_dataset.py dataset.json --resolution-buckets 768x768x25 \\
-            --model-path /path/to/AIPROD2.safetensors --text-encoder-path /path/to/gemma \\
+            --model-path /path/to/AIPROD2.safetensors --text-encoder-path /path/to/aiprod-text-encoder \\
             --reference-column "reference_path" --reference-downscale-factor 2
         # Process dataset with audio for audio-video training
         python scripts/process_dataset.py dataset.json --resolution-buckets 768x512x97 \\
-            --model-path /path/to/AIPROD2.safetensors --text-encoder-path /path/to/gemma \\
+            --model-path /path/to/AIPROD2.safetensors --text-encoder-path /path/to/aiprod-text-encoder \\
             --with-audio
     """
     parsed_resolution_buckets = parse_resolution_buckets(resolution_buckets)

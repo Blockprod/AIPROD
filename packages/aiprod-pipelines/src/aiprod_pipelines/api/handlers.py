@@ -161,7 +161,7 @@ async def handle_financial_optimization(ctx: Context, adapters: Dict[str, Any]) 
         ctx["memory"]["cost_estimation"] = {
             "total_estimated": estimated_cost,
             "cost_per_minute": 1.0,
-            "selected_backend": "runway_gen3",  # Default
+            "selected_backend": "aiprod_shdt",  # Sovereign SHDT default
             "confidence": 0.8
         }
     

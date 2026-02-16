@@ -87,10 +87,10 @@ def basic_arg_parser() -> argparse.ArgumentParser:
         help="Path to AIPROD model checkpoint (.safetensors file).",
     )
     parser.add_argument(
-        "--gemma-root",
+        "--text-encoder-root",
         type=resolve_path,
         required=True,
-        help="Path to the root directory containing the Gemma text encoder model files.",
+        help="Path to the root directory containing the AIPROD text encoder model files.",
     )
     parser.add_argument(
         "--prompt",

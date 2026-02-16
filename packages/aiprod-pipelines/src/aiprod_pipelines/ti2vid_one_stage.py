@@ -11,7 +11,7 @@ from aiprod_core.components.schedulers import AIPROD2Scheduler
 from aiprod_core.loader import LoraPathStrengthAndSDOps
 from aiprod_core.model.audio_vae import decode_audio as vae_decode_audio
 from aiprod_core.model.video_vae import decode_video as vae_decode_video
-from aiprod_core.text_encoders.gemma import encode_text
+from aiprod_core.model.text_encoder import encode_text
 from aiprod_core.types import LatentState, VideoPixelShape
 from aiprod_pipelines.utils import ModelLedger
 from aiprod_pipelines.utils.args import default_1_stage_arg_parser
@@ -43,7 +43,7 @@ class TI2VidOneStagePipeline:
     def __init__(
         self,
         checkpoint_path: str,
-        gemma_root: str,
+        text_encoder_root: str,
         loras: list[LoraPathStrengthAndSDOps],
         device: torch.device = device,
         fp8transformer: bool = False,
@@ -54,7 +54,7 @@ class TI2VidOneStagePipeline:
             dtype=self.dtype,
             device=device,
             checkpoint_path=checkpoint_path,
-            gemma_root_path=gemma_root,
+            text_encoder_path=text_encoder_root,
             loras=loras,
             fp8transformer=fp8transformer,
         )
@@ -167,7 +167,7 @@ def main() -> None:
     args = parser.parse_args()
     pipeline = TI2VidOneStagePipeline(
         checkpoint_path=args.checkpoint_path,
-        gemma_root=args.gemma_root,
+        text_encoder_root=args.text_encoder_root,
         loras=args.lora,
         fp8transformer=args.enable_fp8,
     )

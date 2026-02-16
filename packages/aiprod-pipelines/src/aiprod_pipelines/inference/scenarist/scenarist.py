@@ -387,7 +387,7 @@ Rules:
 
     def __init__(
         self,
-        model_name: str = "mistralai/Mistral-7B-Instruct-v0.3",
+        model_name: str = "models/scenarist/mistral-7b",
         device: str = "auto",
         max_new_tokens: int = 2048,
         temperature: float = 0.7,
@@ -406,7 +406,9 @@ Rules:
             self._AutoModel = AutoModelForCausalLM
             self._AutoTokenizer = AutoTokenizer
             self._available = True
-        except ImportError:
+        except (ImportError, AttributeError, Exception):
+            # AttributeError: triton stub modules on Windows
+            # Any other error during transformers import
             pass
 
     @property
@@ -420,11 +422,15 @@ Rules:
         if self._model is not None:
             return True
         try:
-            self._tokenizer = self._AutoTokenizer.from_pretrained(self._model_name)
+            self._tokenizer = self._AutoTokenizer.from_pretrained(
+                self._model_name,
+                local_files_only=True,
+            )
             self._model = self._AutoModel.from_pretrained(
                 self._model_name,
                 torch_dtype="auto",
                 device_map=self._device,
+                local_files_only=True,
             )
             return True
         except Exception:

@@ -59,8 +59,8 @@ class ModelLedger:
         (transformer, video VAE, audio VAE, text encoder, vocoder). If ``None``, the
         corresponding builders are not created and calling those methods will raise
         a :class:`ValueError`.
-    gemma_root_path:
-        Base path to Gemma-compatible CLIP/text encoder weights. Required to
+    text_encoder_path:
+        Base path to AIPROD text encoder weights. Required to
         initialize the text encoder builder; if omitted, :meth:`text_encoder` cannot be used.
     spatial_upsampler_path:
         Optional path to a latent upsampler checkpoint. If provided, the
@@ -84,7 +84,7 @@ class ModelLedger:
         dtype: torch.dtype,
         device: torch.device,
         checkpoint_path: str | None = None,
-        gemma_root_path: str | None = None,
+        text_encoder_path: str | None = None,
         spatial_upsampler_path: str | None = None,
         loras: LoraPathStrengthAndSDOps | None = None,
         registry: Registry | None = None,
@@ -93,7 +93,7 @@ class ModelLedger:
         self.dtype = dtype
         self.device = device
         self.checkpoint_path = checkpoint_path
-        self.gemma_root_path = gemma_root_path
+        self.text_encoder_path = text_encoder_path
         self.spatial_upsampler_path = spatial_upsampler_path
         self.loras = loras or ()
         self.registry = registry or DummyRegistry()
@@ -138,10 +138,10 @@ class ModelLedger:
                 registry=self.registry,
             )
 
-            if self.gemma_root_path is not None:
+            if self.text_encoder_path is not None:
                 # Build text encoder using LLMBridge (proprietary wrapper)
                 self.text_encoder_config = LLMBridgeConfig(
-                    model_name=self.gemma_root_path,
+                    model_name=self.text_encoder_path,
                 )
                 self._has_text_encoder = True
             else:
@@ -165,7 +165,7 @@ class ModelLedger:
             dtype=self.dtype,
             device=self.device,
             checkpoint_path=self.checkpoint_path,
-            gemma_root_path=self.gemma_root_path,
+            text_encoder_path=self.text_encoder_path,
             spatial_upsampler_path=self.spatial_upsampler_path,
             loras=(*self.loras, *loras),
             registry=self.registry,
@@ -210,7 +210,7 @@ class ModelLedger:
     def text_encoder(self) -> LLMBridge:
         if not getattr(self, "_has_text_encoder", False):
             raise ValueError(
-                "Text encoder not initialized. Please provide a checkpoint path and gemma root path to the "
+                "Text encoder not initialized. Please provide a checkpoint path and text_encoder_path to the "
                 "ModelLedger constructor."
             )
 

@@ -18,20 +18,19 @@ COPY packages/aiprod-pipelines/pyproject.toml /app/
 COPY packages/aiprod-pipelines/src /app/src
 COPY packages/aiprod-core/src /app/aiprod_core
 
-# Install Python dependencies
+# Install Python dependencies (souverain — zéro package cloud)
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir \
     fastapi==0.104.1 \
     uvicorn[standard]==0.24.0 \
-    google-cloud-storage==2.10.0 \
-    google-cloud-logging==3.8.0 \
-    google-cloud-monitoring==2.16.0 \
-    google-generativeai==0.3.0 \
     pydantic==2.5.0 \
     cachetools==5.3.2 \
     aiohttp==3.9.1 \
     pytest==7.4.3 \
     pytest-asyncio==0.21.1
+
+# NOTE: google-cloud-storage, google-cloud-logging, google-cloud-monitoring,
+# google-generativeai ont été retirés (souveraineté Phase 1).
 
 # Copy application code
 COPY packages/aiprod-pipelines/src/aiprod_pipelines /app/aiprod_pipelines

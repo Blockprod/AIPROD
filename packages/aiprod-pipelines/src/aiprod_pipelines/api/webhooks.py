@@ -64,6 +64,19 @@ class WebhookEndpoint:
         if not self.secret:
             self.secret = uuid.uuid4().hex
 
+    def matches(self, event: str) -> bool:
+        """Check if this endpoint should receive the given event."""
+        if not self.events:
+            return False
+        for e in self.events:
+            if isinstance(e, str):
+                if e == "*" or e == event:
+                    return True
+            elif hasattr(e, 'value'):
+                if e.value == "*" or e.value == event:
+                    return True
+        return False
+
 
 @dataclass
 class WebhookPayload:
@@ -80,13 +93,25 @@ class WebhookPayload:
             self.timestamp = time.time()
 
     def to_json(self) -> str:
-        return json.dumps({
-            "event": self.event.value,
+        return json.dumps(self.to_dict(), default=str)
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert payload to dictionary."""
+        event_val = self.event.value if hasattr(self.event, 'value') else str(self.event)
+        return {
+            "event": event_val,
             "job_id": self.job_id,
             "tenant_id": self.tenant_id,
             "timestamp": self.timestamp,
             "data": self.data,
-        }, default=str)
+            "payload_id": str(uuid.uuid4()),
+        }
+
+    def sign(self, secret: str) -> str:
+        """Sign the payload with HMAC-SHA256."""
+        body = self.to_json().encode("utf-8")
+        sig = hmac.new(secret.encode("utf-8"), body, hashlib.sha256).hexdigest()
+        return f"sha256={sig}"
 
 
 @dataclass

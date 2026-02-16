@@ -20,7 +20,7 @@
    - InferenceGraph (DAG executor with Kahn's algorithm)
 
 ✅ aiprod_pipelines/inference/nodes.py                    (400 lines)
-   - TextEncodeNode (Gemma 3 text encoding)
+   - TextEncodeNode (AIPROD text encoding)
    - DenoiseNode (iterative refinement + guidance)
    - UpsampleNode (2x spatial magnification)
    - DecodeVideoNode (VAE decoding with tiling)

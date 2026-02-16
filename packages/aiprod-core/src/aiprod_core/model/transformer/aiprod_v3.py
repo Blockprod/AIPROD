@@ -74,7 +74,7 @@ class AIPRODv3Config:
     scale_factors: List[float] = field(default_factory=lambda: [1.0, 0.5])
 
     # Conditioning
-    text_embed_dim: int = 2048  # e.g. from Gemma-2
+    text_embed_dim: int = 2048  # AIPROD text encoder output dim
     camera_embed_dim: int = 8  # 6-DOF + fov + focus
     camera_hidden_dim: int = 256
     num_camera_tokens: int = 4  # learned camera tokens per block

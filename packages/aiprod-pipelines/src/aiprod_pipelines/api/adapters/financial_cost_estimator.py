@@ -291,16 +291,16 @@ class RealisticCostEstimator:
             client_budget: Client's budget in USD
             
         Returns:
-            Recommended backend: "veo3", "runway_gen3", or "replicate_wan25"
+            Recommended backend: "aiprod_shdt_premium", "aiprod_shdt", or "aiprod_shdt_fast"
         """
         budget_utilization = estimated_cost / client_budget if client_budget > 0 else 0
         
         if budget_utilization >= 0.8:
-            # Over 80% budget = use cheapest
-            return "replicate_wan25"
+            # Over 80% budget = use fastest/cheapest tier
+            return "aiprod_shdt_fast"
         elif budget_utilization >= 0.5:
-            # Moderate usage = balanced option
-            return "runway_gen3"
+            # Moderate usage = standard SHDT
+            return "aiprod_shdt"
         else:
-            # Well under budget = premium option
-            return "veo3"
+            # Well under budget = premium quality (more steps)
+            return "aiprod_shdt_premium"

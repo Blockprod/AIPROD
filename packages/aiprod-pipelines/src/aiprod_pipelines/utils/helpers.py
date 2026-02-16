@@ -21,7 +21,7 @@ from aiprod_core.guidance.perturbations import (
 )
 from aiprod_core.model.transformer import Modality, X0Model
 from aiprod_core.model.video_vae import VideoEncoder
-from aiprod_core.text_encoders.gemma import GemmaTextEncoderModelBase  # noqa: F401 — backward compat path
+from aiprod_core.model.text_encoder import LLMBridge  # noqa: F401
 from aiprod_core.tools import AudioLatentTools, LatentTools, VideoLatentTools
 from aiprod_core.types import AudioLatentShape, LatentState, VideoLatentShape, VideoPixelShape
 from aiprod_core.utils import to_denoised, to_velocity
@@ -544,7 +544,7 @@ _UNICODE_REPLACEMENTS = str.maketrans("\u2018\u2019\u201c\u201d\u2014\u2013\u00a
 
 
 def clean_response(text: str) -> str:
-    """Clean a response from curly quotes and leading non-letter characters which Gemma tends to insert."""
+    """Clean a response from curly quotes and leading non-letter characters which LLMs tend to insert."""
     text = text.translate(_UNICODE_REPLACEMENTS)
 
     # Remove leading non-letter characters
@@ -555,7 +555,7 @@ def clean_response(text: str) -> str:
 
 
 def generate_enhanced_prompt(
-    text_encoder: GemmaTextEncoderModelBase,
+    text_encoder: LLMBridge,
     prompt: str,
     image_path: str | None = None,
     image_long_side: int = 896,

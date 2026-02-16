@@ -1,10 +1,10 @@
 # =============================================================================
-# AIPROD GPU Production Dockerfile
+# AIPROD SOVEREIGN GPU Production Dockerfile
 # =============================================================================
+# 100% souverain : zéro dépendance SaaS, zéro appel réseau en runtime.
 # Multi-stage build: compile → runtime
 # Base: nvidia/cuda:12.4.0-devel-ubuntu22.04
-# Target image: ~15-20 GB with PyTorch + CUDA + all models
-# Health check: /health endpoint with GPU VRAM probe
+# Modèles embarqués dans l'image (build-time, pas runtime download)
 # =============================================================================
 
 # ---- Stage 1: Builder -------------------------------------------------------
@@ -37,6 +37,7 @@ COPY requirements.txt /tmp/requirements.txt
 RUN pip install -r /tmp/requirements.txt
 
 # Install extra production deps (API gateway, monitoring, registry)
+# NOTE: google-cloud-storage et boto3 retirés (souveraineté Phase 1)
 RUN pip install \
     fastapi==0.115.0 \
     uvicorn[standard]==0.32.0 \
@@ -50,9 +51,7 @@ RUN pip install \
     mlflow==2.19.0 \
     redis==5.2.0 \
     celery[redis]==5.4.0 \
-    psycopg2-binary==2.9.10 \
-    google-cloud-storage==2.19.0 \
-    boto3==1.35.0
+    psycopg2-binary==2.9.10
 
 # Copy and install AIPROD packages
 COPY packages/aiprod-core /tmp/aiprod-core
@@ -98,6 +97,16 @@ COPY packages/aiprod-core/src/aiprod_core /app/aiprod_core
 COPY packages/aiprod-pipelines/src/aiprod_pipelines /app/aiprod_pipelines
 COPY packages/aiprod-trainer/src/aiprod_trainer /app/aiprod_trainer
 COPY config /app/config
+
+# Copy sovereign models into image (build-time, NOT runtime download)
+COPY models/aiprod-sovereign/ /app/models/aiprod-sovereign/
+
+# Sovereign config
+ENV AIPROD_CONFIG=/app/config/AIPROD_V34_SOVEREIGN.json
+ENV AIPROD_MODELS_DIR=/app/models/aiprod-sovereign
+ENV AIPROD_OFFLINE=1
+ENV TRANSFORMERS_OFFLINE=1
+ENV HF_HUB_OFFLINE=1
 
 # Model cache directory (models pre-loaded or mounted as volume)
 RUN mkdir -p /app/models /app/logs /app/tmp \

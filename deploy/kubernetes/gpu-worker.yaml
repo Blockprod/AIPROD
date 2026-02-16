@@ -39,7 +39,7 @@ spec:
       terminationGracePeriodSeconds: 300  # allow in-flight jobs to complete
       containers:
         - name: worker
-          image: gcr.io/aiprod/gpu-worker:latest
+          image: registry.aiprod.local/gpu-worker:latest
           ports:
             - name: metrics
               containerPort: 9090
@@ -59,8 +59,12 @@ spec:
               value: "http://mlflow.aiprod-production:5000"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: "http://otel-collector.aiprod-production:4317"
-            - name: GCS_BUCKET
-              value: "aiprod-videos-production"
+            - name: AIPROD_OFFLINE
+              value: "1"
+            - name: TRANSFORMERS_OFFLINE
+              value: "1"
+            - name: HF_HUB_OFFLINE
+              value: "1"
           resources:
             requests:
               cpu: "4"
@@ -110,7 +114,7 @@ spec:
             medium: Memory
             sizeLimit: 16Gi
       nodeSelector:
-        cloud.google.com/gke-accelerator: nvidia-tesla-a100
+        gpu-type: nvidia  # Generic selector — works with any NVIDIA GPU node
       tolerations:
         - key: nvidia.com/gpu
           operator: Exists
@@ -188,8 +192,6 @@ kind: ServiceAccount
 metadata:
   name: aiprod-worker-sa
   namespace: aiprod-production
-  annotations:
-    iam.gke.io/gcp-service-account: aiprod-worker@aiprod.iam.gserviceaccount.com
 ---
 # ServiceAccount for API gateway
 apiVersion: v1
@@ -197,5 +199,3 @@ kind: ServiceAccount
 metadata:
   name: aiprod-gateway-sa
   namespace: aiprod-production
-  annotations:
-    iam.gke.io/gcp-service-account: aiprod-gateway@aiprod.iam.gserviceaccount.com

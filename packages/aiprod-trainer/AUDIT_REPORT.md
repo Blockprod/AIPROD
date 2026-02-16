@@ -13,7 +13,7 @@ The `aiprod-trainer` package is a **fully functional fine-tuning toolkit** for t
 **Key findings:**
 - **100% real implementation** — No stubs, no placeholder code, no TODO-only files
 - **Heavy dependency on `aiprod-core`** — All model architectures (transformer, VAE, text encoder, scheduler, patchifier) come from the sibling `aiprod-core` package
-- **Hardcoded external model references:** Qwen/Qwen2.5-Omni-7B, Gemma 3, Gemini Flash, AIPROD/LTX-Video
+- **Hardcoded external model references:** Qwen/Qwen2.5-Omni-7B, AIPROD Text Encoder, Gemini Flash, AIPROD/LTX-Video
 - **Training paradigm:** Fine-tuning via LoRA (PEFT) on precomputed latents using flow matching
 - **Total source files:** 42 files (16 library modules, 8 scripts, 3 YAML configs, 4 accelerate configs, 10 test files, 1 template)
 
@@ -77,13 +77,13 @@ The `aiprod-trainer` package is a **fully functional fine-tuning toolkit** for t
 
 ---
 
-#### 6. `src/aiprod_trainer/gemma_8bit.py`
+#### 6. `src/aiprod_trainer/text_encoder_8bit.py`
 - **Lines:** ~135
-- **Summary:** Loads the Gemma text encoder in 8-bit precision using bitsandbytes quantization. Wraps `aiprod_core`'s `AVGemmaTextEncoderModel` with HuggingFace's `Gemma3ForConditionalGeneration` loaded in INT8. Handles weight loading from safetensors checkpoints.
+- **Summary:** Loads the AIPROD text encoder in 8-bit precision using bitsandbytes quantization. Wraps `aiprod_core`'s `LLMBridge` with HuggingFace's `AutoModel` loaded in INT8. Handles weight loading from safetensors checkpoints.
 - **Implementation:** ✅ Real, functional
-- **External imports:** `transformers` (Gemma3ForConditionalGeneration, BitsAndBytesConfig), `bitsandbytes`, `aiprod_core` (SafetensorsModelStateDictLoader, AVGemmaTextEncoderModel, GemmaFeaturesExtractorProjLinear, AIPRODVGemmaTokenizer)
+- **External imports:** `transformers` (AutoModel, BitsAndBytesConfig), `bitsandbytes`, `aiprod_core` (SafetensorsModelStateDictLoader, LLMBridge)
 - **Hardcoded model names:**
-  - References **Gemma 3** architecture via `Gemma3ForConditionalGeneration`
+  - References AIPROD text encoder architecture via `AutoModel`
 - **Training type:** Model loading utility (loads existing pretrained text encoder)
 
 ---
@@ -112,7 +112,7 @@ The `aiprod-trainer` package is a **fully functional fine-tuning toolkit** for t
 - **Lines:** ~310
 - **Summary:** Unified model loading using `aiprod_core`'s `SingleGPUModelBuilder`. Provides individual loader functions: `load_transformer()`, `load_video_vae_encoder()`, `load_video_vae_decoder()`, `load_audio_vae_encoder()`, `load_audio_vae_decoder()`, `load_vocoder()`, `load_text_encoder()`. All models are loaded from a single `.safetensors` checkpoint file.
 - **Implementation:** ✅ Real, functional
-- **External imports:** `aiprod_core` (SingleGPUModelBuilder, Transformer3DModel, CausalVideoAutoencoder variants, AudioVAEModel variants, BigVGAN16khzModel, AVGemmaTextEncoderModel, AIPRODVGemmaTokenizer)
+- **External imports:** `aiprod_core` (SingleGPUModelBuilder, Transformer3DModel, CausalVideoAutoencoder variants, AudioVAEModel variants, BigVGAN16khzModel, LLMBridge, AIPRODTextEncoder)
 - **Hardcoded model names:** None (checkpoint path is parameter)
 - **Training type:** Model loading (loads existing pretrained model for fine-tuning)
 
@@ -151,7 +151,7 @@ The `aiprod-trainer` package is a **fully functional fine-tuning toolkit** for t
 #### 13. `src/aiprod_trainer/trainer.py`
 - **Lines:** 978
 - **Summary:** **Main training orchestration class** `AIPRODvTrainer`. Implements the full training loop:
-  1. Loads Gemma text encoder → caches validation prompt embeddings → unloads Gemma (memory optimization)
+  1. Loads AIPROD text encoder → caches validation prompt embeddings → unloads text encoder (memory optimization)
   2. Loads transformer + VAE via `model_loader`
   3. Optionally quantizes transformer via `quantization.py`
   4. Applies LoRA via PEFT (`peft.LoraConfig`, `get_peft_model`)
@@ -331,9 +331,9 @@ The `aiprod-trainer` package is a **fully functional fine-tuning toolkit** for t
 
 #### 29. `scripts/process_captions.py`
 - **Lines:** 429
-- **Summary:** `CaptionsDataset` loads captions from CSV/JSON/JSONL metadata files. Cleans LLM-generated prefixes (e.g., "Here is a caption:" patterns). Computes text embeddings through Gemma text encoder via `_preprocess_text()` and saves as `.pt` files. Supports optional LoRA trigger word prepending and 8-bit text encoder loading.
+- **Summary:** `CaptionsDataset` loads captions from CSV/JSON/JSONL metadata files. Cleans LLM-generated prefixes (e.g., "Here is a caption:" patterns). Computes text embeddings through AIPROD text encoder via `_preprocess_text()` and saves as `.pt` files. Supports optional LoRA trigger word prepending and 8-bit text encoder loading.
 - **Implementation:** ✅ Real, functional
-- **External imports:** `torch`, `aiprod_core` (text encoder), `aiprod_trainer` (model_loader, gemma_8bit)
+- **External imports:** `torch`, `aiprod_core` (text encoder), `aiprod_trainer` (model_loader, text_encoder_8bit)
 - **Hardcoded model names:** None (encoder path from CLI)
 - **Training type:** Preprocessing (text embedding computation)
 
@@ -509,7 +509,7 @@ The `aiprod-trainer` package is a **fully functional fine-tuning toolkit** for t
 |-------|-----------------|---------|
 | **Qwen/Qwen2.5-Omni-7B** | `captioning.py` line ~65 | Auto-captioning (local multimodal model) |
 | **gemini-2.0-flash-lite** | `captioning.py` line ~180 | Auto-captioning (Google API) |
-| **Gemma 3** | `gemma_8bit.py`, `model_loader.py` | Text encoder for AIPROD |
+| **AIPROD Text Encoder** | `text_encoder_8bit.py`, `model_loader.py` | Text encoder for AIPROD |
 | **AIPROD/LTX-Video** (transformer + VAE) | `model_loader.py`, `trainer.py`, `validation_sampler.py` | Base model being fine-tuned |
 | **BigVGAN-16kHz** | `model_loader.py` | Audio vocoder |
 
@@ -522,7 +522,7 @@ The `aiprod-trainer` package is a **fully functional fine-tuning toolkit** for t
 | `accelerate` | Distributed training (DDP, FSDP) |
 | `optimum-quanto` | Weight quantization (int8/int4/fp8) |
 | `bitsandbytes` | 8-bit optimizer, 8-bit model loading |
-| `transformers` | Gemma3, Qwen2.5-Omni loading |
+| `transformers` | AIPROD Text Encoder, Qwen2.5-Omni loading |
 | `wandb` | Experiment tracking |
 | `huggingface-hub` | Model upload |
 | `scenedetect` | Video scene splitting |
@@ -560,7 +560,7 @@ The `aiprod-trainer` package is a **fully functional fine-tuning toolkit** for t
 
 3. Training operates on **precomputed latents** — raw videos are VAE-encoded offline, and the trainer only learns LoRA adapter weights (or optionally fine-tunes full transformer weights) in latent space.
 
-4. The text encoder (Gemma) is **frozen** during training — it's loaded only to precompute text embeddings, then immediately unloaded from GPU.
+4. The text encoder (AIPROD LLMBridge) is **frozen** during training — it's loaded only to precompute text embeddings, then immediately unloaded from GPU.
 
 5. The VAE encoder/decoder are **frozen** — only the transformer backbone receives gradient updates.
 

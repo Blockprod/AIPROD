@@ -31,7 +31,7 @@ spec:
       terminationGracePeriodSeconds: 60
       containers:
         - name: gateway
-          image: gcr.io/aiprod/gateway:latest
+          image: registry.aiprod.local/gateway:latest
           ports:
             - name: http
               containerPort: 8080
@@ -102,8 +102,7 @@ metadata:
   namespace: aiprod-production
   labels:
     app.kubernetes.io/name: aiprod-gateway
-  annotations:
-    cloud.google.com/neg: '{"ingress": true}'
+  annotations: {}
 spec:
   type: LoadBalancer
   selector:

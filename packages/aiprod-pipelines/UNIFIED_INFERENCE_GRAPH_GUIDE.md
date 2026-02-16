@@ -157,7 +157,7 @@ result = graph.run(prompt="A cat")
 ### TextEncodeNode
 - **Inputs:** `prompt` (str or list[str])
 - **Outputs:** `embeddings` [batch, seq_len, hidden], `embeddings_pooled` [batch, hidden]
-- **Model:** Gemma 3 text encoder
+- **Model:** AIPROD text encoder
 - **Features:** Negative prompt support for CFG
 
 ### DenoiseNode
@@ -209,7 +209,7 @@ from aiprod_pipelines.inference import preset
 
 graph = preset(
     "t2v_one_stage",
-    text_encoder=gemma3,
+    text_encoder=aiprod_text_encoder,
     model=transformer,
     scheduler=euler_scheduler,
     vae_decoder=vae,
@@ -239,7 +239,7 @@ encode → denoise → decode → cleanup
 ```python
 graph = preset(
     "t2v_two_stages",
-    text_encoder=gemma3,
+    text_encoder=aiprod_text_encoder,
     model=transformer,
     scheduler=euler_scheduler,
     vae_decoder=vae,
@@ -273,7 +273,7 @@ encode → denoise_stage1 → decode_stage1 → upsample → denoise_stage2 → 
 ```python
 graph = preset(
     "distilled_fast",
-    text_encoder=gemma3,
+    text_encoder=aiprod_text_encoder,
     model=transformer,
     scheduler=euler_scheduler,
     vae_decoder=vae,
@@ -296,7 +296,7 @@ result = graph.run(
 ```python
 graph = preset(
     "ic_lora",
-    text_encoder=gemma3,
+    text_encoder=aiprod_text_encoder,
     model=transformer,
     scheduler=euler_scheduler,
     vae_decoder=vae,
@@ -321,7 +321,7 @@ result = graph.run(
 ```python
 graph = preset(
     "keyframe",
-    text_encoder=gemma3,
+    text_encoder=aiprod_text_encoder,
     model=transformer,
     scheduler=euler_scheduler,
     vae_decoder=vae,
@@ -380,7 +380,7 @@ from aiprod_pipelines.inference import InferenceGraph, TextEncodeNode, DenoiseNo
 
 # Build custom graph
 graph = InferenceGraph("quality_optimized_t2v")
-graph.add_node("encode", TextEncodeNode(gemma3))
+graph.add_node("encode", TextEncodeNode(aiprod_text_encoder))
 graph.add_node("denoise", DenoiseNode(model, scheduler))
 graph.add_node("decode", DecodeVideoNode(vae))
 graph.add_node("assess", QualityAssessmentNode(quality_model))
@@ -426,7 +426,7 @@ def test_t2v_two_stages_full_pipeline():
     """Integration test: 5 nodes in sequence."""
     graph = preset(
         "t2v_two_stages",
-        text_encoder=gemma3,
+        text_encoder=aiprod_text_encoder,
         model=transformer,
         scheduler=scheduler,
         vae_decoder=vae,

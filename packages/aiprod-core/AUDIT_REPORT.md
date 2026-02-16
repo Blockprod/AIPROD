@@ -12,7 +12,7 @@ The package ships two **entirely separate** implementations under the same roof:
 
 | Layer | Location | Status | Quality |
 |---|---|---|---|
-| **Production engine** | `src/aiprod_core/` | Real, functional, production-grade | High — well-structured diffusion transformer with audio+video VAEs, Gemma-3 text encoding, tiled decoding, LoRA, fp8, etc. |
+| **Production engine** | `src/aiprod_core/` | Real, functional, production-grade | High — well-structured diffusion transformer with audio+video VAEs, AIPROD text encoding (LLMBridge), tiled decoding, LoRA, fp8, etc. |
 | **Prototype / toy models** | `src/models/`, `src/training/`, `src/data/` | Self-contained toy implementations | Low — hard-coded fake data, no real tokenizer, char-level "multilingual" encoder, no connection to the production engine |
 
 **Nothing in `src/models/`, `src/training/`, or `src/data/` imports from `src/aiprod_core/`.** They are dead code relative to the production engine.
@@ -161,24 +161,24 @@ The package ships two **entirely separate** implementations under the same roof:
 | 72 | `sampling.py` | ~140 | `SpaceToDepthDownsample`, `DepthToSpaceUpsample` — pixel-shuffle based up/down sampling for video | ✅ Real | torch | — |
 | 73 | `tiling.py` | ~370 | `TilingConfig`, `SpatialTilingConfig`, `TemporalTilingConfig`, `Tile`, `create_tiles` — tiled processing infrastructure with trapezoidal blending masks | ✅ Real | torch | — |
 
-### 12. Text Encoders — Gemma (`src/aiprod_core/text_encoders/gemma/`)
+### 12. Text Encoders — AIPROD LLMBridge (`src/aiprod_core/text_encoders/`)
 
 | # | File | Lines | Summary | Real? | External Imports | Hardcoded Models |
 |---|---|---|---|---|---|---|
 | 74 | `text_encoders/__init__.py` | 1 | Docstring only | — | — | — |
-| 75 | `gemma/__init__.py` | ~20 | Comprehensive exports of all Gemma components | — | — | — |
-| 76 | `config.py` | ~75 | `Gemma3ConfigData`, **`GEMMA3_CONFIG_FOR_AIPROD`** — hardcoded Gemma 3 architecture config | ✅ Real | transformers (Gemma3Config) | **Gemma 3** (hidden_size=3840, num_hidden_layers=48, vocab_size=262208, intermediate_size=24576) |
+| 75 | `__init__.py` | ~20 | Comprehensive exports of all text encoder components | — | — | — |
+| 76 | `config.py` | ~75 | `TextEncoderConfigData`, **`TEXT_ENCODER_CONFIG_FOR_AIPROD`** — AIPROD text encoder architecture config | ✅ Real | transformers (AutoConfig) | **AIPROD** (hidden_size=3840, num_hidden_layers=48, vocab_size=262208, intermediate_size=24576) |
 | 77 | `embeddings_connector.py` | 211 | `Embeddings1DConnector`, `_BasicTransformerBlock1D` — 1D transformer connector with RoPE and learnable registers | ✅ Real | torch | — |
-| 78 | `feature_extractor.py` | ~40 | `GemmaFeaturesExtractorProjLinear` — projects Gemma hidden states (3840×49 → 3840) | ✅ Real | torch | — |
-| 79 | `tokenizer.py` | ~75 | `AIPRODVGemmaTokenizer` — wraps HuggingFace AutoTokenizer with system-prompt template | ✅ Real | transformers (AutoTokenizer) | — |
+| 78 | `feature_extractor.py` | ~40 | `FeaturesExtractorProjLinear` — projects text encoder hidden states (3840×49 → 3840) | ✅ Real | torch | — |
+| 79 | `tokenizer.py` | ~75 | `AIPRODTextTokenizer` — wraps HuggingFace AutoTokenizer with system-prompt template | ✅ Real | transformers (AutoTokenizer) | — |
 
-### 13. Text Encoders — Gemma Encoders (`src/aiprod_core/text_encoders/gemma/encoders/`)
+### 13. Text Encoders — AIPROD Encoders (`src/aiprod_core/text_encoders/encoders/`)
 
 | # | File | Lines | Summary | Real? | External Imports | Hardcoded Models |
 |---|---|---|---|---|---|---|
-| 80 | `base_encoder.py` | 310 | `GemmaTextEncoderModelBase` — base class using `Gemma3ForConditionalGeneration`, text preprocessing with system prompts | ✅ Real | torch, transformers (Gemma3ForConditionalGeneration, AutoImageProcessor, Gemma3Processor) | **Gemma 3** |
-| 81 | `av_encoder.py` | ~170 | `AVGemmaTextEncoderModel`, `AVGemmaTextEncoderModelConfigurator`, AV_GEMMA_TEXT_ENCODER_KEY_OPS + GEMMA_MODEL_OPS key maps | ✅ Real | torch, transformers (Gemma3Config) | **Gemma 3** (via GEMMA3_CONFIG_FOR_AIPROD) |
-| 82 | `video_only_encoder.py` | ~95 | `VideoGemmaTextEncoderModel`, `VideoGemmaTextEncoderModelConfigurator`, VIDEO_ONLY_GEMMA_TEXT_ENCODER_KEY_OPS | ✅ Real | torch, transformers (Gemma3ForConditionalGeneration) | **Gemma 3** |
+| 80 | `base_encoder.py` | 310 | `TextEncoderModelBase` — base class using `AutoModel`, text preprocessing with system prompts | ✅ Real | torch, transformers (AutoModel, AutoImageProcessor, AutoProcessor) | **AIPROD** |
+| 81 | `av_encoder.py` | ~170 | `AIPRODTextEncoderModel`, `AIPRODTextEncoderModelConfigurator`, AIPROD_TEXT_ENCODER_KEY_OPS + TEXT_ENCODER_MODEL_OPS key maps | ✅ Real | torch, transformers (AutoConfig) | **AIPROD** (via TEXT_ENCODER_CONFIG_FOR_AIPROD) |
+| 82 | `video_only_encoder.py` | ~95 | `VideoTextEncoderModel`, `VideoTextEncoderModelConfigurator`, VIDEO_ONLY_TEXT_ENCODER_KEY_OPS | ✅ Real | torch, transformers (AutoModel) | **AIPROD** |
 
 ### 14. Tests (`tests/`)
 
@@ -238,7 +238,7 @@ These files live under `src/models/`, `src/training/`, and `src/data/`. They imp
 | `torch ~2.7` | Everywhere — core tensor ops, nn.Module, autograd |
 | `torchaudio` | Audio VAE: mel spectrogram, InverseMelScale, GriffinLim, resampling |
 | `einops` | Rearrange operations in patchifiers, video VAE, pixel shuffle |
-| `transformers ~4.57` | `Gemma3ForConditionalGeneration`, `Gemma3Config`, `Gemma3Processor`, `AutoTokenizer`, `AutoImageProcessor` |
+| `transformers ~4.57` | `AutoModel`, `AutoConfig`, `AutoProcessor`, `AutoTokenizer`, `AutoImageProcessor` |
 | `safetensors` | Model weight loading (SafetensorsStateDictLoader) |
 | `accelerate` | `init_empty_weights` for model building |
 | `scipy` | `scipy.stats.beta` for BetaScheduler |
@@ -259,7 +259,7 @@ These files live under `src/models/`, `src/training/`, and `src/data/`. They imp
 
 | Reference | File(s) | Details |
 |---|---|---|
-| **Google Gemma 3** | `config.py`, `base_encoder.py`, `av_encoder.py`, `video_only_encoder.py` | `GEMMA3_CONFIG_FOR_AIPROD`: hidden_size=3840, num_hidden_layers=48, vocab_size=262208, intermediate_size=24576, num_attention_heads=32, num_key_value_heads=16 |
+| **AIPROD Text Encoder** | `config.py`, `base_encoder.py`, `av_encoder.py`, `video_only_encoder.py` | `TEXT_ENCODER_CONFIG_FOR_AIPROD`: hidden_size=3840, num_hidden_layers=48, vocab_size=262208, intermediate_size=24576, num_attention_heads=32, num_key_value_heads=16 |
 | **PixArt-Alpha** (pattern) | `adaln.py`, `text_projection.py`, `timestep_embedding.py` | Class names reference PixArt-Alpha architecture patterns: `AdaLayerNormSingle`, `PixArtAlphaTextProjection`, `PixArtAlphaCombinedTimestepSizeEmbeddings` |
 | `google/mt5-small` | `text_encoder.py` (prototype) | Referenced in docstring/default param but **never actually loaded** |
 

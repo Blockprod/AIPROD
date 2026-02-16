@@ -221,7 +221,7 @@ Component loaders:
 - `load_video_vae_decoder()` → `VideoVAEDecoder`
 - `load_audio_vae_decoder()` → `AudioVAEDecoder`
 - `load_vocoder()` → `Vocoder`
-- `load_text_encoder()` → `AVGemmaTextEncoderModel`
+- `load_text_encoder()` → `LLMBridge`
 - `load_model()` → `AIPRODModelComponents` (convenience wrapper)
 
 **`src/AIPROD_trainer/validation_sampler.py`** - Inference for validation
@@ -291,7 +291,7 @@ audio = replace(audio, enabled=False)
 **Model Loading:**
 
 - Ensure `model_path` points to a local `.safetensors` file
-- Ensure `text_encoder_path` points to a Gemma model directory
+- Ensure `text_encoder_path` points to an AIPROD text encoder directory
 - URLs are NOT supported for model paths
 
 **Configuration:**
@@ -316,7 +316,7 @@ Width and height must be divisible by 32.
 
 - Must be local paths (URLs not supported)
 - `model_path`: Path to `.safetensors` checkpoint
-- `text_encoder_path`: Path to Gemma model directory
+- `text_encoder_path`: Path to AIPROD text encoder directory
 
 ### Platform Requirements
 
@@ -337,8 +337,8 @@ packages/AIPROD-core/src/AIPROD_core/
 │   ├── audio_vae/
 │   │   ├── audio_vae.py          # Decoder
 │   │   └── vocoder.py            # Vocoder
-│   └── clip/gemma/
-│       └── encoders/av_encoder.py  # AVGemmaTextEncoderModel
+│   └── clip/text-encoder/
+│       └── encoders/av_encoder.py  # LLMBridge
 ├── pipeline/
 │   ├── components/
 │   │   ├── schedulers.py         # AIPROD2Scheduler

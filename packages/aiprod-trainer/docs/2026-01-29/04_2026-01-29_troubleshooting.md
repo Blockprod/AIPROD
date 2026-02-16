@@ -24,7 +24,7 @@ optimization:
 
 #### 2. Enable 8-bit Text Encoder
 
-Load the Gemma text encoder in 8-bit precision to save GPU memory:
+Load the AIPROD text encoder in 8-bit precision to save GPU memory:
 
 ```yaml
 acceleration:
@@ -57,13 +57,13 @@ Reduce spatial or temporal dimensions to save memory:
 uv run python scripts/process_dataset.py dataset.json \
     --resolution-buckets "512x512x49" \
     --model-path /path/to/model.safetensors \
-    --text-encoder-path /path/to/gemma
+    --text-encoder-path /path/to/aiprod-text-encoder
 
 # Fewer frames
 uv run python scripts/process_dataset.py dataset.json \
     --resolution-buckets "960x544x25" \
     --model-path /path/to/model.safetensors \
-    --text-encoder-path /path/to/gemma
+    --text-encoder-path /path/to/aiprod-text-encoder
 ```
 
 #### 5. Enable Model Quantization
@@ -104,15 +104,15 @@ uv run python scripts/train.py configs/AIPROD2_av_lora.yaml
 > Always use `uv run` to execute Python scripts. This automatically uses the correct virtual environment
 > without requiring manual activation.
 
-### Issue: "Gemma model path is not a directory" Error
+### Issue: "Text encoder model path is not a directory" Error
 
 **Solution:**
-The `text_encoder_path` must point to a directory containing the Gemma model, not a file:
+The `text_encoder_path` must point to a directory containing the AIPROD text encoder model, not a file:
 
 ```yaml
 model:
   model_path: "/path/to/AIPROD-model.safetensors"  # File path
-  text_encoder_path: "/path/to/gemma-model/"      # Directory path
+  text_encoder_path: "/path/to/aiprod-text-encoder/"      # Directory path
 ```
 
 ### Issue: "Model path does not exist" Error

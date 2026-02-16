@@ -91,7 +91,7 @@ This step preprocesses your video dataset by:
 uv run python scripts/process_dataset.py dataset.json \
     --resolution-buckets "960x544x49" \
     --model-path /path/to/AIPROD-model.safetensors \
-    --text-encoder-path /path/to/gemma-model
+    --text-encoder-path /path/to/aiprod-text-encoder
 ```
 
 ### With Audio Processing
@@ -102,7 +102,7 @@ For audio-video training, add the `--with-audio` flag:
 uv run python scripts/process_dataset.py dataset.json \
     --resolution-buckets "960x544x49" \
     --model-path /path/to/AIPROD-model.safetensors \
-    --text-encoder-path /path/to/gemma-model \
+    --text-encoder-path /path/to/aiprod-text-encoder \
     --with-audio
 ```
 
@@ -171,7 +171,7 @@ The dimensions of each bucket must follow these constraints due to AIPROD's VAE 
 uv run python scripts/process_dataset.py dataset.json \
     --resolution-buckets "960x544x49" \
     --model-path /path/to/AIPROD-model.safetensors \
-    --text-encoder-path /path/to/gemma-model
+    --text-encoder-path /path/to/aiprod-text-encoder
 ```
 
 Multiple buckets are supported by separating entries with `;`:
@@ -180,7 +180,7 @@ Multiple buckets are supported by separating entries with `;`:
 uv run python scripts/process_dataset.py dataset.json \
     --resolution-buckets "960x544x49;512x512x49" \
     --model-path /path/to/AIPROD-model.safetensors \
-    --text-encoder-path /path/to/gemma-model
+    --text-encoder-path /path/to/aiprod-text-encoder
 ```
 
 **Video processing workflow:**
@@ -262,7 +262,7 @@ in your dataset JSON/JSONL/CSV that contains the reference video paths:
 uv run python scripts/process_dataset.py dataset.json \
     --resolution-buckets "960x544x49" \
     --model-path /path/to/AIPROD-model.safetensors \
-    --text-encoder-path /path/to/gemma-model \
+    --text-encoder-path /path/to/aiprod-text-encoder \
     --reference-column "reference_path"
 ```
 
@@ -302,7 +302,7 @@ When training a LoRA, you can specify a trigger token that will be prepended to 
 uv run python scripts/process_dataset.py dataset.json \
     --resolution-buckets "960x544x49" \
     --model-path /path/to/AIPROD-model.safetensors \
-    --text-encoder-path /path/to/gemma-model \
+    --text-encoder-path /path/to/aiprod-text-encoder \
     --lora-trigger "MYTRIGGER"
 ```
 
@@ -322,7 +322,7 @@ decoded and saved to `.precomputed/decoded_audio`. This allows you to visually a
 uv run python scripts/process_dataset.py dataset.json \
     --resolution-buckets "960x544x49" \
     --model-path /path/to/AIPROD-model.safetensors \
-    --text-encoder-path /path/to/gemma-model \
+    --text-encoder-path /path/to/aiprod-text-encoder \
     --decode
 ```
 

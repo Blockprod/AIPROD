@@ -1,4 +1,4 @@
-# Backward-compat shim — old import path ``aiprod_core.text_encoders.gemma``
+# Backward-compat shim — old import path ``aiprod_core.text_encoders.text_encoder_compat``
 # Use ``aiprod_core.model.text_encoder`` for new code.
 
 from __future__ import annotations
@@ -7,9 +7,9 @@ from typing import TYPE_CHECKING
 
 from aiprod_core.model.text_encoder import LLMBridge
 
-# Legacy aliases
-GemmaTextEncoderModelBase = LLMBridge
-AVGemmaTextEncoderModel = LLMBridge
+# Legacy aliases — kept for backward compatibility only
+AIPRODTextEncoderBase = LLMBridge
+AIPRODTextEncoderModel = LLMBridge
 
 
 def encode_text(
@@ -29,7 +29,7 @@ def encode_text(
 
 
 __all__ = [
-    "GemmaTextEncoderModelBase",
-    "AVGemmaTextEncoderModel",
+    "AIPRODTextEncoderBase",
+    "AIPRODTextEncoderModel",
     "encode_text",
 ]

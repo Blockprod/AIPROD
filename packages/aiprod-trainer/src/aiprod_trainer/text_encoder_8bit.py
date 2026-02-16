@@ -6,16 +6,16 @@
 This module provides functionality for loading the LLMBridge text encoder in 8-bit precision
 using bitsandbytes, which significantly reduces GPU memory usage.
 
-This replaces the old Gemma-specific 8-bit loader with a generic approach that
+This replaces the old model-specific 8-bit loader with a generic approach that
 uses the LLMBridge's pluggable backend architecture.
 
 Example usage::
 
-    from aiprod_trainer.gemma_8bit import load_8bit_text_encoder
+    from aiprod_trainer.text_encoder_8bit import load_8bit_text_encoder
 
     text_encoder = load_8bit_text_encoder(
         checkpoint_path="/path/to/AIPROD2.safetensors",
-        text_model_path="/path/to/gemma-or-llama",
+        text_model_path="/path/to/aiprod-text-encoder",
     )
 """
 
@@ -47,7 +47,7 @@ def load_8bit_text_encoder(
         checkpoint_path: Path to the AIPROD safetensors checkpoint file
             (used for loading projection weights).
         text_model_path: Path to the HuggingFace model directory
-            (Gemma, LLaMA, Mistral, etc.).
+            (AIPROD proprietary text encoder or compatible LLM).
         dtype: Data type for non-quantized model weights (projection layers).
 
     Returns:
@@ -86,6 +86,7 @@ def load_8bit_text_encoder(
     tokenizer = AutoTokenizer.from_pretrained(
         str(text_model_path),
         trust_remote_code=True,
+        local_files_only=True,
     )
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
@@ -168,7 +169,3 @@ def _suppress_accelerate_memory_warnings() -> Generator[None, None, None]:
         yield
     finally:
         accelerate_logger.setLevel(old_level)
-
-
-# ── Backward-compatible alias ────────────────────────────────────────────────
-load_8bit_gemma = load_8bit_text_encoder

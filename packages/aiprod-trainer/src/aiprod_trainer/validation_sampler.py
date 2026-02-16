@@ -42,7 +42,7 @@ VIDEO_SCALE_FACTORS = SpatioTemporalScaleFactors.default()
 class CachedPromptEmbeddings:
     """Pre-computed text embeddings for a validation prompt.
     These embeddings are computed once at training start and reused for all validation runs,
-    avoiding the need to load the full Gemma text encoder during validation.
+    avoiding the need to load the full text encoder during validation.
     """
 
     video_context_positive: Tensor  # [1, seq_len, hidden_dim]
@@ -85,7 +85,7 @@ class GenerationConfig:
     reference_downscale_factor: int = 1  # For IC-LoRA: downscale factor (1 = same resolution, 2 = half resolution)
     generate_audio: bool = True  # Whether to generate audio alongside video
     include_reference_in_output: bool = False  # For IC-LoRA: concatenate original reference with generated output
-    cached_embeddings: CachedPromptEmbeddings | None = None  # Pre-computed text embeddings (avoids loading Gemma)
+    cached_embeddings: CachedPromptEmbeddings | None = None  # Pre-computed text embeddings (avoids loading text encoder)
     stg_scale: float = 0.0  # STG strength (0.0 = disabled, recommended: 1.0)
     stg_blocks: list[int] | None = None  # Transformer blocks to perturb (None = all, recommended: [29])
     stg_mode: Literal["stg_av", "stg_v"] = "stg_av"  # STG mode: "stg_av" (audio+video) or "stg_v" (video only)
@@ -113,7 +113,7 @@ class ValidationSampler:
     The implementation follows the patterns from aiprod_pipelines.single_stage.
     Text embeddings can be provided either via:
     - A full text_encoder (encodes prompts on-the-fly)
-    - Pre-computed cached_embeddings (avoids loading Gemma during validation)
+    - Pre-computed cached_embeddings (avoids loading text encoder during validation)
     """
 
     def __init__(

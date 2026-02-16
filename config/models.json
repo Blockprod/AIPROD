@@ -1,0 +1,39 @@
+{
+  "models": {
+    "text_encoder": {
+      "path": "models/text-encoder",
+      "description": "AIPROD Text Encoder (LLMBridge) base weights",
+      "required_for": ["inference", "training"]
+    },
+    "scenarist": {
+      "path": "models/scenarist/mistral-7b",
+      "description": "Mistral-7B-Instruct for storyboard generation",
+      "required_for": ["inference"]
+    },
+    "clip": {
+      "path": "models/clip",
+      "description": "CLIP ViT-L/14 for semantic QA",
+      "required_for": ["inference"]
+    },
+    "captioning": {
+      "path": "models/captioning/qwen-omni-7b",
+      "description": "Qwen2.5-Omni-7B for audio-visual captioning",
+      "required_for": ["training"]
+    },
+    "checkpoint": {
+      "path": "models/ltx2_research/ltx-2-19b-dev-fp8.safetensors",
+      "description": "LTX-2 19B FP8 checkpoint (base model)",
+      "required_for": ["inference", "training"]
+    },
+    "upsampler": {
+      "path": "models/ltx2_research/ltx-2-spatial-upscaler-x2-1.0.safetensors",
+      "description": "Spatial upsampler ×2 for 1080p output",
+      "required_for": ["inference"]
+    }
+  },
+  "sovereignty": {
+    "all_local_files_only": true,
+    "offline_capable": true,
+    "download_script": "scripts/download_models.py"
+  }
+}

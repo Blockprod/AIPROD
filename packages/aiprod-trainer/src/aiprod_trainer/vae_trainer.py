@@ -21,7 +21,15 @@ from typing import Optional
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import wandb
+
+# wandb: optional dependency (souveraineté)
+try:
+    import wandb
+    _WANDB_AVAILABLE = True
+except ImportError:
+    wandb = None  # type: ignore[assignment]
+    _WANDB_AVAILABLE = False
+
 from accelerate import Accelerator
 from torch.optim import AdamW, lr_scheduler
 from torch.utils.data import DataLoader, DistributedSampler
@@ -57,7 +65,10 @@ class PerceptualLoss(nn.Module):
             if layers is None:
                 layers = ["relu3_2"]  # Can extend to multiple layers if needed
 
-            vgg = vgg16(pretrained=True).to(device)
+            # Souveraineté: utiliser weights enum au lieu de pretrained=True
+            # Les poids VGG16 doivent être pré-provisionnés dans le cache local
+            from torchvision.models import VGG16_Weights
+            vgg = vgg16(weights=VGG16_Weights.DEFAULT).to(device)
             self.features = nn.ModuleDict()
 
             layer_name_mapping = {
@@ -308,7 +319,7 @@ class VAETrainerConfig:
 
     # Logging
     log_interval: int = 10
-    use_wandb: bool = True
+    use_wandb: bool = False  # Défaut souverain: pas de wandb. Activer avec pip install wandb
     project_name: str = "aiprod-vae-training"
 
 
@@ -371,12 +382,14 @@ class VideoVAETrainer:
             self.load_checkpoint(checkpoint_path)
 
         # Initialize WandB
-        if config.use_wandb and self.accelerator.is_main_process:
+        if config.use_wandb and _WANDB_AVAILABLE and self.accelerator.is_main_process:
             wandb.init(
                 project=config.project_name,
                 config=vars(config),
                 name="video_vae",
             )
+        elif config.use_wandb and not _WANDB_AVAILABLE:
+            logger.warning("use_wandb=True but wandb not installed. Install with: pip install wandb")
 
     def train(self) -> dict:
         """Run training loop."""
@@ -451,7 +464,7 @@ class VideoVAETrainer:
                 avg_loss = epoch_loss / num_batches
                 logger.info(f"  Batch {batch_idx}/{len(self.train_dataloader)}: loss={avg_loss:.4f}")
 
-                if self.config.use_wandb:
+                if self.config.use_wandb and _WANDB_AVAILABLE:
                     wandb.log({
                         **loss_dict,
                         "epoch": epoch,
@@ -585,7 +598,7 @@ class AudioVAETrainer:
             self.load_checkpoint(checkpoint_path)
 
         # Initialize WandB
-        if config.use_wandb and self.accelerator.is_main_process:
+        if config.use_wandb and _WANDB_AVAILABLE and self.accelerator.is_main_process:
             wandb.init(
                 project=config.project_name,
                 config=vars(config),
@@ -605,7 +618,7 @@ class AudioVAETrainer:
             # Validation phase
             if self.val_dataloader is not None and epoch % 5 == 0:
                 val_metrics = self._validate(epoch)
-                if self.config.use_wandb:
+                if self.config.use_wandb and _WANDB_AVAILABLE:
                     wandb.log({"val": val_metrics}, step=epoch)
 
             # Save checkpoint
@@ -660,7 +673,7 @@ class AudioVAETrainer:
                 avg_loss = epoch_loss / num_batches
                 logger.info(f"  Batch {batch_idx}/{len(self.train_dataloader)}: loss={avg_loss:.4f}")
 
-                if self.config.use_wandb:
+                if self.config.use_wandb and _WANDB_AVAILABLE:
                     wandb.log({**loss_dict, "epoch": epoch}, step=batch_idx)
 
         self.scheduler.step()

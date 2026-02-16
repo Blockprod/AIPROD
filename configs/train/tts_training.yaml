@@ -1,0 +1,101 @@
+# ============================================================================
+# AIPROD Sovereign — TTS Training Phase 3.4
+# ============================================================================
+# Target : Entraîner le pipeline TTS complet (FastSpeech 2 + HiFi-GAN)
+# GPU    : 1× A100 40GB
+# Durée  : ~10 jours (3 phases)
+# Output : models/aiprod-sovereign/aiprod-tts-v1.safetensors (~300MB)
+#
+# Données :
+#   - LJSpeech (13k clips, 24h, domaine public)
+#   - LibriTTS (585h, CC BY 4.0)
+# ============================================================================
+
+model:
+  type: "tts"
+  text_frontend:
+    vocab_size: 256
+    embedding_dim: 256
+    num_phoneme_classes: 76
+  mel_decoder:
+    hidden_dim: 512
+    num_layers: 6
+    num_heads: 8
+    ff_dim: 2048
+    n_mels: 80
+    max_seq_len: 2048
+  vocoder:
+    upsample_rates: [8, 8, 2, 2]
+    upsample_kernel_sizes: [16, 16, 4, 4]
+    resblock_kernel_sizes: [3, 7, 11]
+    resblock_dilation_sizes: [[1, 3, 5], [1, 3, 5], [1, 3, 5]]
+  prosody:
+    hidden_dim: 256
+    num_emotion_classes: 8
+    pitch_range: [50, 500]
+
+training:
+  # Phase 1: TextFrontend + MelDecoder sur LJSpeech
+  phase1:
+    epochs: 200
+    batch_size: 16
+    learning_rate: 1e-3
+    warmup_steps: 4000
+    data: "data/ljspeech"
+    components: ["text_frontend", "mel_decoder"]
+
+  # Phase 2: Vocoder HiFi-GAN sur mel spectrograms
+  phase2:
+    epochs: 500
+    batch_size: 16
+    learning_rate: 2e-4
+    warmup_steps: 1000
+    data: "data/ljspeech"
+    components: ["vocoder"]
+
+  # Phase 3: ProsodyModeler fine-tuning
+  phase3:
+    epochs: 100
+    batch_size: 32
+    learning_rate: 5e-5
+    warmup_steps: 500
+    data: "data/libritts"
+    components: ["prosody"]
+
+  # Common
+  weight_decay: 0.01
+  lr_scheduler: "cosine"
+  gradient_accumulation_steps: 2
+  mixed_precision: "bf16"
+  max_grad_norm: 5.0
+
+loss:
+  mel_reconstruction_weight: 1.0
+  duration_prediction_weight: 1.0
+  pitch_prediction_weight: 0.1
+  energy_prediction_weight: 0.1
+  adversarial_weight: 1.0
+  feature_matching_weight: 2.0
+  mel_spectral_weight: 45.0
+
+validation:
+  interval_epochs: 20
+  num_samples: 4
+  prompts:
+    - "The quick brown fox jumps over the lazy dog."
+    - "In a quiet village nestled between green hills, a gentle breeze carries the scent of wildflowers."
+    - "Welcome to the future of sovereign AI video generation."
+
+checkpoints:
+  save_interval_epochs: 50
+  keep_last_n: 2
+
+output:
+  dir: "checkpoints/aiprod_tts_v1"
+  final: "models/aiprod-sovereign/aiprod-tts-v1.safetensors"
+
+wandb:
+  enabled: false
+  project: "aiprod-sovereign-tts"
+
+seed: 42

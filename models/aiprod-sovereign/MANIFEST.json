@@ -1,0 +1,94 @@
+{
+  "version": "1.0.0",
+  "name": "aiprod-sovereign",
+  "description": "Modèles 100% propriétaires AIPROD — Entraînés sur données sous licence, sans dépendance à des API cloud tierces.",
+  "created": "2026-02-14",
+  "models": [
+    {
+      "name": "aiprod-shdt-v1-fp8",
+      "file": "aiprod-shdt-v1-fp8.safetensors",
+      "architecture": "SHDT (Sovereign Hybrid Diffusion Transformer)",
+      "description": "Transformer de diffusion vidéo, quantifié FP8 E4M3",
+      "parameters": "19B",
+      "format": "fp8_e4m3",
+      "estimated_size_gb": 12,
+      "training_config": "configs/train/full_finetune.yaml",
+      "quantization_config": "fp8-quanto via scripts/quantize_model.py",
+      "license": "Propriétaire AIPROD",
+      "sha256": "TO_BE_COMPUTED_AFTER_TRAINING",
+      "status": "pending_training"
+    },
+    {
+      "name": "aiprod-hwvae-v1",
+      "file": "aiprod-hwvae-v1.safetensors",
+      "architecture": "HW-VAE (Haar Wavelet Video Autoencoder)",
+      "description": "Video VAE avec décomposition Haar Wavelet, encoder/décodeur propriétaire",
+      "parameters": "~150M",
+      "format": "bf16",
+      "estimated_size_gb": 0.5,
+      "training_config": "configs/train/vae_finetune.yaml",
+      "license": "Propriétaire AIPROD",
+      "sha256": "TO_BE_COMPUTED_AFTER_TRAINING",
+      "status": "pending_training"
+    },
+    {
+      "name": "aiprod-audio-vae-v1",
+      "file": "aiprod-audio-vae-v1.safetensors",
+      "architecture": "NAC (Neural Audio Codec) + RVQ",
+      "description": "Audio codec avec Residual Vector Quantization, 24 kHz sample rate",
+      "parameters": "~50M",
+      "format": "bf16",
+      "estimated_size_gb": 0.2,
+      "training_config": "configs/train/audio_vae.yaml",
+      "license": "Propriétaire AIPROD",
+      "sha256": "TO_BE_COMPUTED_AFTER_TRAINING",
+      "status": "pending_training"
+    },
+    {
+      "name": "aiprod-tts-v1",
+      "file": "aiprod-tts-v1.safetensors",
+      "architecture": "FastSpeech 2 + HiFi-GAN + ProsodyModeler",
+      "description": "TTS complet : TextFrontend → MelDecoder → Vocoder + contrôle prosodie",
+      "parameters": "~80M",
+      "format": "bf16",
+      "estimated_size_gb": 0.3,
+      "training_config": "configs/train/tts_training.yaml",
+      "license": "Propriétaire AIPROD",
+      "sha256": "TO_BE_COMPUTED_AFTER_TRAINING",
+      "status": "pending_training"
+    },
+    {
+      "name": "aiprod-text-encoder-v1",
+      "file": "aiprod-text-encoder-v1.safetensors",
+      "architecture": "AIPROD Text Encoder v1 (proprietary, fine-tuné depuis architecture open-source)",
+      "description": "Text encoder propriétaire AIPROD avec projection LoRA fusionnée vers espace latent SHDT. Poids 100% propriétaires.",
+      "parameters": "~1B",
+      "format": "bf16",
+      "estimated_size_gb": 1.0,
+      "training_config": "configs/train/lora_phase1.yaml",
+      "license": "Propriétaire AIPROD (poids entraînés — dérivé Apache 2.0)",
+      "sha256": "TO_BE_COMPUTED_AFTER_TRAINING",
+      "status": "pending_training"
+    },
+    {
+      "name": "aiprod-upsampler-v1",
+      "file": "aiprod-upsampler-v1.safetensors",
+      "architecture": "Spatial Upsampler ×2",
+      "description": "Upsampler spatial pour résolution finale 1080p",
+      "parameters": "~150M",
+      "format": "bf16",
+      "estimated_size_gb": 0.5,
+      "license": "Propriétaire AIPROD",
+      "sha256": "TO_BE_COMPUTED_AFTER_TRAINING",
+      "status": "pending_training"
+    }
+  ],
+  "total_estimated_size_gb": 14.5,
+  "checksums_algorithm": "SHA-256",
+  "sovereignty": {
+    "cloud_dependencies": 0,
+    "third_party_apis": 0,
+    "all_weights_local": true,
+    "offline_capable": true
+  }
+}

@@ -182,7 +182,7 @@ class TestVAETrainerConfig:
         assert config.learning_rate > 0
         assert config.batch_size > 0
         assert config.num_epochs > 0
-        assert config.use_wandb is True
+        assert config.use_wandb is False  # Défaut souverain: pas de wandb
         assert config.mixed_precision in ["bf16", "fp16", "no"]
     
     def test_vae_trainer_config_checkpoint_dir(self):

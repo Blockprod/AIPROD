@@ -2,7 +2,7 @@
 Concrete inference nodes implementing core video generation operations.
 
 Each node encapsulates a specific transformation step in the inference pipeline:
-- TextEncodeNode: Text → embeddings (Gemma 3)
+- TextEncodeNode: Text → embeddings (AIPROD proprietary text encoder)
 - DenoiseNode: Denoising loop with configurable steps, guidance, LoRAs
 - UpsampleNode: 2x spatial upsampling
 - DecodeVideoNode: Latents → video frames (with tiled decoding)
@@ -21,7 +21,7 @@ class TextEncodeNode(GraphNode):
     """
     Text encoding node.
     
-    Converts text prompts to embeddings using Gemma 3 text encoder.
+    Converts text prompts to embeddings using AIPROD proprietary text encoder.
     Handles negative prompts for unconditional guidance.
     
     Inputs:
@@ -47,7 +47,7 @@ class TextEncodeNode(GraphNode):
         Initialize text encoder node.
         
         Args:
-            text_encoder: Gemma 3 text encoder model
+            text_encoder: AIPROD proprietary text encoder model
             **kwargs: Additional config (prompt_embeds_path, etc.)
         """
         super().__init__(**kwargs)

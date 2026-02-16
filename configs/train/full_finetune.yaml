@@ -1,0 +1,163 @@
+# ============================================================================
+# AIPROD Sovereign — Full Fine-tuning Phase 3.1.2
+# ============================================================================
+# Target : Entraîner le modèle complet (LTX-2 + LoRA v1 fusionné)
+# GPU    : 4× A100 80GB (DDP via accelerate)
+# Durée  : ~10-14 jours
+# Output : checkpoints/aiprod_shdt_v1/checkpoint.safetensors (~25GB bf16)
+#
+# Curriculum training intégré :
+#   Phase 1: 256×256, 16 frames  → batch_size=4, lr=5e-6
+#   Phase 2: 512×512, 32 frames  → batch_size=2, lr=3e-6
+#   Phase 3: 768×768, 64 frames  → batch_size=1, lr=1e-6
+#   Phase 4: 1024×576, 97 frames → batch_size=1, lr=5e-7
+# ============================================================================
+
+model:
+  model_path: "checkpoints/aiprod_lora_v1/merged_model.safetensors"
+  text_encoder_path: "models/aiprod-sovereign/aiprod-text-encoder-v1"
+  training_mode: "full"
+  load_checkpoint: null
+
+lora: null
+
+training_strategy:
+  name: "text_to_video"
+
+optimization:
+  learning_rate: 5e-6
+  steps: 100000
+  batch_size: 4
+  gradient_accumulation_steps: 4
+  max_grad_norm: 1.0
+  optimizer_type: "adamw"
+  scheduler_type: "cosine"
+  scheduler_params:
+    T_max: 100000
+    eta_min: 1e-8
+  enable_gradient_checkpointing: true
+
+acceleration:
+  mixed_precision_mode: "bf16"
+  quantization: null
+  load_text_encoder_in_8bit: true
+
+data:
+  preprocessed_data_root: "data/preprocessed/full_finetune"
+  num_dataloader_workers: 4
+
+validation:
+  prompts:
+    - "A cinematic shot of a golden sunset over calm ocean waves, 4K quality"
+    - "A person walking through a misty forest at dawn, volumetric lighting"
+    - "A drone shot flying over a futuristic city at night, neon lights reflecting on wet streets"
+    - "Close-up of raindrops falling on a rose petal in slow motion, macro photography"
+  negative_prompt: "worst quality, inconsistent motion, blurry, jittery, distorted, low resolution"
+  video_dims: [768, 512, 97]
+  frame_rate: 24.0
+  seed: 42
+  inference_steps: 30
+  interval: 5000
+  videos_per_prompt: 1
+  guidance_scale: 3.0
+  stg_scale: 1.0
+  stg_blocks: [29]
+  stg_mode: "stg_av"
+  generate_audio: false
+  skip_initial_validation: true
+
+checkpoints:
+  interval: 10000
+  keep_last_n: 3
+  precision: "bfloat16"
+
+hub:
+  push_to_hub: false
+
+flow_matching:
+  timestep_sampling_mode: "shifted_logit_normal"
+  timestep_sampling_params: {}
+
+wandb:
+  enabled: false
+  project: "aiprod-sovereign-full"
+  tags: ["phase3", "full-finetune", "sovereign", "curriculum"]
+  log_validation_videos: true
+
+seed: 42
+output_dir: "checkpoints/aiprod_shdt_v1"
+
+# ============================================================================
+# Curriculum Configuration (loaded by curriculum_training.py)
+# ============================================================================
+curriculum:
+  enabled: true
+  transition_on: "step"
+  phases:
+    - name: "phase_1_low_res"
+      resolution:
+        height: 256
+        width: 256
+        latent_height: 32
+        latent_width: 32
+      duration:
+        min_frames: 4
+        max_frames: 16
+        target_frames: 16
+      batch_size: 4
+      learning_rate: 5e-6
+      learning_rate_multiplier: 1.0
+      duration_value: 20000
+      warmup_steps: 1000
+      gradient_accumulation_steps: 4
+
+    - name: "phase_2_high_res"
+      resolution:
+        height: 512
+        width: 512
+        latent_height: 64
+        latent_width: 64
+      duration:
+        min_frames: 16
+        max_frames: 32
+        target_frames: 32
+      batch_size: 2
+      learning_rate: 3e-6
+      learning_rate_multiplier: 1.0
+      duration_value: 30000
+      warmup_steps: 500
+      gradient_accumulation_steps: 4
+
+    - name: "phase_3_full_res"
+      resolution:
+        height: 768
+        width: 768
+        latent_height: 96
+        latent_width: 96
+      duration:
+        min_frames: 32
+        max_frames: 64
+        target_frames: 64
+      batch_size: 1
+      learning_rate: 1e-6
+      learning_rate_multiplier: 1.0
+      duration_value: 30000
+      warmup_steps: 500
+      gradient_accumulation_steps: 8
+
+    - name: "phase_4_production"
+      resolution:
+        height: 576
+        width: 1024
+        latent_height: 72
+        latent_width: 128
+      duration:
+        min_frames: 64
+        max_frames: 97
+        target_frames: 97
+      batch_size: 1
+      learning_rate: 5e-7
+      learning_rate_multiplier: 1.0
+      duration_value: 20000
+      warmup_steps: 500
+      gradient_accumulation_steps: 8

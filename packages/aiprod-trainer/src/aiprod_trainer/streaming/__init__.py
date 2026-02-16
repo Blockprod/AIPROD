@@ -13,12 +13,21 @@ from aiprod_trainer.streaming.cache import AsyncPrefetcher, CacheMetrics, SmartL
 from aiprod_trainer.streaming.sources import (
     DataSource,
     DataSourceConfig,
-    GCSDataSource,
-    HuggingFaceDataSource,
     LocalDataSource,
-    S3DataSource,
     create_data_source,
 )
+
+# Cloud sources — available when aiprod-cloud is installed
+try:
+    from aiprod_cloud.cloud_sources import (  # noqa: PLC0415
+        GCSDataSource,
+        HuggingFaceDataSource,
+        S3DataSource,
+    )
+except ImportError:
+    GCSDataSource = None  # type: ignore[assignment,misc]
+    HuggingFaceDataSource = None  # type: ignore[assignment,misc]
+    S3DataSource = None  # type: ignore[assignment,misc]
 
 __all__ = [
     "StreamingDatasetAdapter",

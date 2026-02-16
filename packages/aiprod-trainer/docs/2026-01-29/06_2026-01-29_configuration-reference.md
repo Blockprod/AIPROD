@@ -38,7 +38,7 @@ Controls the base model and training mode settings.
 ```yaml
 model:
   model_path: "/path/to/AIPROD-model.safetensors"  # Local path to model checkpoint
-  text_encoder_path: "/path/to/gemma-model"       # Path to Gemma text encoder directory
+  text_encoder_path: "/path/to/aiprod-text-encoder"  # Path to AIPROD text encoder directory
   training_mode: "lora"                           # "lora" or "full"
   load_checkpoint: null                           # Path to checkpoint to resume from
 ```
@@ -48,12 +48,12 @@ model:
 | Parameter           | Description                                                                                                                                                    |
 |---------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | `model_path`        | **Required.** Local path to the AIPROD model checkpoint (`.safetensors` file). URLs are not supported.                                                          |
-| `text_encoder_path` | **Required.** Path to the Gemma text encoder model directory. Download from [HuggingFace](https://huggingface.co/google/gemma-3-12b-it-qat-q4_0-unquantized/). |
+| `text_encoder_path` | **Required.** Path to the AIPROD text encoder model directory. Available locally at `models/text-encoder/`. |
 | `training_mode`     | Training approach - `"lora"` for LoRA training or `"full"` for full-rank fine-tuning.                                                                          |
 | `load_checkpoint`   | Optional path to resume training from a checkpoint file or directory.                                                                                          |
 
 > [!NOTE]
-> AIPROD requires both a model checkpoint and a Gemma text encoder. Both must be local paths.
+> AIPROD requires both a model checkpoint and an AIPROD text encoder. Both must be local paths.
 
 ### LoraConfig
 
@@ -226,7 +226,7 @@ acceleration:
 |-----------------------------|------------------------------------------------------------------------------------|
 | `mixed_precision_mode`      | Precision mode - `"bf16"` recommended for modern GPUs                              |
 | `quantization`              | Model quantization: `null`, `"int8-quanto"`, `"int4-quanto"`, `"fp8-quanto"`, etc. |
-| `load_text_encoder_in_8bit` | Load the Gemma text encoder in 8-bit to save GPU memory                            |
+| `load_text_encoder_in_8bit` | Load the AIPROD text encoder in 8-bit to save GPU memory                            |
 
 ### DataConfig
 

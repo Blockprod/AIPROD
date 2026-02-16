@@ -1,7 +1,7 @@
 {
   "version": "3.3",
   "exportedAt": "2026-01-05T00:00:00.000Z",
-  "notes": "AIPROD ULTIMATE — Version industrielle et visionnaire. Fusion des agents cognitifs, déterminisme financier (OFP), double QA (Sémantique + Technique) et Orchestrateur pur. Avec cache de cohérence, pricing dynamique et contraintes Fast Track renforcées.",
+  "notes": "AIPROD-V33 ULTIMATE — Version industrielle et visionnaire. Fusion des agents cognitifs, déterminisme financier (OFP), double QA (Sémantique + Technique) et Orchestrateur pur. Avec cache de cohérence, pricing dynamique et contraintes Fast Track renforcées.",
   
   "state": {
     "blocks": {
@@ -9,7 +9,7 @@
       "orchestrator": {
         "id": "orch-0001",
         "type": "orchestrator",
-        "name": "AIPROD Orchestrator (Pure State Machine)",
+        "name": "AIPROD Orchestrator v33 (Pure State Machine)",
         "purpose": "State machine only. Routes execution, retries, and stops cleanly on failure. No business or financial logic.",
         "states": [
           "INIT",

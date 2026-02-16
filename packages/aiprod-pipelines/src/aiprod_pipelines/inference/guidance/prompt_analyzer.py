@@ -40,7 +40,7 @@ class PromptAnalyzer(nn.Module):
     """
     Neural network for analyzing prompts to predict guidance parameters.
     
-    Uses text embeddings (e.g., from Gemma 3 or CLIP) to predict:
+    Uses text embeddings (e.g., from AIPROD text encoder or CLIP) to predict:
     - Prompt complexity (0-1)
     - Optimal baseline guidance scale (4-10)
     

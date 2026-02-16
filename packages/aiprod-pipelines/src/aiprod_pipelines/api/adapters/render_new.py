@@ -3,9 +3,14 @@ Render Executor Adapter - Video Generation with Retry & Fallback
 ================================================================
 
 Executes video generation with intelligent retry logic, exponential backoff,
-and multi-level fallback chain across backend providers.
+and multi-level fallback chain across sovereign backend tiers.
 
 PHASE 1 implementation (Weeks 4-5 in execution plan).
+
+Backend tiers (100% souverain — aucun appel réseau externe) :
+- aiprod_shdt         : Standard SHDT diffusion (default)
+- aiprod_shdt_fast    : Lower-step count, faster/cheaper
+- aiprod_shdt_premium : Higher-step count, max quality
 """
 
 from typing import Dict, Any, List, Optional, Tuple
@@ -42,8 +47,8 @@ class RenderExecutorAdapter(BaseAdapter):
         self.base_backoff_delay = 1.0  # seconds
         self.max_backoff_delay = 30.0
         
-        # Fallback chain: primary backend → chain of fallbacks
-        self.fallback_chain = ["runway_gen3", "replicate_wan25"]
+        # Fallback chain: primary backend → chain of fallbacks (souverain)
+        self.fallback_chain = ["aiprod_shdt", "aiprod_shdt_fast"]
         
         # Rate limiting
         self.rate_limit_delay = 2.0  # seconds between batches
@@ -69,7 +74,7 @@ class RenderExecutorAdapter(BaseAdapter):
             raise ValueError("Missing shot_list in context")
         
         shot_list = ctx["memory"]["shot_list"]
-        selected_backend = ctx["memory"].get("cost_estimation", {}).get("selected_backend", "runway_gen3")
+        selected_backend = ctx["memory"].get("cost_estimation", {}).get("selected_backend", "aiprod_shdt")
         
         ctx["memory"]["render_start"] = time.time()
         
@@ -213,13 +218,13 @@ class RenderExecutorAdapter(BaseAdapter):
         for shot in batch:
             asset = {
                 "id": shot["shot_id"],
-                "url": f"gs://aiprod-assets/{shot['shot_id']}.mp4",
+                "url": f"/data/aiprod-assets/{shot['shot_id']}.mp4",
                 "duration_sec": shot.get("duration_sec", 10),
                 "resolution": "1080p",
                 "codec": "h264",
                 "bitrate": 5000000,
                 "file_size_bytes": int(shot.get("duration_sec", 10) * 5000000 // 8),
-                "thumbnail_url": f"gs://aiprod-assets/{shot['shot_id']}_thumb.jpg",
+                "thumbnail_url": f"/data/aiprod-assets/{shot['shot_id']}_thumb.jpg",
                 "backend_used": backend,
                 "seed": shot.get("seed", 0),
                 "generated_at": time.time()

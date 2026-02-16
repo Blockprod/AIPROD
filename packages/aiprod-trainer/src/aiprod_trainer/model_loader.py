@@ -8,9 +8,9 @@ Example usage:
     # Load individual components
     vae_encoder = load_video_vae_encoder("/path/to/checkpoint.safetensors", device="cuda")
     vae_decoder = load_video_vae_decoder("/path/to/checkpoint.safetensors", device="cuda")
-    text_encoder = load_text_encoder("/path/to/checkpoint.safetensors", "/path/to/gemma", device="cuda")
+    text_encoder = load_text_encoder("/path/to/checkpoint.safetensors", "/path/to/text-encoder", device="cuda")
     # Load all components at once
-    components = load_model("/path/to/checkpoint.safetensors", text_encoder_path="/path/to/gemma")
+    components = load_model("/path/to/checkpoint.safetensors", text_encoder_path="/path/to/text-encoder")
 """
 
 from __future__ import annotations
@@ -188,33 +188,33 @@ def load_vocoder(
 
 def load_text_encoder(
     checkpoint_path: str | Path,
-    gemma_model_path: str | Path,
+    text_encoder_path: str | Path,
     device: Device = "cpu",
     dtype: torch.dtype = torch.bfloat16,
     load_in_8bit: bool = False,
 ) -> "LLMBridge":
-    """Load the text encoder.
+    """Load the AIPROD proprietary text encoder.
 
-    Uses the AIPROD LLMBridge which supports pluggable LLM backends
-    (Gemma, LLaMA, Mistral, etc.).
+    Uses the AIPROD LLMBridge which supports pluggable LLM backends.
 
     Args:
         checkpoint_path: Path to the AIPROD safetensors checkpoint file
-        gemma_model_path: Path to the LLM model directory (e.g. gemma-3/)
+        text_encoder_path: Path to the text encoder model directory
+            (e.g. models/aiprod-sovereign/aiprod-text-encoder-v1)
         device: Device to load model on
         dtype: Data type for model weights
         load_in_8bit: Whether to load in 8-bit precision (requires bitsandbytes).
     Returns:
         Loaded LLMBridge text encoder
     """
-    if not Path(gemma_model_path).is_dir():
-        raise ValueError(f"Text encoder model path is not a directory: {gemma_model_path}")
+    if not Path(text_encoder_path).is_dir():
+        raise ValueError(f"Text encoder model path is not a directory: {text_encoder_path}")
 
     # Use 8-bit loading path if requested
     if load_in_8bit:
-        from aiprod_trainer.gemma_8bit import load_8bit_text_encoder
+        from aiprod_trainer.text_encoder_8bit import load_8bit_text_encoder
 
-        return load_8bit_text_encoder(checkpoint_path, gemma_model_path, dtype)
+        return load_8bit_text_encoder(checkpoint_path, text_encoder_path, dtype)
 
     # Standard loading path using LLMBridge
     from aiprod_core.model.text_encoder import LLMBridge, LLMBridgeConfig
@@ -222,7 +222,7 @@ def load_text_encoder(
     torch_device = _to_torch_device(device)
 
     config = LLMBridgeConfig(
-        model_name=str(gemma_model_path),
+        model_name=str(text_encoder_path),
     )
     bridge = LLMBridge(config)
     bridge = bridge.to(device=torch_device, dtype=dtype)
@@ -270,7 +270,7 @@ def load_model(
     - load_text_encoder()
     Args:
         checkpoint_path: Path to the safetensors checkpoint file
-        text_encoder_path: Path to Gemma model directory (required if with_text_encoder=True)
+        text_encoder_path: Path to text encoder model directory (required if with_text_encoder=True)
         device: Device to load models on ("cuda", "cpu", etc.)
         dtype: Data type for model weights
         with_video_vae_encoder: Whether to load the video VAE encoder (for preprocessing)
@@ -326,7 +326,7 @@ def load_model(
     if with_text_encoder:
         if text_encoder_path is None:
             raise ValueError("text_encoder_path must be provided when with_text_encoder=True")
-        logger.debug("Loading Gemma text encoder...")
+        logger.debug("Loading AIPROD text encoder...")
         text_encoder = load_text_encoder(checkpoint_path, text_encoder_path, torch_device, dtype)
 
     # Create scheduler (stateless, no loading needed)

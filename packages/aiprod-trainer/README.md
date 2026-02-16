@@ -29,7 +29,7 @@ All detailed guides and technical documentation are in the [docs](./docs/) direc
 ## 🔧 Requirements
 
 - **AIPROD Model Checkpoint** - Local `.safetensors` file
-- **Gemma Text Encoder** - Local Gemma model directory (required for AIPROD)
+- **AIPROD Text Encoder** - Local AIPROD text encoder model directory (required for AIPROD)
 - **Linux with CUDA** - CUDA 13+ recommended for optimal performance
 - **Nvidia GPU with 80GB+ VRAM** - Recommended for the standard config. For GPUs with 32GB VRAM (e.g., RTX 5090),
   use the [low VRAM config](configs/AIPROD2_av_lora_low_vram.yaml) which enables INT8 quantization and other

@@ -258,12 +258,12 @@ class PerformanceOptimizationLayer:
         
         # State-specific prefetching
         if target_state == State.CREATIVE_DIRECTION:
-            # Prefetch Gemini cache
-            prefetched["gemini_cache_warmed"] = True
+            # Prefetch creative adapter cache
+            prefetched["creative_cache_warmed"] = True
         
         elif target_state == State.RENDER_EXECUTION:
             # Prefetch backend availability
-            prefetched["backends_available"] = ["veo3", "runway_gen3"]
+            prefetched["backends_available"] = ["aiprod_shdt", "aiprod_shdt_premium"]
         
         elif target_state == State.QA_TECHNICAL:
             # Prefetch video metadata

@@ -1,6 +1,7 @@
 [tool.uv.sources]
 aiprod-core = { workspace = true }
 aiprod-pipelines = { workspace = true }
+aiprod-cloud = { workspace = true }
 
 [tool.uv.workspace]
 members = ["packages/*"]
@@ -8,6 +9,14 @@ members = ["packages/*"]
 [[tool.uv.index]]
 name = "pypi"
 url = "https://pypi.org/simple"
+
+# ---- Optional cloud/external dependencies (souveraineté) ----
+[project.optional-dependencies]
+cloud-gcs = ["google-cloud-storage>=2.10"]
+cloud-s3 = ["boto3>=1.35"]
+billing-stripe = ["stripe>=7.0"]
+tracking-wandb = ["wandb>=0.16"]
+tracking-gemini = ["google-generativeai>=0.3"]
 
 [dependency-groups]
 dev = [

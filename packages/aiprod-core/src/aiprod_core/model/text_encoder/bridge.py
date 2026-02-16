@@ -49,7 +49,7 @@ class LLMBridgeConfig:
         freeze: Whether to freeze the LLM weights.
     """
     backend: TextEncoderBackend = TextEncoderBackend.LOCAL_CAUSAL_LM
-    model_name: str = "meta-llama/Llama-3.2-1B"
+    model_name: str = "models/aiprod-sovereign/aiprod-text-encoder-v1"
     output_dim: int = 2048
     max_length: int = 512
     hidden_dim: int = 2048       # will be auto-detected
@@ -137,6 +137,7 @@ class LLMBridge(nn.Module):
         self._tokenizer = AutoTokenizer.from_pretrained(
             self.config.model_name,
             trust_remote_code=True,
+            local_files_only=True,
         )
         if self._tokenizer.pad_token is None:
             self._tokenizer.pad_token = self._tokenizer.eos_token
@@ -152,6 +153,7 @@ class LLMBridge(nn.Module):
             self.config.model_name,
             torch_dtype=dtype,
             trust_remote_code=True,
+            local_files_only=True,
         )
 
         if self.config.freeze:
