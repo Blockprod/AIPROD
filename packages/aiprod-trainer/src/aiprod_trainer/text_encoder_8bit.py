@@ -75,11 +75,10 @@ def load_8bit_text_encoder(
     quantization_config = BitsAndBytesConfig(load_in_8bit=True)
     with _suppress_accelerate_memory_warnings():
         encoder = AutoModel.from_pretrained(
-            str(text_model_path),
+            str(text_model_path), local_files_only=True,
             quantization_config=quantization_config,
             torch_dtype=torch.bfloat16,
             device_map="auto",
-            local_files_only=True,
             trust_remote_code=True,
         )
 

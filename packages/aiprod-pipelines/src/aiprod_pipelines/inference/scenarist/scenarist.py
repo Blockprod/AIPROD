@@ -427,10 +427,9 @@ Rules:
                 local_files_only=True,
             )
             self._model = self._AutoModel.from_pretrained(
-                self._model_name,
+                self._model_name, local_files_only=True,
                 torch_dtype="auto",
                 device_map=self._device,
-                local_files_only=True,
             )
             return True
         except Exception:

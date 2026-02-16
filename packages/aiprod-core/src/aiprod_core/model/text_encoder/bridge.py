@@ -150,10 +150,9 @@ class LLMBridge(nn.Module):
         dtype = dtype_map.get(self.config.dtype, torch.bfloat16)
 
         self._encoder = AutoModel.from_pretrained(
-            self.config.model_name,
+            self.config.model_name, local_files_only=True,
             torch_dtype=dtype,
             trust_remote_code=True,
-            local_files_only=True,
         )
 
         if self.config.freeze:

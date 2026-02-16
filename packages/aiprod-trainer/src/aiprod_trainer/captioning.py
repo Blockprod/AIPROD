@@ -261,12 +261,11 @@ class QwenOmniCaptioner(MediaCaptioningModel):
 
         # Use Thinker-only model for text generation (saves memory by not loading Talker)
         self.model = Qwen2_5OmniThinkerForConditionalGeneration.from_pretrained(
-            self.MODEL_ID,
+            self.MODEL_ID, local_files_only=True,
             dtype=torch.bfloat16,
             low_cpu_mem_usage=True,
             quantization_config=quantization_config,
             device_map="auto",
-            local_files_only=True,
         )
 
         self.processor = Qwen2_5OmniProcessor.from_pretrained(
