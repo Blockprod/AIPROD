@@ -203,7 +203,7 @@ class TTSModel(nn.Module):
         self.config = config
 
         # Sub-modules
-        self.text_frontend = TextFrontend(FrontendConfig(vocab=None))
+        self.text_frontend = TextFrontend(FrontendConfig())
         self.text_encoder = TextEncoder(config)
         self.prosody = ProsodyModeler(
             encoder_dim=config.encoder_hidden,
