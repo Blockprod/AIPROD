@@ -94,9 +94,10 @@ class PerceptualLoss(nn.Module):
                 torch.tensor([0.229, 0.224, 0.225]).view(1, 3, 1, 1)
             )
         except Exception as e:
+            import traceback
             logger.warning(
-                f"Failed to initialize VGG16 perceptual loss ({type(e).__name__}). "
-                f"Using L2 loss fallback instead."
+                f"Failed to initialize VGG16 perceptual loss ({type(e).__name__}: {str(e)[:100]}). "
+                f"Using L2 loss fallback instead. Device={device}, Traceback:\n{traceback.format_exc()}"
             )
 
     def forward(self, x: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
