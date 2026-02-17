@@ -109,8 +109,12 @@ def _train_video_vae(raw: dict, config: VAETrainerConfig, dummy_data: bool) -> N
 
         vae_config = HWVAEConfig(
             in_channels=model_raw.get("in_channels", 3),
-            latent_dim=model_raw.get("latent_dim", 128),
-            channels=model_raw.get("channels", [64, 128, 256, 512]),
+            latent_channels=model_raw.get("latent_channels", model_raw.get("latent_dim", 64)),
+            encoder_channels=tuple(model_raw.get("encoder_channels", [128, 256, 384, 512])),
+            decoder_channels=tuple(model_raw.get("decoder_channels", [512, 384, 256, 128])),
+            wavelet=model_raw.get("wavelet", "haar"),
+            kl_weight=model_raw.get("kl_weight", 1e-5),
+            perceptual_weight=model_raw.get("perceptual_weight", 1.0),
         )
         from aiprod_core.model.video_vae import HWVAEEncoder
 
