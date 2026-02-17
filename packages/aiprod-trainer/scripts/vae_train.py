@@ -13,12 +13,16 @@ Usage:
     python scripts/vae_train.py configs/train/vae_finetune.yaml --type video --dummy-data
 """
 
+from __future__ import annotations
+
 from pathlib import Path
 
 import torch
 import typer
 import yaml
 from rich.console import Console
+
+from aiprod_trainer.vae_trainer import VAETrainerConfig
 
 console = Console()
 app = typer.Typer(
@@ -91,11 +95,11 @@ def main(
         raise typer.Exit(code=1)
 
 
-def _train_video_vae(raw: dict, config: "VAETrainerConfig", dummy_data: bool) -> None:
+def _train_video_vae(raw: dict, config: VAETrainerConfig, dummy_data: bool) -> None:
     """Train video VAE."""
     from torch.utils.data import DataLoader, TensorDataset
 
-    from aiprod_trainer.vae_trainer import VAETrainerConfig, VideoVAETrainer
+    from aiprod_trainer.vae_trainer import VideoVAETrainer
 
     # Build model
     model_raw = raw.get("model", {})
@@ -171,11 +175,11 @@ def _train_video_vae(raw: dict, config: "VAETrainerConfig", dummy_data: bool) ->
     console.print(f"\n✅ Video VAE training complete: {results}")
 
 
-def _train_audio_vae(raw: dict, config: "VAETrainerConfig", dummy_data: bool) -> None:
+def _train_audio_vae(raw: dict, config: VAETrainerConfig, dummy_data: bool) -> None:
     """Train audio VAE."""
     from torch.utils.data import DataLoader, TensorDataset
 
-    from aiprod_trainer.vae_trainer import AudioVAETrainer, VAETrainerConfig
+    from aiprod_trainer.vae_trainer import AudioVAETrainer
 
     # Build model
     try:
