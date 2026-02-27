@@ -104,7 +104,7 @@ class AIPRODVideoGenerator:
         t0 = time.time()
 
         # Internal implementation: diffusers LTX2Pipeline
-        from diffusers import LTX2Pipeline  # noqa: WPS433 (nested import OK)
+        from diffusers import LTX2Pipeline  # type: ignore[import-unresolved]  # noqa: WPS433
 
         self._pipe = LTX2Pipeline.from_pretrained(
             self.model_id,
@@ -217,18 +217,34 @@ class AIPRODVideoGenerator:
 
         Returns the absolute path of the written file.
         """
-        from diffusers.pipelines.ltx2.export_utils import encode_video  # noqa: WPS433
-
         out = Path(output_path)
         out.parent.mkdir(parents=True, exist_ok=True)
 
-        encode_video(
-            video[0],
-            fps=fps,
-            audio=audio[0].float().cpu() if audio is not None else None,
-            audio_sample_rate=self.audio_sample_rate,
-            output_path=str(out),
-        )
+        try:
+            from diffusers.pipelines.ltx2.export_utils import encode_video as _enc  # type: ignore[import-unresolved]
+        except ImportError:
+            _enc = None
+
+        if _enc is not None:
+            _enc(
+                video[0],
+                fps=fps,
+                audio=audio[0].float().cpu() if audio is not None else None,
+                audio_sample_rate=self.audio_sample_rate,
+                output_path=str(out),
+            )
+        else:
+            # Fallback: AIPROD proprietary encoder
+            from aiprod_pipelines.utils.media_io import encode_video as _aiprod_enc
+
+            _aiprod_enc(
+                video=video,
+                fps=fps,
+                audio=audio[0].float().cpu() if audio is not None else None,
+                audio_sample_rate=self.audio_sample_rate,
+                output_path=str(out),
+                video_chunks_number=1,
+            )
         logger.info("Saved %s (%.1f MB)", out, out.stat().st_size / 1024**2)
         return out
 
