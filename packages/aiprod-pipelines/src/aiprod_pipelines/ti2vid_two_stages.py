@@ -117,7 +117,7 @@ class TI2VidTwoStagesPipeline:
         # Stage 1: Initial low resolution video generation.
         video_encoder = self.stage_1_model_ledger.video_encoder()
         transformer = self.stage_1_model_ledger.transformer()
-        sigmas = AIPROD2Scheduler().execute(steps=num_inference_steps).to(dtype=torch.float32, device=self.device)
+        sigmas = AIPROD2Scheduler().get_schedule(num_steps=num_inference_steps, device=self.device).to(dtype=torch.float32)
 
         def first_stage_denoising_loop(
             sigmas: torch.Tensor, video_state: LatentState, audio_state: LatentState, stepper: DiffusionStepProtocol

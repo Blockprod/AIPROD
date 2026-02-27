@@ -500,7 +500,7 @@ class ValidationSampler:
     ) -> tuple[LatentState, LatentState | None]:
         """Run the denoising loop using X0 prediction with CFG and optional STG."""
         scheduler = AIPROD2Scheduler()
-        sigmas = scheduler.execute(steps=config.num_inference_steps).to(device).float()
+        sigmas = scheduler.get_schedule(num_steps=config.num_inference_steps, device=device).float()
         stepper = EulerFlowStep()
         cfg_guider = CFGGuider(guidance_scale=config.guidance_scale)
 

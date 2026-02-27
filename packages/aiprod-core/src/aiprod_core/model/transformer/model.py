@@ -163,6 +163,20 @@ class SHDTModel(nn.Module):
         embedding = torch.cat([torch.cos(args), torch.sin(args)], dim=-1)
         return self.timestep_embed(embedding)
 
+    def _build_audio_projections(
+        self, audio_channels: int, device: torch.device, dtype: torch.dtype
+    ) -> None:
+        """Lazily create audio input/output projections on first use."""
+        if not hasattr(self, "_audio_embed"):
+            self._audio_embed = nn.Sequential(
+                nn.Linear(audio_channels, self.config.hidden_dim),
+                AdaptiveRMSNorm(self.config.hidden_dim),
+            ).to(device=device, dtype=dtype)
+        if not hasattr(self, "_audio_out_proj"):
+            self._audio_out_proj = nn.Linear(
+                self.config.hidden_dim, audio_channels
+            ).to(device=device, dtype=dtype)
+
     def forward(
         self,
         latent: torch.Tensor,
@@ -212,3 +226,76 @@ class SHDTModel(nn.Module):
         x = x.reshape(B, T, H, W, C).permute(0, 4, 1, 2, 3)
 
         return x
+
+    def forward_multimodal(
+        self,
+        video_latent: torch.Tensor,
+        audio_latent: Optional[torch.Tensor] = None,
+        video_positions: Optional[torch.Tensor] = None,
+        audio_positions: Optional[torch.Tensor] = None,
+        context: Optional[torch.Tensor] = None,
+        timestep: Optional[torch.Tensor] = None,
+    ) -> tuple[torch.Tensor, Optional[torch.Tensor]]:
+        """Multimodal forward pass for joint video+audio denoising.
+
+        Accepts **pre-patchified** inputs from the pipeline where video and
+        audio tokens are already in sequence form ``[B, seq, C]``.
+
+        Args:
+            video_latent: [B, video_seq, C_video] patchified video tokens.
+            audio_latent: [B, audio_seq, C_audio] patchified audio tokens (optional).
+            video_positions: [B, 3, video_seq, 2] position coordinates (unused in compact blocks).
+            audio_positions: [B, ndim, audio_seq, 2] audio positions (unused).
+            context: [B, text_seq, D_text] text encoder embeddings.
+            timestep: [B] or scalar noise level.
+
+        Returns:
+            ``(denoised_video, denoised_audio)`` — same shapes as inputs.
+        """
+        B = video_latent.shape[0]
+        video_seq = video_latent.shape[1]
+
+        # Project video tokens to hidden dim
+        x_video = self.patch_embed(video_latent)  # [B, video_seq, D]
+
+        # Handle audio modality
+        audio_seq = 0
+        if audio_latent is not None:
+            audio_ch = audio_latent.shape[-1]
+            self._build_audio_projections(audio_ch, audio_latent.device, audio_latent.dtype)
+            x_audio = self._audio_embed(audio_latent)  # [B, audio_seq, D]
+            audio_seq = audio_latent.shape[1]
+            x = torch.cat([x_video, x_audio], dim=1)  # [B, total_seq, D]
+        else:
+            x = x_video
+
+        # Timestep conditioning
+        if timestep is not None:
+            if timestep.dim() == 0:
+                timestep = timestep.unsqueeze(0).expand(B)
+            t_embed = self._get_timestep_embedding(timestep)
+        else:
+            t_embed = torch.zeros(B, self.config.hidden_dim, device=x.device, dtype=x.dtype)
+
+        # Text conditioning
+        if context is not None:
+            text_ctx = self.text_proj(context)
+        else:
+            text_ctx = torch.zeros(B, 1, self.config.hidden_dim, device=x.device, dtype=x.dtype)
+
+        # Process through transformer blocks (treat full sequence as spatial)
+        total_seq = x.shape[1]
+        for block in self.blocks:
+            x = block(x, t_embed=t_embed, text_ctx=text_ctx, video_shape=(1, 1, total_seq))
+
+        # Output projections
+        x = self.out_norm(x, t_embed)
+
+        video_out = self.out_proj(x[:, :video_seq, :])  # [B, video_seq, C_latent]
+
+        audio_out = None
+        if audio_latent is not None and audio_seq > 0:
+            audio_hidden = x[:, video_seq:, :]  # [B, audio_seq, D_hidden]
+            audio_out = self._audio_out_proj(audio_hidden)  # [B, audio_seq, C_audio]
+
+        return video_out, audio_out
