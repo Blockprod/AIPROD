@@ -12,13 +12,16 @@ like `aiprod_pipelines.utils.media_io` or `aiprod_pipelines.utils.constants`.
 """
 
 from aiprod_pipelines.distilled import DistilledPipeline
+from aiprod_pipelines.generate import AIPRODVideoGenerator, GenerationConfig
 from aiprod_pipelines.ic_lora import ICLoraPipeline
 from aiprod_pipelines.keyframe_interpolation import KeyframeInterpolationPipeline
 from aiprod_pipelines.ti2vid_one_stage import TI2VidOneStagePipeline
 from aiprod_pipelines.ti2vid_two_stages import TI2VidTwoStagesPipeline
 
 __all__ = [
+    "AIPRODVideoGenerator",
     "DistilledPipeline",
+    "GenerationConfig",
     "ICLoraPipeline",
     "KeyframeInterpolationPipeline",
     "TI2VidOneStagePipeline",
