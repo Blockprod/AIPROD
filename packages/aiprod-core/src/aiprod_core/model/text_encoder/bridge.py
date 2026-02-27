@@ -174,8 +174,10 @@ class LLMBridge(nn.Module):
                 self.config.hidden_dim = actual_dim
 
         # Move encoder to the same device as projection (e.g. CUDA)
+        # and align projection dtype with encoder dtype to avoid mat1/mat2 mismatch
         target_device = next(self.projection.parameters()).device
         self._encoder = self._encoder.to(target_device)
+        self.projection = self.projection.to(device=target_device, dtype=dtype)
 
     def encode_text(
         self,
