@@ -173,6 +173,10 @@ class LLMBridge(nn.Module):
                 ).to(next(self.projection.parameters()).device)
                 self.config.hidden_dim = actual_dim
 
+        # Move encoder to the same device as projection (e.g. CUDA)
+        target_device = next(self.projection.parameters()).device
+        self._encoder = self._encoder.to(target_device)
+
     def encode_text(
         self,
         texts: list[str],
