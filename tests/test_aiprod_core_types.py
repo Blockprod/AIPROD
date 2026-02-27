@@ -104,7 +104,7 @@ class TestLatentShape:
         """Test default parameters."""
         shape = LatentShape(batch=1)
         assert shape.batch == 1
-        assert shape.channels == 64
+        assert shape.channels == 128
         assert shape.frames == 7
         assert shape.height == 64
         assert shape.width == 96
@@ -123,7 +123,7 @@ class TestVideoLatentShape:
         """Test VideoLatentShape defaults."""
         shape = VideoLatentShape()
         assert shape.batch_size == 1
-        assert shape.channels == 64
+        assert shape.channels == 128
         assert shape.num_frames == 7
         assert shape.height == 64
         assert shape.width == 96

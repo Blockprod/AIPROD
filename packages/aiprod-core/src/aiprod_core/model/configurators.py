@@ -59,19 +59,87 @@ class SHDTConfigurator:
     """Configurator for the SHDT transformer backbone."""
 
     @staticmethod
+    def _infer_config(state_dict: dict[str, torch.Tensor]) -> SHDTConfig:
+        """Infer SHDTConfig hyper-parameters from checkpoint weight shapes.
+
+        Probes well-known weight keys to determine:
+            - latent_channels  (from patch_embed.0.weight)
+            - hidden_dim       (from patch_embed.0.weight)
+            - text_embed_dim   (from text_proj.weight)
+            - num_layers       (from max block index in keys)
+            - num_heads / num_kv_heads / head_dim (from attention projections)
+        Falls back to SHDTConfig defaults for anything not found.
+        """
+        config_kwargs: dict[str, object] = {}
+
+        # --- latent_channels & hidden_dim from patch_embed.0.weight [hidden_dim, latent_channels] ---
+        pe_key = "patch_embed.0.weight"
+        if pe_key in state_dict:
+            w = state_dict[pe_key]
+            config_kwargs["hidden_dim"] = w.shape[0]
+            config_kwargs["latent_channels"] = w.shape[1]
+
+        # --- text_embed_dim from text_proj.weight [hidden_dim, text_embed_dim] ---
+        tp_key = "text_proj.weight"
+        if tp_key in state_dict:
+            config_kwargs["text_embed_dim"] = state_dict[tp_key].shape[1]
+
+        # --- num_layers from block indices ---
+        block_indices: set[int] = set()
+        for key in state_dict:
+            if key.startswith("blocks."):
+                try:
+                    idx = int(key.split(".")[1])
+                    block_indices.add(idx)
+                except (IndexError, ValueError):
+                    pass
+        if block_indices:
+            config_kwargs["num_layers"] = max(block_indices) + 1
+
+        # --- num_heads / num_kv_heads / head_dim from attention projections ---
+        q_key = "blocks.0.spatial_attn.attn.q_proj.weight"
+        k_key = "blocks.0.spatial_attn.attn.k_proj.weight"
+        if q_key in state_dict and k_key in state_dict:
+            hidden_dim = config_kwargs.get("hidden_dim", SHDTConfig.hidden_dim)
+            q_out = state_dict[q_key].shape[0]  # num_heads * head_dim
+            k_out = state_dict[k_key].shape[0]  # num_kv_heads * head_dim
+            # head_dim divides both q_out and k_out
+            from math import gcd
+            hd = gcd(q_out, k_out)
+            # Ensure head_dim is reasonable (32..256)
+            while hd > 256:
+                hd //= 2
+            if hd >= 32:
+                config_kwargs["head_dim"] = hd
+                config_kwargs["num_heads"] = q_out // hd
+                config_kwargs["num_kv_heads"] = k_out // hd
+
+        return SHDTConfig(**config_kwargs)
+
+    @staticmethod
     def from_state_dict(
         state_dict: dict[str, torch.Tensor],
         device: torch.device = torch.device("cpu"),
         dtype: torch.dtype = torch.float32,
     ) -> SHDTModel:
         """Infer config from state dict, build model, and load weights."""
-        config = SHDTConfig()  # Use defaults; can be inferred from shapes
+        config = SHDTConfigurator._infer_config(state_dict)
         model = SHDTModel(config)
         # Try to load matching keys
         model_sd = model.state_dict()
         filtered = {k: v for k, v in state_dict.items() if k in model_sd}
         if filtered:
             model.load_state_dict(filtered, strict=False)
+        else:
+            import logging
+            logging.warning(
+                "SHDTConfigurator: no checkpoint keys matched the SHDT model "
+                "(%d keys in checkpoint vs %d in model). The model will have "
+                "random weights. This usually means the checkpoint comes from "
+                "an incompatible architecture and requires key remapping.",
+                len(state_dict),
+                len(model_sd),
+            )
         return model
 
 

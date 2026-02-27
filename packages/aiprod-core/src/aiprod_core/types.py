@@ -130,7 +130,7 @@ class LatentShape:
     `spatial_factor` and `temporal_factor`.
     """
     batch: int
-    channels: int = 64
+    channels: int = 128
     frames: int = 7
     height: int = 64
     width: int = 96
@@ -153,7 +153,7 @@ class VideoLatentShape:
     Computed from a VideoPixelShape and the VAE scale factors.
     """
     batch_size: int = 1
-    channels: int = 64
+    channels: int = 128
     num_frames: int = 7
     height: int = 64
     width: int = 96

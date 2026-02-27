@@ -44,7 +44,7 @@ class SHDTConfig:
     cross_stream_interval: int = 4   # cross-attention between streams every N layers
 
     # Input specs
-    latent_channels: int = 64
+    latent_channels: int = 128      # must match VIDEO_LATENT_CHANNELS in pipeline
     text_embed_dim: int = 2048      # from LLM bridge output
     max_caption_tokens: int = 512
 
