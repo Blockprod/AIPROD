@@ -80,6 +80,10 @@ class AIPRODVideoGenerator:
         If *True* (default), never contact the network — use local
         weights only (sovereign mode).  Set to *False* on Colab/Cloud
         to allow downloading weights from HuggingFace.
+    variant : str or None
+        Weight variant to download.  Use ``"bf16"`` to download only
+        bfloat16 weights (~38 GB) instead of all variants (~104 GB).
+        Highly recommended on Colab where disk space is limited.
     """
 
     def __init__(
@@ -90,6 +94,7 @@ class AIPRODVideoGenerator:
         cpu_offload: bool = True,
         enable_tiling: bool = True,
         local_files_only: bool = True,
+        variant: str | None = None,
     ):
         self.model_id = model_id
         self.device = device
@@ -98,6 +103,7 @@ class AIPRODVideoGenerator:
         self._cpu_offload = cpu_offload
         self._enable_tiling = enable_tiling
         self._local_files_only = local_files_only
+        self._variant = variant
 
     # -- lazy init --------------------------------------------------------
 
@@ -112,10 +118,16 @@ class AIPRODVideoGenerator:
         # Internal implementation: diffusers LTX2Pipeline
         from diffusers import LTX2Pipeline  # type: ignore[import-unresolved]  # noqa: WPS433
 
+        kwargs: dict[str, Any] = {
+            "torch_dtype": self.dtype,
+            "local_files_only": self._local_files_only,
+        }
+        if self._variant is not None:
+            kwargs["variant"] = self._variant
+
         self._pipe = LTX2Pipeline.from_pretrained(
             self.model_id,
-            torch_dtype=self.dtype,
-            local_files_only=self._local_files_only,
+            **kwargs,
         )
 
         if self._cpu_offload:
