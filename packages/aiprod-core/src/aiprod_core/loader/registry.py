@@ -38,8 +38,33 @@ class Registry:
 
     @staticmethod
     def _load(path: str) -> dict[str, torch.Tensor]:
+        from pathlib import Path
         from safetensors.torch import load_file
-        return load_file(path)
+
+        p = Path(path).resolve()  # Always use absolute path for mmap
+        if p.is_dir():
+            candidates = sorted(p.glob("*.safetensors"))
+            if not candidates:
+                raise FileNotFoundError(
+                    f"No .safetensors file found in directory: {path}"
+                )
+            p = candidates[0]
+
+        abs_path = str(p)
+
+        # Handle symlinks: resolve to actual file (e.g. HuggingFace cache)
+        if p.is_symlink():
+            abs_path = str(p.resolve())
+
+        try:
+            return load_file(abs_path)
+        except OSError:
+            # Fallback: load via torch if safetensors mmap fails (large files)
+            import logging
+            logging.warning(
+                f"safetensors mmap failed for {abs_path}, falling back to torch.load"
+            )
+            return torch.load(abs_path, map_location="cpu", weights_only=True)
 
 
 class DummyRegistry(Registry):
