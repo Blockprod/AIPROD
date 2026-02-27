@@ -76,6 +76,10 @@ class AIPRODVideoGenerator:
         Enable sequential CPU off-load to save VRAM (recommended).
     enable_tiling : bool
         Enable VAE tiling for large resolutions.
+    local_files_only : bool
+        If *True* (default), never contact the network — use local
+        weights only (sovereign mode).  Set to *False* on Colab/Cloud
+        to allow downloading weights from HuggingFace.
     """
 
     def __init__(
@@ -85,6 +89,7 @@ class AIPRODVideoGenerator:
         dtype: torch.dtype = torch.bfloat16,
         cpu_offload: bool = True,
         enable_tiling: bool = True,
+        local_files_only: bool = True,
     ):
         self.model_id = model_id
         self.device = device
@@ -92,6 +97,7 @@ class AIPRODVideoGenerator:
         self._pipe: Any | None = None
         self._cpu_offload = cpu_offload
         self._enable_tiling = enable_tiling
+        self._local_files_only = local_files_only
 
     # -- lazy init --------------------------------------------------------
 
@@ -109,6 +115,7 @@ class AIPRODVideoGenerator:
         self._pipe = LTX2Pipeline.from_pretrained(
             self.model_id,
             torch_dtype=self.dtype,
+            local_files_only=self._local_files_only,
         )
 
         if self._cpu_offload:
