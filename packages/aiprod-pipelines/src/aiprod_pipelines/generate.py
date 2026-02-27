@@ -118,16 +118,11 @@ class AIPRODVideoGenerator:
         # Internal implementation: diffusers LTX2Pipeline
         from diffusers import LTX2Pipeline  # type: ignore[import-unresolved]  # noqa: WPS433
 
-        kwargs: dict[str, Any] = {
-            "torch_dtype": self.dtype,
-            "local_files_only": self._local_files_only,
-        }
-        if self._variant is not None:
-            kwargs["variant"] = self._variant
-
         self._pipe = LTX2Pipeline.from_pretrained(
             self.model_id,
-            **kwargs,
+            torch_dtype=self.dtype,
+            local_files_only=self._local_files_only,
+            variant=self._variant if self._variant is not None else None,
         )
 
         if self._cpu_offload:
