@@ -9,6 +9,9 @@
     "score": "10/10",
     "proprietary_weights": true,
     "external_dependencies": 0,
+    "cloud_dependencies": 0,
+    "third_party_apis": 0,
+    "all_weights_local": true,
     "offline_capable": true,
     "note": "Tous les poids sont des œuvres dérivées propriétaires AIPROD. Le text encoder base (Apache 2.0) a servi uniquement d'initialisation et a été supprimé après fine-tuning."
   },
